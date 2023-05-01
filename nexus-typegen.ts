@@ -33,6 +33,7 @@ export interface NexusGenObjects {
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
+    token?: string | null; // String
   }
   Query: {};
 }
@@ -49,12 +50,14 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
   Mutation: { // field return type
+    signin: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signup: NexusGenRootTypes['MutationResponse']; // MutationResponse!
   }
   MutationResponse: { // field return type
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
+    token: string | null; // String
   }
   Query: { // field return type
     ok: boolean; // Boolean!
@@ -63,12 +66,14 @@ export interface NexusGenFieldTypes {
 
 export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
+    signin: 'MutationResponse'
     signup: 'MutationResponse'
   }
   MutationResponse: { // field return type name
     error: 'Boolean'
     message: 'String'
     status: 'Int'
+    token: 'String'
   }
   Query: { // field return type name
     ok: 'Boolean'
@@ -77,6 +82,10 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
   Mutation: {
+    signin: { // args
+      password: string; // String!
+      username: string; // String!
+    }
     signup: { // args
       age_range?: string | null; // String
       email: string; // String!

@@ -3,6 +3,7 @@
 
 
 type Mutation {
+  signin(password: String!, username: String!): MutationResponse!
   signup(age_range: String, email: String!, full_name: String!, gender: String, password: String!, phone: String!, username: String!): MutationResponse!
 }
 
@@ -10,6 +11,7 @@ type MutationResponse {
   error: Boolean!
   message: String!
   status: Int!
+  token: String
 }
 
 type Query {
