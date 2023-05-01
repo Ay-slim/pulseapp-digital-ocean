@@ -1,13 +1,13 @@
 import { extendType, nonNull, stringArg } from "nexus";
 import { create_user, find_user_by_uname } from "../utils/my_sql_ops/db_call";
-import { MutationResponse } from "./utils";
-import bcrypt from 'bcrypt';
+import { MutationAuthResponse } from "./utils";
+import bcrypt from "bcrypt";
 
 export const UserSignupMutation = extendType({
   type: "Mutation",
   definition(t) {
     t.nonNull.field("signup", {
-      type: MutationResponse,
+      type: MutationAuthResponse,
       args: {
         username: nonNull(stringArg()),
         password: nonNull(stringArg()),

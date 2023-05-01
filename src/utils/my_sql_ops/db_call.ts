@@ -11,5 +11,9 @@ export const create_user = async (payload:User) => {
 }
 
 export const find_user_by_uname = async (payload: string) => {
-  return execute_query<[]>(my_sql_queries.find_user_by_uname, [payload]);
+  return execute_query<[{ username: string }]>(my_sql_queries.find_user_by_uname, [payload]);
+}
+
+export const find_user_pw_by_uname = async (payload: string) => {
+  return execute_query<[{ hashed_password: string }]>(my_sql_queries.find_user_pw_by_uname, [payload]);
 }
