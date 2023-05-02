@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["extendedWhereUnique"]
 }
 
@@ -12,7 +12,7 @@ model users {
   id        Int           @id @default(autoincrement())
   full_name String        @db.VarChar(50)
   email     String        @db.VarChar(50)
-  username  String        @db.VarChar(50) @unique
+  username  String        @unique @db.VarChar(50)
   password  String?       @db.VarChar(100)
   age_range String?       @db.VarChar(50)
   gender    users_gender?
@@ -23,6 +23,6 @@ model users {
 enum users_gender {
   male
   female
-  binary
+  nonbinary
   other
 }
