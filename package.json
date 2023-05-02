@@ -12,7 +12,7 @@
     },
     "husky": {
         "hooks": {
-            "pre-commit": "yarn lint"
+            "pre-commit": "lint-staged"
         }
     },
     "lint-staged": {
@@ -42,11 +42,12 @@
         "@typescript-eslint/eslint-plugin": "^5.59.2",
         "@typescript-eslint/parser": "^5.59.2",
         "eslint": "^8.39.0",
+        "husky": "^8.0.0",
+        "lint-staged": "^13.2.2",
         "nodemon": "^2.0.22",
         "prettier": "^2.8.8",
         "ts-node": "^10.9.1",
         "ts-node-dev": "^2.0.0",
-        "typescript": "^5.0.4",
-        "husky": "^8.0.0"
+        "typescript": "^5.0.4"
     }
 }
