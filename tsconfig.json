@@ -5,6 +5,7 @@
       "jsx": "preserve",
       "strict": true,
       "esModuleInterop": true,
+      "outDir": "dist",
       "lib": ["es2018", "esnext.asynciterable"]
   },
   "exclude": ["node_modules"]
