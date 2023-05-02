@@ -4,8 +4,8 @@
     "description": "App backend",
     "main": "index.ts",
     "scripts": {
-    "migrate:deploy": "prisma migrate deploy",
-    "start": "prisma generate && yarn generate && tsc && node dist/src/index.js",
+        "migrate:deploy": "prisma migrate deploy",
+        "start": "prisma generate && yarn generate && tsc && node dist/src/index.js",
         "dev": "ts-node-dev --transpile-only --no-notify --exit-child src/index.ts",
         "generate": "ts-node --transpile-only src/schema.ts",
         "lint": "eslint src/**/*.ts",
