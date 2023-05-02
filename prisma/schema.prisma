@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["extendedWhereUnique"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id        Int           @id @default(autoincrement())
+  full_name String        @db.VarChar(50)
+  email     String        @db.VarChar(50)
+  username  String        @db.VarChar(50) @unique
+  password  String?       @db.VarChar(100)
+  age_range String?       @db.VarChar(50)
+  gender    users_gender?
+  country   String?       @db.VarChar(50)
+  phone     String?       @db.VarChar(50)
+}
+
+enum users_gender {
+  male
+  female
+  binary
+  other
+}

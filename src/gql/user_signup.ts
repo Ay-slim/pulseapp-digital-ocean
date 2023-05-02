@@ -1,7 +1,12 @@
-import { extendType, nonNull, stringArg } from "nexus";
-import { create_user, find_user_by_uname } from "../utils/my_sql_ops/db_call";
+import { extendType, nonNull, stringArg, enumType } from "nexus";
 import { MutationAuthResponse } from "./utils";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
+import { create_jwt_token } from "./utils";
+
+const GenderEnum = enumType({
+  name: 'GenderEnum',
+  members: ["male", "female", "binary", "other"],
+});
 
 export const UserSignupMutation = extendType({
   type: "Mutation",
@@ -14,33 +19,46 @@ export const UserSignupMutation = extendType({
         phone: nonNull(stringArg()),
         email: nonNull(stringArg()),
         full_name: nonNull(stringArg()),
-        gender: stringArg(),
+        gender: GenderEnum,
         age_range: stringArg(),
       },
-      async resolve(_, args) {
+      async resolve(_, args, context) {
         const {
           username, password, phone, email, full_name
         } = args;
         const gender = args?.gender;
         const age_range = args?.age_range;
         try{
-          const existing_uname_check = await find_user_by_uname(username);
-          if (existing_uname_check?.length) throw new Error("Username already exists!");
+          const existing_uname_check = await context.prisma.users.findUnique({
+            where: {
+              username,
+            },
+            select: {
+              username: true,
+            }
+          });
+          if (existing_uname_check) throw new Error("Username already exists!");
           const salt = bcrypt.genSaltSync(10);
           const hashed_password = bcrypt.hashSync(password, salt);
-          await create_user({
-            username,
-            password: hashed_password,
-            phone,
-            email,
-            full_name,
-            gender,
-            age_range
+          await context.prisma.users.create({data: 
+            {
+              username,
+              password: hashed_password,
+              phone,
+              email,
+              full_name,
+              gender,
+              age_range
+            }
           });
+          const token = create_jwt_token(username);
           return {
             status: 201,
             error: false,
             message: "Success",
+            data: {
+              token,
+            }
           };
         } catch(err: any) {
           console.error(err);

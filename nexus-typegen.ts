@@ -17,6 +17,7 @@ export interface NexusGenInputs {
 }
 
 export interface NexusGenEnums {
+  GenderEnum: "binary" | "female" | "male" | "other"
 }
 
 export interface NexusGenScalars {
@@ -28,12 +29,15 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  AuthData: { // root type
+    token: string; // String!
+  }
   Mutation: {};
   MutationResponse: { // root type
+    data?: NexusGenRootTypes['AuthData'] | null; // AuthData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
-    token?: string | null; // String
   }
   Query: {};
 }
@@ -46,18 +50,21 @@ export interface NexusGenUnions {
 
 export type NexusGenRootTypes = NexusGenObjects
 
-export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
+export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  AuthData: { // field return type
+    token: string; // String!
+  }
   Mutation: { // field return type
     signin: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signup: NexusGenRootTypes['MutationResponse']; // MutationResponse!
   }
   MutationResponse: { // field return type
+    data: NexusGenRootTypes['AuthData'] | null; // AuthData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
-    token: string | null; // String
   }
   Query: { // field return type
     ok: boolean; // Boolean!
@@ -65,15 +72,18 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  AuthData: { // field return type name
+    token: 'String'
+  }
   Mutation: { // field return type name
     signin: 'MutationResponse'
     signup: 'MutationResponse'
   }
   MutationResponse: { // field return type name
+    data: 'AuthData'
     error: 'Boolean'
     message: 'String'
     status: 'Int'
-    token: 'String'
   }
   Query: { // field return type name
     ok: 'Boolean'
@@ -90,7 +100,7 @@ export interface NexusGenArgTypes {
       age_range?: string | null; // String
       email: string; // String!
       full_name: string; // String!
-      gender?: string | null; // String
+      gender?: NexusGenEnums['GenderEnum'] | null; // GenderEnum
       password: string; // String!
       phone: string; // String!
       username: string; // String!
@@ -108,7 +118,7 @@ export type NexusGenObjectNames = keyof NexusGenObjects;
 
 export type NexusGenInputNames = never;
 
-export type NexusGenEnumNames = never;
+export type NexusGenEnumNames = keyof NexusGenEnums;
 
 export type NexusGenInterfaceNames = never;
 
