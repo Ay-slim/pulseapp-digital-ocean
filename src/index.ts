@@ -9,14 +9,13 @@ export const startApolloServer = async () => {
     const server = new ApolloServer({
         schema,
     })
-    const { url } = await startStandaloneServer(server, {
+    await startStandaloneServer(server, {
         context: async () => {
             return {
                 prisma,
             }
         },
     })
-    console.log(`🚀  Server ready at ${url}`)
 }
 
 startApolloServer()
