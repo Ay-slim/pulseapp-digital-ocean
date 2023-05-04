@@ -14,7 +14,8 @@ export const MutationAuthResponse = objectType({
             type: objectType({
                 name: 'AuthData',
                 definition(t) {
-                    t.nonNull.string('token')
+                    t.string('token')
+                    t.string('email')
                 },
             }),
         })
