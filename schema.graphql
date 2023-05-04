@@ -3,19 +3,21 @@
 
 
 type AuthData {
-  token: String!
+  email: String
+  token: String
 }
 
 enum GenderEnum {
-  binary
   female
   male
+  nonbinary
   other
 }
 
 type Mutation {
   signin(password: String!, username: String!): MutationResponse!
   signup(age_range: String, email: String!, full_name: String!, gender: GenderEnum, password: String!, phone: String!, username: String!): MutationResponse!
+  waitlist(email: String!): MutationResponse!
 }
 
 type MutationResponse {
