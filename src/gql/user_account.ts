@@ -141,7 +141,9 @@ export const UserJoinWaitlist = extendType({
                 const { email } = args
                 try {
                     const success = await context.prisma.waitlist.create({
-                        email,
+                        data: {
+                            email,
+                        },
                     })
 
                     if (!success) {
@@ -157,10 +159,12 @@ export const UserJoinWaitlist = extendType({
                         },
                     }
                 } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
                     return {
                         status: 500,
                         error: true,
-                        message: 'Could not add to waitlist',
+                        message: Error?.message,
                     }
                 }
             },
