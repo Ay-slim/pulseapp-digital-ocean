@@ -158,7 +158,7 @@ export const UserJoinWaitlist = extendType({
                     }
                 } catch (err) {
                     return {
-                        status: 409,
+                        status: 500,
                         error: true,
                         message: 'Could not add to waitlist',
                     }

@@ -18,7 +18,7 @@ model users {
   gender     users_gender?
   country    String?       @db.VarChar(50)
   phone      String?       @db.VarChar(50)
-  createdAt  DateTime      @default(now())
+  created_at DateTime      @default(now())
   updated_at DateTime?     @default(now())
 }
 
