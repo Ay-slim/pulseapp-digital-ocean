@@ -7,6 +7,11 @@ import { create_jwt_token } from './utils'
 
 dotenv.config()
 
+const GenderEnum = enumType({
+    name: 'GenderEnum',
+    members: ['male', 'female', 'nonbinary', 'other'],
+})
+
 /* ALL CONTRACTS RELATED TO USER ACCOUNT MANAGEMENT*/
 export const UserSigninMutation = extendType({
     type: 'Mutation',
@@ -56,11 +61,6 @@ export const UserSigninMutation = extendType({
             },
         })
     },
-})
-
-const GenderEnum = enumType({
-    name: 'GenderEnum',
-    members: ['male', 'female', 'nonbinary', 'other'],
 })
 
 export const UserSignupMutation = extendType({
@@ -122,6 +122,45 @@ export const UserSignupMutation = extendType({
                         status: 400,
                         error: true,
                         message: Error?.message,
+                    }
+                }
+            },
+        })
+    },
+})
+
+export const UserJoinWaitlist = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('waitlist', {
+            type: MutationAuthResponse,
+            args: {
+                email: nonNull(stringArg()),
+            },
+            async resolve(_, args, context) {
+                const { email } = args
+                try {
+                    const success = await context.prisma.waitlist.create({
+                        email,
+                    })
+
+                    if (!success) {
+                        throw new Error()
+                    }
+
+                    return {
+                        status: 200,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            email,
+                        },
+                    }
+                } catch (err) {
+                    return {
+                        status: 409,
+                        error: true,
+                        message: 'Could not add to waitlist',
                     }
                 }
             },
