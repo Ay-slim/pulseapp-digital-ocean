@@ -1,5 +1,5 @@
-import { enumType, extendType, nonNull, stringArg } from 'nexus'
-import { MutationAuthResponse, ServerReturnType } from './utils'
+import { enumType, extendType, nonNull, stringArg, list } from 'nexus'
+import { MutationAuthResponse, ServerReturnType, login_auth } from './utils'
 import { err_return } from './utils'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
@@ -12,6 +12,16 @@ const GenderEnum = enumType({
     members: ['male', 'female', 'nonbinary', 'other'],
 })
 
+const AgeRangeEnum = enumType({
+    name: 'AgeRangeEnum',
+    members: [
+        'under_20',
+        'twenty_to_forty',
+        'forty_to_sixty',
+        'sixty_to_eighty',
+    ],
+})
+
 /* ALL CONTRACTS RELATED TO USER ACCOUNT MANAGEMENT*/
 export const UserSigninMutation = extendType({
     type: 'Mutation',
@@ -19,23 +29,28 @@ export const UserSigninMutation = extendType({
         t.nonNull.field('signin', {
             type: MutationAuthResponse,
             args: {
-                username: nonNull(stringArg()),
+                email: nonNull(stringArg()),
                 password: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
-                const { username, password } = args
+                const { email, password } = args
                 try {
-                    const db_resp =
-                        await context.prisma.users.findUniqueOrThrow({
-                            where: {
-                                username,
-                            },
-                            select: {
-                                password: true,
-                            },
+                    const db_resp = await context.knex_client
+                        .select('password', 'id', 'info_completion')
+                        .from('users')
+                        .where({
+                            email: email,
                         })
-                    const { password: hashed_password } = db_resp
-                    //Needed the check below because Typescript is too dumb to realize that findUniqueorThrow would throw if hashed_password is null
+                    if (db_resp?.length != 1)
+                        throw {
+                            status: 400,
+                            messsage: 'User does not exist!',
+                        }
+                    const {
+                        password: hashed_password,
+                        id,
+                        info_completion,
+                    } = db_resp?.[0]
                     const pw_match = hashed_password
                         ? await bcrypt.compare(password, hashed_password)
                         : false
@@ -44,13 +59,14 @@ export const UserSigninMutation = extendType({
                             status: 401,
                             message: 'Invalid password!',
                         }
-                    const token = create_jwt_token(username)
+                    const token = create_jwt_token(id)
                     return {
                         status: 200,
                         error: false,
                         message: 'Success',
                         data: {
                             token,
+                            completion_status: info_completion,
                         },
                     }
                 } catch (err) {
@@ -69,44 +85,44 @@ export const UserSignupMutation = extendType({
         t.nonNull.field('signup', {
             type: MutationAuthResponse,
             args: {
-                username: nonNull(stringArg()),
                 password: nonNull(stringArg()),
                 phone: nonNull(stringArg()),
                 email: nonNull(stringArg()),
-                full_name: nonNull(stringArg()),
+                name: nonNull(stringArg()),
                 gender: GenderEnum,
-                age_range: stringArg(),
+                age_range: AgeRangeEnum,
             },
             async resolve(_, args, context) {
-                const { username, password, phone, email, full_name } = args
+                const { password, phone, email, name } = args
                 const gender = args?.gender
                 const age_range = args?.age_range
                 try {
-                    const existing_uname_check =
-                        await context.prisma.users.findUnique({
-                            where: {
-                                username,
-                            },
-                            select: {
-                                username: true,
-                            },
+                    const existing_email_check = await context.knex_client
+                        .select('email')
+                        .from('users')
+                        .where({
+                            email: email,
                         })
-                    if (existing_uname_check)
-                        throw new Error('Username already exists!')
+                    if (existing_email_check?.length > 0)
+                        throw new Error(
+                            'A user already signed up with this email!'
+                        )
                     const salt = bcrypt.genSaltSync(10)
                     const hashed_password = bcrypt.hashSync(password, salt)
-                    await context.prisma.users.create({
-                        data: {
-                            username,
-                            password: hashed_password,
-                            phone,
-                            email,
-                            full_name,
-                            gender,
-                            age_range,
-                        },
-                    })
-                    const token = create_jwt_token(username)
+                    const insert_ret = await context
+                        .knex_client('users')
+                        .insert(
+                            {
+                                password: hashed_password,
+                                phone,
+                                email,
+                                name,
+                                gender,
+                                age_range,
+                            },
+                            ['id']
+                        )
+                    const token = create_jwt_token(insert_ret?.[0]?.id)
                     return {
                         status: 201,
                         error: false,
@@ -118,11 +134,7 @@ export const UserSignupMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return {
-                        status: 400,
-                        error: true,
-                        message: Error?.message,
-                    }
+                    return err_return(Error?.status, Error?.message)
                 }
             },
         })
@@ -140,11 +152,11 @@ export const UserJoinWaitlist = extendType({
             async resolve(_, args, context) {
                 const { email } = args
                 try {
-                    const success = await context.prisma.waitlist.create({
-                        data: {
+                    const success = await context
+                        .knex_client('waitlist')
+                        .insert({
                             email,
-                        },
-                    })
+                        })
 
                     if (!success) {
                         throw new Error()
@@ -161,11 +173,55 @@ export const UserJoinWaitlist = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
+                    return err_return(Error?.status, Error?.message)
+                }
+            },
+        })
+    },
+})
+
+export const UserAddInterests = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('interests', {
+            type: MutationAuthResponse,
+            args: {
+                athletes: nonNull(list(stringArg())),
+                sports: nonNull(list(stringArg())),
+                incentives: nonNull(list(stringArg())),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const { athletes, sports, incentives } = args
+                    const user_id = login_auth(context?.auth_token)
+
+                    await Promise.all([
+                        context.knex_client('interests').insert({
+                            user_id,
+                            athletes: JSON.stringify(athletes),
+                            sports: JSON.stringify(sports),
+                            incentives: JSON.stringify(incentives),
+                        }),
+                        context
+                            .knex_client('users')
+                            .where('id', user_id)
+                            .update({
+                                info_completion: 'complete',
+                            }),
+                    ])
+
                     return {
-                        status: 500,
-                        error: true,
-                        message: Error?.message,
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            completion_status: 'complete',
+                        },
                     }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status, Error?.message)
                 }
             },
         })

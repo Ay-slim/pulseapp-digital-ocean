@@ -10,6 +10,11 @@ declare global {
 export interface NexusGenInputs {}
 
 export interface NexusGenEnums {
+    AgeRangeEnum:
+        | 'forty_to_sixty'
+        | 'sixty_to_eighty'
+        | 'twenty_to_forty'
+        | 'under_20'
     GenderEnum: 'female' | 'male' | 'nonbinary' | 'other'
 }
 
@@ -24,6 +29,7 @@ export interface NexusGenScalars {
 export interface NexusGenObjects {
     AuthData: {
         // root type
+        completion_status?: string | null // String
         email?: string | null // String
         token?: string | null // String
     }
@@ -51,11 +57,13 @@ export type NexusGenAllTypes = NexusGenRootTypes &
 export interface NexusGenFieldTypes {
     AuthData: {
         // field return type
+        completion_status: string | null // String
         email: string | null // String
         token: string | null // String
     }
     Mutation: {
         // field return type
+        interests: NexusGenRootTypes['MutationResponse'] // MutationResponse!
         signin: NexusGenRootTypes['MutationResponse'] // MutationResponse!
         signup: NexusGenRootTypes['MutationResponse'] // MutationResponse!
         waitlist: NexusGenRootTypes['MutationResponse'] // MutationResponse!
@@ -76,11 +84,13 @@ export interface NexusGenFieldTypes {
 export interface NexusGenFieldTypeNames {
     AuthData: {
         // field return type name
+        completion_status: 'String'
         email: 'String'
         token: 'String'
     }
     Mutation: {
         // field return type name
+        interests: 'MutationResponse'
         signin: 'MutationResponse'
         signup: 'MutationResponse'
         waitlist: 'MutationResponse'
@@ -100,20 +110,25 @@ export interface NexusGenFieldTypeNames {
 
 export interface NexusGenArgTypes {
     Mutation: {
+        interests: {
+            // args
+            athletes: Array<string | null> // [String]!
+            incentives: Array<string | null> // [String]!
+            sports: Array<string | null> // [String]!
+        }
         signin: {
             // args
+            email: string // String!
             password: string // String!
-            username: string // String!
         }
         signup: {
             // args
-            age_range?: string | null // String
+            age_range?: NexusGenEnums['AgeRangeEnum'] | null // AgeRangeEnum
             email: string // String!
-            full_name: string // String!
             gender?: NexusGenEnums['GenderEnum'] | null // GenderEnum
+            name: string // String!
             password: string // String!
             phone: string // String!
-            username: string // String!
         }
         waitlist: {
             // args
