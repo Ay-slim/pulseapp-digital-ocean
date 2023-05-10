@@ -21,11 +21,14 @@ const config: { [key: string]: Knex.Config } = {
     staging: {
         client: 'mysql',
         connection: {
-            host: '127.0.0.1',
-            port: 3306,
-            user: 'your_database_user',
-            password: 'your_database_password',
-            database: 'myapp_test',
+            host: process.env.DB_HOST,
+            user: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            port: Number(process.env.DB_PORT),
+            database: process.env.DB_NAME,
+            ssl: {
+                rejectUnauthorized: true,
+            },
         },
         migrations: {
             directory: './migrations',
