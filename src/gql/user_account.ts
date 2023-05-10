@@ -124,7 +124,7 @@ export const UserSignupMutation = extendType({
                             },
                             ['id']
                         )
-                    const token = create_jwt_token(insert_ret?.[0]?.id)
+                    const token = create_jwt_token(insert_ret?.[0])
                     return {
                         status: 201,
                         error: false,

@@ -67,7 +67,7 @@ export const login_auth = (
             jwt_secret
         )
         if (!jwt_payload || !(jwt_payload as JwtPayloadWithId)?.user_id) {
-            throw new Error('Unable to extract user id from')
+            throw new Error('Unable to extract user id from token')
         }
 
         return (jwt_payload as JwtPayloadWithId)?.user_id
