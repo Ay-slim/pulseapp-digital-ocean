@@ -50,7 +50,9 @@ export const create_jwt_token = (id: number): string => {
     return token
 }
 
-export const login_auth = (bearer_token: string) => {
+export const login_auth = (
+    bearer_token: string
+): number | Error | undefined => {
     try {
         const token = bearer_token.replace('Bearer ', '')
         if (!token) {
@@ -64,8 +66,10 @@ export const login_auth = (bearer_token: string) => {
             token,
             jwt_secret
         )
-        if (!jwt_payload || !(jwt_payload as JwtPayloadWithId)?.user_id)
+        if (!jwt_payload || !(jwt_payload as JwtPayloadWithId)?.user_id) {
             throw new Error('Unable to extract user id from')
+        }
+
         return (jwt_payload as JwtPayloadWithId)?.user_id
     } catch (err) {
         const Error = err as ServerReturnType
