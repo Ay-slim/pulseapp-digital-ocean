@@ -1,21 +1,34 @@
 import { ApolloServer } from '@apollo/server'
 import { startStandaloneServer } from '@apollo/server/standalone'
-import { PrismaClient } from '@prisma/client'
+import { knex, Knex } from 'knex'
+import knex_config from './db/knexfile'
+import dotenv from 'dotenv'
 import { schema } from './schema'
 
-const prisma = new PrismaClient()
+dotenv.config({
+    path: '../.env',
+})
+interface Context {
+    knex_client: Knex
+    auth_token: string | undefined
+}
+const env = process.env.NODE_ENV
+if (!env) throw new Error('No env value set for NODE_ENV')
+const knex_client = knex(knex_config[env])
 
 export const startApolloServer = async () => {
     const server = new ApolloServer({
         schema,
     })
-    await startStandaloneServer(server, {
-        context: async () => {
+    const { url } = await startStandaloneServer(server, {
+        context: async ({ req }): Promise<Context> => {
             return {
-                prisma,
+                auth_token: req?.headers?.authorization,
+                knex_client,
             }
         },
     })
+    console.log(`server running on ${url} 🚀`)
 }
 
 startApolloServer()

@@ -2,7 +2,16 @@
 ### Do not make changes to this file directly
 
 
+enum AgeRangeEnum {
+  above_fortyfive
+  eighteen_to_twentyfour
+  thirtyfive_to_fortyfour
+  twentyfive_to_thirtyfour
+  under_18
+}
+
 type AuthData {
+  completion_status: String
   email: String
   token: String
 }
@@ -15,8 +24,9 @@ enum GenderEnum {
 }
 
 type Mutation {
-  signin(password: String!, username: String!): MutationResponse!
-  signup(age_range: String, email: String!, full_name: String!, gender: GenderEnum, password: String!, phone: String!, username: String!): MutationResponse!
+  interests(athletes: [String]!, incentives: [String]!, sports: [String]!): MutationResponse!
+  signin(email: String!, password: String!): MutationResponse!
+  signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): MutationResponse!
   waitlist(email: String!): MutationResponse!
 }
 
