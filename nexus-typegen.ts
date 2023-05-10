@@ -11,10 +11,11 @@ export interface NexusGenInputs {}
 
 export interface NexusGenEnums {
     AgeRangeEnum:
-        | 'forty_to_sixty'
-        | 'sixty_to_eighty'
-        | 'twenty_to_forty'
-        | 'under_20'
+        | 'above_fortyfive'
+        | 'eighteen_to_twentyfour'
+        | 'thirtyfive_to_fortyfour'
+        | 'twentyfive_to_thirtyfour'
+        | 'under_18'
     GenderEnum: 'female' | 'male' | 'nonbinary' | 'other'
 }
 

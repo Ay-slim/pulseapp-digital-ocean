@@ -20,7 +20,7 @@ export const startApolloServer = async () => {
     const server = new ApolloServer({
         schema,
     })
-    await startStandaloneServer(server, {
+    const { url } = await startStandaloneServer(server, {
         context: async ({ req }): Promise<Context> => {
             return {
                 auth_token: req?.headers?.authorization,
@@ -28,6 +28,7 @@ export const startApolloServer = async () => {
             }
         },
     })
+    console.log(`server running on ${url} 🚀`)
 }
 
 startApolloServer()

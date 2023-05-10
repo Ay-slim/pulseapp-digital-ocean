@@ -12,10 +12,11 @@ export async function up(knex: Knex): Promise<void> {
             .defaultTo('partial')
             .notNullable()
         table.enum('age_range', [
-            'under_20',
-            'twenty_to_forty',
-            'forty_to_sixty',
-            'sixty_to_eighty',
+            'under_18',
+            'eighteen_to_twentyfour',
+            'twentyfive_to_thirtyfour',
+            'thirtyfive_to_fortyfour',
+            'above_fortyfive',
         ])
         table.enum('gender', ['male', 'female', 'nonbinary', 'other'])
         table.timestamp('created_at').defaultTo(knex.fn.now())

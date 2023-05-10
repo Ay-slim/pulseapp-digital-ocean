@@ -15,10 +15,11 @@ const GenderEnum = enumType({
 const AgeRangeEnum = enumType({
     name: 'AgeRangeEnum',
     members: [
-        'under_20',
-        'twenty_to_forty',
-        'forty_to_sixty',
-        'sixty_to_eighty',
+        'under_18',
+        'eighteen_to_twentyfour',
+        'twentyfive_to_thirtyfour',
+        'thirtyfive_to_fortyfour',
+        'above_fortyfive',
     ],
 })
 
@@ -41,6 +42,7 @@ export const UserSigninMutation = extendType({
                         .where({
                             email: email,
                         })
+
                     if (db_resp?.length != 1)
                         throw {
                             status: 400,
