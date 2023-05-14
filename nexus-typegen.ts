@@ -30,9 +30,22 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  AthleteData: { // root type
+    description?: string | null; // String
+    display_name?: string | null; // String
+    id?: number | null; // Int
+    image_url?: string | null; // String
+    incentives?: Array<string | null> | null; // [String]
+    sport?: string | null; // String
+  }
   AuthData: { // root type
+    athlete_data?: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
     completion_status?: string | null; // String
+    content_data?: Array<NexusGenRootTypes['UserContent'] | null> | null; // [UserContent]
     email?: string | null; // String
+    incentives?: Array<string | null> | null; // [String]
+    max_id?: number | null; // Int
+    sports?: Array<string | null> | null; // [String]
     token?: string | null; // String
   }
   Mutation: {};
@@ -43,6 +56,12 @@ export interface NexusGenObjects {
     status: number; // Int!
   }
   Query: {};
+  UserContent: { // root type
+    athlete_display_name?: string | null; // String
+    athlete_image_url?: string | null; // String
+    content_caption?: string | null; // String
+    content_media_url?: string | null; // String
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -56,12 +75,28 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  AthleteData: { // field return type
+    description: string | null; // String
+    display_name: string | null; // String
+    id: number | null; // Int
+    image_url: string | null; // String
+    incentives: Array<string | null> | null; // [String]
+    sport: string | null; // String
+  }
   AuthData: { // field return type
+    athlete_data: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
     completion_status: string | null; // String
+    content_data: Array<NexusGenRootTypes['UserContent'] | null> | null; // [UserContent]
     email: string | null; // String
+    incentives: Array<string | null> | null; // [String]
+    max_id: number | null; // Int
+    sports: Array<string | null> | null; // [String]
     token: string | null; // String
   }
   Mutation: { // field return type
+    add_content: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    athlete_signin: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    athlete_signup: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     interests: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signin: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signup: NexusGenRootTypes['MutationResponse']; // MutationResponse!
@@ -74,17 +109,42 @@ export interface NexusGenFieldTypes {
     status: number; // Int!
   }
   Query: { // field return type
-    ok: boolean; // Boolean!
+    athletes: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    fetch_user_content: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    user_fetch_incentives: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    user_fetch_sports: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+  }
+  UserContent: { // field return type
+    athlete_display_name: string | null; // String
+    athlete_image_url: string | null; // String
+    content_caption: string | null; // String
+    content_media_url: string | null; // String
   }
 }
 
 export interface NexusGenFieldTypeNames {
+  AthleteData: { // field return type name
+    description: 'String'
+    display_name: 'String'
+    id: 'Int'
+    image_url: 'String'
+    incentives: 'String'
+    sport: 'String'
+  }
   AuthData: { // field return type name
+    athlete_data: 'AthleteData'
     completion_status: 'String'
+    content_data: 'UserContent'
     email: 'String'
+    incentives: 'String'
+    max_id: 'Int'
+    sports: 'String'
     token: 'String'
   }
   Mutation: { // field return type name
+    add_content: 'MutationResponse'
+    athlete_signin: 'MutationResponse'
+    athlete_signup: 'MutationResponse'
     interests: 'MutationResponse'
     signin: 'MutationResponse'
     signup: 'MutationResponse'
@@ -97,14 +157,40 @@ export interface NexusGenFieldTypeNames {
     status: 'Int'
   }
   Query: { // field return type name
-    ok: 'Boolean'
+    athletes: 'MutationResponse'
+    fetch_user_content: 'MutationResponse'
+    user_fetch_incentives: 'MutationResponse'
+    user_fetch_sports: 'MutationResponse'
+  }
+  UserContent: { // field return type name
+    athlete_display_name: 'String'
+    athlete_image_url: 'String'
+    content_caption: 'String'
+    content_media_url: 'String'
   }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
+    add_content: { // args
+      caption: string; // String!
+      media_url?: string | null; // String
+    }
+    athlete_signin: { // args
+      email: string; // String!
+      password: string; // String!
+    }
+    athlete_signup: { // args
+      display_name: string; // String!
+      email: string; // String!
+      incentives: Array<string | null>; // [String]!
+      name: string; // String!
+      password: string; // String!
+      phone: string; // String!
+      sports: Array<string | null>; // [String]!
+    }
     interests: { // args
-      athletes: Array<string | null>; // [String]!
+      athletes: Array<number | null>; // [Int]!
       incentives: Array<string | null>; // [String]!
       sports: Array<string | null>; // [String]!
     }
@@ -122,6 +208,13 @@ export interface NexusGenArgTypes {
     }
     waitlist: { // args
       email: string; // String!
+    }
+  }
+  Query: {
+    athletes: { // args
+      limit: number; // Int!
+      next_min_id?: number | null; // Int
+      sports: Array<string | null>; // [String]!
     }
   }
 }

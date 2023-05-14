@@ -10,9 +10,23 @@ enum AgeRangeEnum {
   under_18
 }
 
+type AthleteData {
+  description: String
+  display_name: String
+  id: Int
+  image_url: String
+  incentives: [String]
+  sport: String
+}
+
 type AuthData {
+  athlete_data: [AthleteData]
   completion_status: String
+  content_data: [UserContent]
   email: String
+  incentives: [String]
+  max_id: Int
+  sports: [String]
   token: String
 }
 
@@ -24,7 +38,10 @@ enum GenderEnum {
 }
 
 type Mutation {
-  interests(athletes: [String]!, incentives: [String]!, sports: [String]!): MutationResponse!
+  add_content(caption: String!, media_url: String): MutationResponse!
+  athlete_signin(email: String!, password: String!): MutationResponse!
+  athlete_signup(display_name: String!, email: String!, incentives: [String]!, name: String!, password: String!, phone: String!, sports: [String]!): MutationResponse!
+  interests(athletes: [Int]!, incentives: [String]!, sports: [String]!): MutationResponse!
   signin(email: String!, password: String!): MutationResponse!
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): MutationResponse!
   waitlist(email: String!): MutationResponse!
@@ -38,5 +55,15 @@ type MutationResponse {
 }
 
 type Query {
-  ok: Boolean!
+  athletes(limit: Int!, next_min_id: Int, sports: [String]!): MutationResponse!
+  fetch_user_content: MutationResponse!
+  user_fetch_incentives: MutationResponse!
+  user_fetch_sports: MutationResponse!
+}
+
+type UserContent {
+  athlete_display_name: String
+  athlete_image_url: String
+  content_caption: String
+  content_media_url: String
 }

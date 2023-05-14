@@ -1,0 +1,102 @@
+"""
+Athletes mock data
+"""
+
+INSERT INTO athletes (`name`, `display_name`, `email`, `password`, `phone`, `sport`, `country`, `image_url`, `metadata`) VALUES 
+('Lionel Messi', 'Lionel Messi', 'messi@psg.com', 'new', '1234', 'Football (Soccer)', 'Argentina', 'http://whateveryouget', '{"description": "Argentinan superstar Messi currently plies his trade for PSG", "incentives": ["Autographed memorabilia", "VIP access to games", "Charity events"]}' ),
+('Cristiano Ronaldo', 'Cristiano Ronaldo', 'ronaldo@manutd.com', 'password123', '5678', 'Football (Soccer)', 'Portugal', 'http://whateveryouget', '{"description": "Portuguese superstar Ronaldo has returned to Manchester United", "incentives": ["Autographed memorabilia", "VIP access to games", "Charity events"]}' ),
+('Sachin Tendulkar', 'Sachin Tendulkar', 'sachin@bcci.com', 'p@ssw0rd', '9012', 'Cricket', 'India', 'http://whateveryouget', '{"description": "Legendary Indian cricketer Tendulkar is widely regarded as one of the greatest batsmen of all time", "incentives": ["Autographed memorabilia", "VIP access to games", "Charity events"]}' ),
+('Don Bradman', 'Don Bradman', 'don@auscricket.com', 'letmein', '3456', 'Cricket', 'Australia', 'http://whateveryouget', '{"description": "Australian cricket legend Bradman is widely regarded as the greatest batsman of all time", "incentives": ["Autographed memorabilia", "VIP access to games", "Charity events"]}' ),
+('Michael Jordan', 'Michael Jordan', 'mj@bulls.com', 'changeme', '7890', 'Basketball', 'USA', 'http://whateveryouget', '{"description": "Basketball icon Jordan won six NBA championships with the Chicago Bulls", "incentives": ["Autographed memorabilia", "VIP access to games", "Charity events"]}' ),
+('LeBron James', 'LeBron James', 'lebron@lakers.com', 'qwerty', '4321', 'Basketball', 'USA', 'http://whateveryouget', '{"description": "Four-time NBA champion James is widely regarded as one of the greatest basketball players of all time", "incentives": ["Autographed memorabilia", "VIP access to games", "Charity events"]}' ),
+('Dhyan Chand', 'Dhyan Chand', 'dhyan@hockey.in', 'password', '5678', 'Field Hockey', 'India', 'http://whateveryouget', '{"description": "Indian hockey legend Dhyan Chand won three Olympic gold medals", "incentives": ["Autographed memorabilia", "VIP access to games", "Charity events"]}' ),
+('Jamie Dwyer', 'Jamie Dwyer', 'jamie@hockey.au', 'letmein123', '9012', 'Field Hockey', 'Australia', 'http://whateveryouget', '{"description": "Australian hockey great Dwyer won two Olympic gold medals", "incentives": ["Autographed memorabilia", "VIP access to games", "Charity events"]}' ),
+('Roger Federer', 'Roger Federer', 'roger@tennis.ch', 'p@ssword', '3456', 'Tennis', 'Switzerland', 'http://whateveryouget', '{"description": "Swiss tennis legend Federer has won a record 20 Grand Slam titles", "incentives": ["Meet-and-greets with fans", "Charity events", "VIP access to tournaments"]}' ),
+('Serena Williams', 'Serena Williams', 'serena@tennis.us', 'secret123', '7890', 'Tennis', 'USA', 'http://whateveryouget', '{"description": "American tennis icon Williams has won 23 Grand Slam singles titles", "incentives": ["Meet-and-greets with fans", "Charity events", "VIP access to tournaments"]}' ),
+('Karch Kiraly', 'Karch Kiraly', 'karch@volleyball.us', 'changeme', '2345', 'Volleyball', 'USA', 'http://whateveryouget', '{"description": "American volleyball legend Kiraly won three Olympic gold medals", "incentives": ["Meet-and-greets with fans", "Charity events", "VIP access to tournaments"]}' ),
+('Giba', 'Giba', 'giba@volleyball.br', 'letmein', '6789', 'Volleyball', 'Brazil', 'http://whateveryouget', '{"description": "Brazilian volleyball great Giba won two Olympic gold medals", "incentives": ["Meet-and-greets with fans", "Charity events", "VIP access to tournaments"]}' ),
+('Ma Long', 'Ma Long', 'ma@tabletennis.cn', '123456', '1234', 'Table Tennis (Ping Pong)', 'China', 'http://whateveryouget', '{"description": "Chinese table tennis star Ma Long has won two Olympic gold medals", "incentives": ["Meet-and-greets with fans", "Charity events", "VIP access to tournaments"]}' ),
+('Zhang Jike', 'Zhang Jike', 'zhang@tabletennis.cn', 'password123', '5678', 'Table Tennis (Ping Pong)', 'China', 'http://whateveryouget', '{"description": "Chinese table tennis player Zhang Jike has won two Olympic gold medals", "incentives": ["Meet-and-greets with fans", "Charity events", "VIP access to tournaments"]}' ),
+('Babe Ruth', 'Babe Ruth', 'babe@baseball.us', 'password456', '91011', 'Baseball', 'USA', 'http://whateveryouget', '{"description": "Baseball legend Babe Ruth was known for his powerful hitting and charisma on and off the field", "incentives": ["Autographed memorabilia", "Private batting lessons", "VIP access to games"]}' ),
+('Willie Mays', 'Willie Mays', 'willie@baseball.us', 'password789', '121314', 'Baseball', 'USA', 'http://whateveryouget', '{"description": "Baseball great Willie Mays was a 24-time All-Star and a 2-time MVP", "incentives": ["Meet-and-greets with fans", "Charity events", "VIP access to games"]}' ),
+('Tiger Woods', 'Tiger Woods', 'tiger@golf.us', 'password987', '151617', 'Golf', 'USA', 'http://whateveryouget', '{"description": "Golf superstar Tiger Woods has won 15 major championships and is widely regarded as one of the greatest golfers of all time", "incentives": ["Private golf lessons", "VIP access to tournaments", "Exclusive merchandise"]}' ),
+('Jack Nicklaus', 'Jack Nicklaus', 'jack@golf.us', 'password654', '181920', 'Golf', 'USA', 'http://whateveryouget', '{"description": "Golf legend Jack Nicklaus won 18 major championships and is considered one of the greatest golfers of all time", "incentives": ["Meet-and-greets with fans", "Charity events", "VIP access to tournaments"]}' ),
+('Jim Brown', 'Jim Brown', 'jim@football.us', 'password321', '212223', 'American Football', 'USA', 'http://whateveryouget', '{"description": "Football icon Jim Brown was a 9-time Pro Bowl selection and a 3-time NFL MVP", "incentives": ["Private workouts", "VIP access to games", "Autographed memorabilia"]}' ),
+('Jerry Rice', 'Jerry Rice', 'jerry@football.us', 'password321', '223344', 'American Football', 'USA', 'http://whateveryouget', '{"description": "Wide receiver Jerry Rice is considered one of the greatest NFL players of all time with 3 Super Bowl rings and 13 Pro Bowl selections", "incentives": ["Private workouts", "VIP access to games", "Autographed memorabilia"]}' ),
+('Richie McCaw', 'Richie McCaw', 'richie@rugby.nz', 'password321', '334455', 'Rugby', 'New Zealand', 'http://whateveryouget', '{"description": "Former New Zealand rugby union player Richie McCaw captained the All Blacks to two consecutive Rugby World Cup victories in 2011 and 2015", "incentives": ["Private training sessions", "Match tickets", "Signed memorabilia"]}' ),
+('Jonah Lomu', 'Jonah Lomu', 'jonah@rugby.nz', 'password321', '445566', 'Rugby', 'New Zealand', 'http://whateveryouget', '{"description": "Legendary rugby player Jonah Lomu scored 43 tries in 73 international matches for the New Zealand All Blacks", "incentives": ["Private training sessions", "Match tickets", "Signed memorabilia"]}' ),
+('Lin Dan', 'Lin Dan', 'lin@badminton.cn', 'password321', '556677', 'Badminton', 'China', 'http://whateveryouget', '{"description": "Chinese badminton player Lin Dan is widely considered one of the greatest badminton players of all time with 2 Olympic gold medals and 5 World Championship titles", "incentives": ["Training sessions", "Signed racquets", "Meet and greets"]}' ),
+('Carolina Marin', 'Carolina Marin', 'carolina@badminton.es', 'password321', '667788', 'Badminton', 'Spain', 'http://whateveryouget', '{"description": "Spanish badminton player Carolina Marin is a former Olympic gold medalist and 3-time World Champion", "incentives": ["Training sessions", "Signed racquets", "Meet and greets"]}' ),
+('Usain Bolt', 'Usain Bolt', 'usain@athletics.jm', 'password321', '778899', 'Athletics (Track and Field)', 'Jamaica', 'http://whateveryouget', '{"description": "Jamaican sprinter Usain Bolt is widely considered the greatest sprinter of all time with 8 Olympic gold medals and 11 World Championship titles", "incentives": ["Training sessions", "Signed spikes", "Meet and greets"]}' ),
+('Carl Lewis', 'Carl Lewis', 'carl@athletics.us', 'password321', '889977', 'Athletics (Track and Field)', 'USA', 'http://whateveryouget', '{"description": "American track and field athlete Carl Lewis won 9 Olympic gold medals and 1 silver medal during his career", "incentives": ["Signed shoes", "Meet and greets", "Training sessions"]}' ),
+('Muhammad Ali', 'Muhammad Ali', 'muhammad@boxing.us', 'password321', '334455', 'Boxing', 'USA', 'http://whateveryouget', '{"description": "Muhammad Ali, also known as `The Greatest`, was an American boxer who won multiple world heavyweight championships", "incentives": ["Signed gloves", "Meet and greets", "Training sessions"]}' ),
+('Sugar Ray Robinson', 'Sugar Ray Robinson', 'sugarray@boxing.us', 'password321', '667788', 'Boxing', 'USA', 'http://whateveryouget', '{"description": "Sugar Ray Robinson was an American professional boxer who won world championships in multiple weight classes", "incentives": ["Signed gloves", "Meet and greets", "Training sessions"]}' ),
+('Eddy Merckx', 'Eddy Merckx', 'eddy@cycling.be', 'password321', '112233', 'Cycling', 'Belgium', 'http://whateveryouget', '{"description": "Eddy Merckx is a retired Belgian cyclist who won multiple world championships and Grand Tour races", "incentives": ["Signed jerseys", "Meet and greets", "Training sessions"]}' ),
+('Miguel Indurain', 'Miguel Indurain', 'miguel@cycling.es', 'password321', '556677', 'Cycling', 'Spain', 'http://whateveryouget', '{"description": "Miguel Indurain is a retired Spanish cyclist who won multiple Tour de France and Olympic time trial titles", "incentives": ["Signed jerseys", "Meet and greets", "Training sessions"]}' ),
+('Michael Phelps', 'Michael Phelps', 'michael@swimming.us', 'password321', '990011', 'Swimming', 'USA', 'http://whateveryouget', '{"description": "Michael Phelps is an American former competitive swimmer who won a record-breaking 23 Olympic gold medals", "incentives": ["Signed swim caps", "Meet and greets", "Training sessions"]}' ),
+('Katie Ledecky', 'Katie Ledecky', 'katie@swimming.us', 'password123', '112233', 'Swimming', 'USA', 'http://whateveryouget', '{"description": "Katie Ledecky is an American swimmer who has won multiple Olympic and World Championship gold medals", "incentives": ["Signed swim caps", "Meet and greets", "Training sessions"]}' ),
+('Bruce Lee', 'Bruce Lee', 'bruce@martialarts.us', 'password456', '445566', 'Martial Arts', 'USA/Hong Kong', 'http://whateveryouget', '{"description": "Bruce Lee was a legendary martial artist and actor who founded the martial art Jeet Kune Do", "incentives": ["Signed nunchucks", "Meet and greets", "Training sessions"]}' ),
+('Anderson Silva', 'Anderson Silva', 'anderson@martialarts.br', 'password789', '778899', 'Martial Arts', 'Brazil', 'http://whateveryouget', '{"description": "Anderson Silva is a Brazilian former mixed martial artist who held the UFC Middleweight Championship for a record-breaking 2,457 days", "incentives": ["Signed gloves", "Meet and greets", "Training sessions"]}' ),
+('Aleksandr Karelin', 'Aleksandr Karelin', 'aleksandr@wrestling.ru', 'passwordabc', '223344', 'Wrestling', 'Russia', 'http://whateveryouget', '{"description": "Aleksandr Karelin is a retired Russian wrestler who won 3 Olympic gold medals and 9 World Championships", "incentives": ["Signed wrestling shoes", "Meet and greets", "Training sessions"]}' ),
+('John Smith', 'John Smith', 'john@wrestling.us', 'passworddef', '556677', 'Wrestling', 'USA', 'http://whateveryouget', '{"description": "John Smith is a retired American wrestler who won 2 Olympic gold medals and 6 World Championships", "incentives": ["Signed wrestling shoes", "Meet and greets", "Training sessions"]}' ),
+('Simone Biles', 'Simone Biles', 'simone@gymnastics.us', 'passwordghi', '889900', 'Gymnastics', 'USA', 'http://whateveryouget', '{"description": "Simone Biles is an American artistic gymnast who has won multiple Olympic and World Championship gold medals", "incentives": ["Signed leotards", "Meet and greets", "Training sessions"]}' ),
+('Nadia Comăneci', 'Nadia Comăneci', 'nadia@gymnastics.ro', 'passwordjkl', '778899', 'Gymnastics', 'Romania', 'http://whateveryouget', '{"description": "Nadia Comăneci is a retired Romanian gymnast who is the first gymnast to score a perfect 10 at the Olympics", "incentives": ["Signed leotards", "Meet and greets", "Training sessions"]}' ),
+('John Tavares', 'John Tavares', 'john@boxlacrosse.ca', 'passwordmno', '112233', 'Box Lacrosse', 'Canada', 'http://whateveryouget', '{"description": "John Tavares is a Canadian retired professional box lacrosse player and coach", "incentives": ["Signed jerseys", "Meet and greets", "Training sessions"]}' ),
+('Gary Gait', 'Gary Gait', 'gary@boxlacrosse.ca', 'passwordpqr', '445566', 'Box Lacrosse', 'Canada', 'http://whateveryouget', '{"description": "Gary Gait is a retired Canadian professional box lacrosse player and coach", "incentives": ["Signed jerseys", "Meet and greets", "Training sessions"]}' ),
+('Wayne Gretzky', 'Wayne Gretzky', 'wayne@icehockey.ca', 'passwordstu', '778899', 'Ice Hockey', 'Canada', 'http://whateveryouget', '{"description": "Wayne Gretzky is a Canadian former professional ice hockey player and coach", "incentives": ["Signed hockey sticks", "Meet and greets", "Training sessions"]}' ),
+('Bobby Orr', 'Bobby Orr', 'bobby@icehockey.ca', 'passwordvwx', '112233', 'Ice Hockey', 'Canada', 'http://whateveryouget', '{"description": "Bobby Orr is a Canadian former professional ice hockey player and coach", "incentives": ["Signed hockey pucks", "Meet and greets", "Training sessions"]}' );
+
+
+"""
+Content mock data
+"""
+
+ INSERT INTO content (athlete_id, media_url, caption) SELECT    FLOOR(RAND() * 42) + 1 as athlete_id,   CONCAT('http://example.com/image', FLOOR(RAND() * 1000) + 1, '.jpg') as media_url,   CONCAT(     CASE FLOOR(RAND() * 3)       WHEN 0 THEN 'Just dropped some new merch! Check it out at {merch_url}.'       WHEN 1 THEN 'Training hard for the upcoming {event_name}! Can\'t wait to compete.'       ELSE 'So excited to announce that I\'m partnering with {brand_name}! Stay tuned for more details.'     END,     ' 😍 #sportslife #newbeginnings',     FLOOR(RAND() * 1000) + 1   ) as caption FROM information_schema.tables AS t1   JOIN information_schema.tables AS t2   JOIN information_schema.tables AS t3 LIMIT 50;
+
+
+"""
+Sports mock data
+"""
+
+INSERT INTO constants (sports, incentives) 
+VALUES ('[
+        "Football (Soccer)",
+        "Cricket",
+        "Basketball",
+        "Field Hockey",
+        "Tennis",
+        "Volleyball",
+        "Table Tennis (Ping Pong)",
+        "Baseball",
+        "Golf",
+        "American Football",
+        "Rugby",
+        "Badminton",
+        "Athletics (Track and Field)",
+        "Boxing",
+        "Cycling",
+        "Ice Hockey",
+        "Swimming",
+        "Skiing",
+        "Wrestling",
+        "Gymnastics"
+    ]', '[
+        "Autographed memorabilia",
+        "Meet-and-greet sessions",
+        "VIP access to games",
+        "Social media shoutouts",
+        "Personalized videos or messages",
+        "Merchandise discounts",
+        "Charity events"
+    ]');
+
+INSERT INTO constants(incentives)
+VALUES ('[
+        "Autographed memorabilia",
+        "Meet-and-greet sessions",
+        "VIP access to games",
+        "Social media shoutouts",
+        "Personalized videos or messages",
+        "Merchandise discounts",
+        "Charity events"
+    ]');
