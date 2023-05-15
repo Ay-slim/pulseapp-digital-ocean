@@ -491,7 +491,13 @@ export const UserInterestsSuggestions = extendType({
                     // const incentives_list = JSON.parse(interests_data?.incentives)
                     const suggestions: SuggestionsDataType[] = await context
                         .knex_client('athletes')
-                        .select('id', 'display_name', 'image_url', 'metadata')
+                        .select(
+                            'id',
+                            'display_name',
+                            'image_url',
+                            'metadata',
+                            'sport'
+                        )
                         .whereNotIn('id', athletes_list)
                     // const filtered_suggestions = suggestions.map(suggestion => {
                     //     const ath_metadata = JSON.parse(suggestion?.metadata)

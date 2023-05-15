@@ -68,6 +68,7 @@ type SuggestionsData {
   display_name: String
   id: Int
   image_url: String
+  sport: String
 }
 
 type UserContent {

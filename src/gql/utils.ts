@@ -13,10 +13,10 @@ export type SuggestionsDataType = {
     id: number
     display_name: string
     image_url: string
+    sport: string
 }
 
 export type AthleteDataType = SuggestionsDataType & {
-    sport: string
     metadata: string
 }
 
@@ -50,6 +50,7 @@ const SuggestionsData = list(
             t.int('id')
             t.string('display_name')
             t.string('image_url')
+            t.string('sport')
         },
     })
 )

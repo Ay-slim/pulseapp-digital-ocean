@@ -62,6 +62,7 @@ export interface NexusGenObjects {
     display_name?: string | null; // String
     id?: number | null; // Int
     image_url?: string | null; // String
+    sport?: string | null; // String
   }
   UserContent: { // root type
     athlete_display_name?: string | null; // String
@@ -129,6 +130,7 @@ export interface NexusGenFieldTypes {
     display_name: string | null; // String
     id: number | null; // Int
     image_url: string | null; // String
+    sport: string | null; // String
   }
   UserContent: { // field return type
     athlete_display_name: string | null; // String
@@ -186,6 +188,7 @@ export interface NexusGenFieldTypeNames {
     display_name: 'String'
     id: 'Int'
     image_url: 'String'
+    sport: 'String'
   }
   UserContent: { // field return type name
     athlete_display_name: 'String'
