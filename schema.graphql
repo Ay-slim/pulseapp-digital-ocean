@@ -21,6 +21,7 @@ type AthleteData {
 
 type AuthData {
   athlete_data: [AthleteData]
+  athletes: [AthleteData]
   completion_status: String
   content_data: [UserContent]
   email: String

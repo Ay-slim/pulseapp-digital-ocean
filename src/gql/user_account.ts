@@ -426,12 +426,17 @@ export const UserDisplayContent = extendType({
                             content_caption: content?.caption,
                         }
                     })
+                    const all_followed_athletes = await context.knex_client
+                        .select('id', 'display_name', 'image_url')
+                        .from('athletes')
+                        .whereIn('id', athletes_list)
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
                             content_data: normalized_db_resp,
+                            athletes: all_followed_athletes,
                             max_id,
                         },
                     }

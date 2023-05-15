@@ -40,6 +40,7 @@ export interface NexusGenObjects {
   }
   AuthData: { // root type
     athlete_data?: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
+    athletes?: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
     completion_status?: string | null; // String
     content_data?: Array<NexusGenRootTypes['UserContent'] | null> | null; // [UserContent]
     email?: string | null; // String
@@ -85,6 +86,7 @@ export interface NexusGenFieldTypes {
   }
   AuthData: { // field return type
     athlete_data: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
+    athletes: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
     completion_status: string | null; // String
     content_data: Array<NexusGenRootTypes['UserContent'] | null> | null; // [UserContent]
     email: string | null; // String
@@ -133,6 +135,7 @@ export interface NexusGenFieldTypeNames {
   }
   AuthData: { // field return type name
     athlete_data: 'AthleteData'
+    athletes: 'AthleteData'
     completion_status: 'String'
     content_data: 'UserContent'
     email: 'String'

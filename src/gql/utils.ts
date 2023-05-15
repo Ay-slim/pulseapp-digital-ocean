@@ -70,6 +70,9 @@ export const GQLResponse = objectType({
                         type: UserContent,
                     })
                     t.int('max_id')
+                    t.field('athletes', {
+                        type: AthleteData,
+                    })
                     t.list.string('sports')
                     t.list.string('incentives')
                 },
