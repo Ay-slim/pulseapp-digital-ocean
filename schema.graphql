@@ -56,7 +56,7 @@ type MutationResponse {
 
 type Query {
   athletes(limit: Int!, next_min_id: Int, sports: [String]!): MutationResponse!
-  fetch_user_content: MutationResponse!
+  fetch_user_content(limit: Int!, next_min_id: Int): MutationResponse!
   user_fetch_incentives: MutationResponse!
   user_fetch_sports: MutationResponse!
 }

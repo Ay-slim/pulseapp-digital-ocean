@@ -216,6 +216,10 @@ export interface NexusGenArgTypes {
       next_min_id?: number | null; // Int
       sports: Array<string | null>; // [String]!
     }
+    fetch_user_content: { // args
+      limit: number; // Int!
+      next_min_id?: number | null; // Int
+    }
   }
 }
 

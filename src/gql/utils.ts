@@ -22,6 +22,7 @@ export type UserContentType = {
     image_url: string
     media_url: string
     caption: string
+    id: number
 }
 
 const AthleteData = list(

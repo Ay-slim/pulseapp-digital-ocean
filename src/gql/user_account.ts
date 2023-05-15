@@ -377,9 +377,13 @@ export const UserDisplayContent = extendType({
     definition(t) {
         t.nonNull.field('fetch_user_content', {
             type: GQLResponse,
-            args: {},
-            async resolve(_, __, context) {
+            args: {
+                next_min_id: intArg(),
+                limit: nonNull(intArg()),
+            },
+            async resolve(_, args, context) {
                 try {
+                    const { next_min_id, limit } = args
                     const { user_id } = login_auth(
                         context?.auth_token,
                         'user_id'
@@ -390,12 +394,13 @@ export const UserDisplayContent = extendType({
                         .where('user_id', user_id)
                         .first()
                     const athletes_list = JSON.parse(interests_data?.athletes)
-                    const db_resp: UserContentType[] = await context.knex_client
+                    const content_query = context.knex_client
                         .select(
                             'athletes.display_name',
                             'athletes.image_url',
                             'content.media_url',
-                            'content.caption'
+                            'content.caption',
+                            'content.id'
                         )
                         .from('athletes')
                         .join(
@@ -405,6 +410,14 @@ export const UserDisplayContent = extendType({
                             'content.athlete_id'
                         )
                         .whereIn('athletes.id', athletes_list)
+                        .orderBy('content.id', 'asc')
+                        .limit(limit)
+                    if (next_min_id) {
+                        content_query.where('content.id', '>', next_min_id)
+                    }
+                    const db_resp: UserContentType[] = await content_query
+                    const batch_len = db_resp.length
+                    const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
                     const normalized_db_resp = db_resp?.map((content) => {
                         return {
                             athlete_display_name: content?.display_name,
@@ -419,6 +432,7 @@ export const UserDisplayContent = extendType({
                         message: 'Success',
                         data: {
                             content_data: normalized_db_resp,
+                            max_id,
                         },
                     }
                 } catch (err) {
