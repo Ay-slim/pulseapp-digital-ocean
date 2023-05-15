@@ -67,4 +67,5 @@ type UserContent {
   athlete_image_url: String
   content_caption: String
   content_media_url: String
+  distance: String
 }

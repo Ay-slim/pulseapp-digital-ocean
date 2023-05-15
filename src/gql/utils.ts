@@ -23,6 +23,7 @@ export type UserContentType = {
     media_url: string
     caption: string
     id: number
+    created_at: string
 }
 
 const AthleteData = list(
@@ -47,6 +48,7 @@ const UserContent = list(
             t.string('athlete_image_url')
             t.string('content_media_url')
             t.string('content_caption')
+            t.string('distance')
         },
     })
 )

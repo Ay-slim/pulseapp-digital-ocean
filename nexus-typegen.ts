@@ -62,6 +62,7 @@ export interface NexusGenObjects {
     athlete_image_url?: string | null; // String
     content_caption?: string | null; // String
     content_media_url?: string | null; // String
+    distance?: string | null; // String
   }
 }
 
@@ -121,6 +122,7 @@ export interface NexusGenFieldTypes {
     athlete_image_url: string | null; // String
     content_caption: string | null; // String
     content_media_url: string | null; // String
+    distance: string | null; // String
   }
 }
 
@@ -170,6 +172,7 @@ export interface NexusGenFieldTypeNames {
     athlete_image_url: 'String'
     content_caption: 'String'
     content_media_url: 'String'
+    distance: 'String'
   }
 }
 

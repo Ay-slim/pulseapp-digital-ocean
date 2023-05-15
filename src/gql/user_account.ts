@@ -1,6 +1,7 @@
 import { enumType, extendType, nonNull, stringArg, list, intArg } from 'nexus'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
+import { formatDistance, subDays } from 'date-fns'
 import {
     create_jwt_token,
     AthleteDataType,
@@ -401,7 +402,8 @@ export const UserDisplayContent = extendType({
                             'athletes.image_url',
                             'content.media_url',
                             'content.caption',
-                            'content.id'
+                            'content.id',
+                            'content.created_at'
                         )
                         .from('athletes')
                         .join(
@@ -433,6 +435,11 @@ export const UserDisplayContent = extendType({
                             athlete_image_url: content?.image_url,
                             content_media_url: content?.media_url,
                             content_caption: content?.caption,
+                            distance: formatDistance(
+                                new Date(content?.created_at),
+                                new Date(),
+                                { addSuffix: true }
+                            ),
                         }
                     })
                     const all_followed_athletes = next_min_id
