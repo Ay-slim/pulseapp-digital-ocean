@@ -9,10 +9,13 @@ type JwtPayloadWithId = JwtPayload & {
     athlete_id?: number
 }
 
-export type AthleteDataType = {
+export type SuggestionsDataType = {
     id: number
     display_name: string
     image_url: string
+}
+
+export type AthleteDataType = SuggestionsDataType & {
     sport: string
     metadata: string
 }
@@ -36,6 +39,17 @@ const AthleteData = list(
             t.string('sport')
             t.string('description')
             t.list.string('incentives')
+        },
+    })
+)
+
+const SuggestionsData = list(
+    objectType({
+        name: 'SuggestionsData',
+        definition(t) {
+            t.int('id')
+            t.string('display_name')
+            t.string('image_url')
         },
     })
 )
@@ -74,6 +88,9 @@ export const GQLResponse = objectType({
                     t.int('max_id')
                     t.field('athletes', {
                         type: AthleteData,
+                    })
+                    t.field('suggestions', {
+                        type: SuggestionsData,
                     })
                     t.list.string('sports')
                     t.list.string('incentives')

@@ -10,6 +10,7 @@ import {
     ServerReturnType,
     login_auth,
     UserContentType,
+    SuggestionsDataType,
 } from './utils'
 
 dotenv.config()
@@ -442,12 +443,13 @@ export const UserDisplayContent = extendType({
                             ),
                         }
                     })
-                    const all_followed_athletes = next_min_id
-                        ? []
-                        : await context.knex_client
-                              .select('id', 'display_name', 'image_url')
-                              .from('athletes')
-                              .whereIn('id', athletes_list)
+                    const all_followed_athletes: SuggestionsDataType[] =
+                        next_min_id
+                            ? []
+                            : await context.knex_client
+                                  .select('id', 'display_name', 'image_url')
+                                  .from('athletes')
+                                  .whereIn('id', athletes_list)
                     return {
                         status: 201,
                         error: false,
@@ -456,6 +458,51 @@ export const UserDisplayContent = extendType({
                             content_data: normalized_db_resp,
                             athletes: all_followed_athletes,
                             max_id,
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status, Error?.message)
+                }
+            },
+        })
+    },
+})
+
+export const UserInterestsSuggestions = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('fetch_user_suggestions', {
+            type: GQLResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const user_id = login_auth(
+                        context?.auth_token,
+                        'user_id'
+                    )?.user_id
+                    const interests_data = await context
+                        .knex_client('interests')
+                        .select('athletes', 'incentives')
+                        .where('user_id', user_id)
+                        .first()
+                    const athletes_list = JSON.parse(interests_data?.athletes)
+                    // const incentives_list = JSON.parse(interests_data?.incentives)
+                    const suggestions: SuggestionsDataType[] = await context
+                        .knex_client('athletes')
+                        .select('id', 'display_name', 'image_url', 'metadata')
+                        .whereNotIn('id', athletes_list)
+                    // const filtered_suggestions = suggestions.map(suggestion => {
+                    //     const ath_metadata = JSON.parse(suggestion?.metadata)
+
+                    // })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            suggestions,
                         },
                     }
                 } catch (err) {

@@ -47,6 +47,7 @@ export interface NexusGenObjects {
     incentives?: Array<string | null> | null; // [String]
     max_id?: number | null; // Int
     sports?: Array<string | null> | null; // [String]
+    suggestions?: Array<NexusGenRootTypes['SuggestionsData'] | null> | null; // [SuggestionsData]
     token?: string | null; // String
   }
   Mutation: {};
@@ -57,6 +58,11 @@ export interface NexusGenObjects {
     status: number; // Int!
   }
   Query: {};
+  SuggestionsData: { // root type
+    display_name?: string | null; // String
+    id?: number | null; // Int
+    image_url?: string | null; // String
+  }
   UserContent: { // root type
     athlete_display_name?: string | null; // String
     athlete_image_url?: string | null; // String
@@ -94,6 +100,7 @@ export interface NexusGenFieldTypes {
     incentives: Array<string | null> | null; // [String]
     max_id: number | null; // Int
     sports: Array<string | null> | null; // [String]
+    suggestions: Array<NexusGenRootTypes['SuggestionsData'] | null> | null; // [SuggestionsData]
     token: string | null; // String
   }
   Mutation: { // field return type
@@ -114,8 +121,14 @@ export interface NexusGenFieldTypes {
   Query: { // field return type
     athletes: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     fetch_user_content: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    fetch_user_suggestions: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     user_fetch_incentives: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     user_fetch_sports: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+  }
+  SuggestionsData: { // field return type
+    display_name: string | null; // String
+    id: number | null; // Int
+    image_url: string | null; // String
   }
   UserContent: { // field return type
     athlete_display_name: string | null; // String
@@ -144,6 +157,7 @@ export interface NexusGenFieldTypeNames {
     incentives: 'String'
     max_id: 'Int'
     sports: 'String'
+    suggestions: 'SuggestionsData'
     token: 'String'
   }
   Mutation: { // field return type name
@@ -164,8 +178,14 @@ export interface NexusGenFieldTypeNames {
   Query: { // field return type name
     athletes: 'MutationResponse'
     fetch_user_content: 'MutationResponse'
+    fetch_user_suggestions: 'MutationResponse'
     user_fetch_incentives: 'MutationResponse'
     user_fetch_sports: 'MutationResponse'
+  }
+  SuggestionsData: { // field return type name
+    display_name: 'String'
+    id: 'Int'
+    image_url: 'String'
   }
   UserContent: { // field return type name
     athlete_display_name: 'String'
