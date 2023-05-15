@@ -380,10 +380,11 @@ export const UserDisplayContent = extendType({
             args: {
                 next_min_id: intArg(),
                 limit: nonNull(intArg()),
+                athlete_select_id: intArg(),
             },
             async resolve(_, args, context) {
                 try {
-                    const { next_min_id, limit } = args
+                    const { next_min_id, limit, athlete_select_id } = args
                     const { user_id } = login_auth(
                         context?.auth_token,
                         'user_id'
@@ -409,9 +410,17 @@ export const UserDisplayContent = extendType({
                             '=',
                             'content.athlete_id'
                         )
-                        .whereIn('athletes.id', athletes_list)
                         .orderBy('content.id', 'asc')
                         .limit(limit)
+                    if (athlete_select_id) {
+                        content_query.where(
+                            'athletes.id',
+                            '=',
+                            athlete_select_id
+                        )
+                    } else {
+                        content_query.whereIn('athletes.id', athletes_list)
+                    }
                     if (next_min_id) {
                         content_query.where('content.id', '>', next_min_id)
                     }
@@ -426,10 +435,12 @@ export const UserDisplayContent = extendType({
                             content_caption: content?.caption,
                         }
                     })
-                    const all_followed_athletes = await context.knex_client
-                        .select('id', 'display_name', 'image_url')
-                        .from('athletes')
-                        .whereIn('id', athletes_list)
+                    const all_followed_athletes = next_min_id
+                        ? []
+                        : await context.knex_client
+                              .select('id', 'display_name', 'image_url')
+                              .from('athletes')
+                              .whereIn('id', athletes_list)
                     return {
                         status: 201,
                         error: false,

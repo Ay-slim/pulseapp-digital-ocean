@@ -220,6 +220,7 @@ export interface NexusGenArgTypes {
       sports: Array<string | null>; // [String]!
     }
     fetch_user_content: { // args
+      athlete_select_id?: number | null; // Int
       limit: number; // Int!
       next_min_id?: number | null; // Int
     }
