@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 import { create_jwt_token } from './utils'
 
 dotenv.config()
+const AUTO_NOTIFICATION_CONTENT = ['draw', 'poll']
 
 /* ALL CONTRACTS RELATED TO USER ACCOUNT MANAGEMENT*/
 export const AthleteSigninMutation = extendType({
@@ -68,14 +69,13 @@ export const AthleteSignupMutation = extendType({
             args: {
                 password: nonNull(stringArg()),
                 phone: nonNull(stringArg()),
-                display_name: nonNull(stringArg()),
                 email: nonNull(stringArg()),
                 name: nonNull(stringArg()),
-                sports: nonNull(list(stringArg())),
-                incentives: nonNull(list(stringArg())),
+                sport: nonNull(stringArg()),
+                country: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
-                const { password, phone, email, name, display_name } = args
+                const { password, phone, email, name, sport, country } = args
                 try {
                     const existing_email_check = await context.knex_client
                         .select('email')
@@ -97,7 +97,8 @@ export const AthleteSignupMutation = extendType({
                                 phone,
                                 email,
                                 name,
-                                display_name,
+                                sport,
+                                country,
                             },
                             ['id']
                         )
@@ -123,6 +124,46 @@ export const AthleteSignupMutation = extendType({
     },
 })
 
+export const AthleteUpdateInfoMutation = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('athlete_update_info', {
+            type: GQLResponse,
+            args: {
+                incentives: nonNull(list(stringArg())),
+                description: nonNull(stringArg()),
+                image_url: nonNull(stringArg()),
+            },
+            async resolve(_, args, context) {
+                const { incentives, description, image_url } = args
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const metadata = JSON.stringify({
+                        incentives,
+                        description,
+                    })
+                    await context
+                        .knex_client('athletes')
+                        .where('id', '=', athlete_id)
+                        .update({ metadata, image_url })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status, Error?.message)
+                }
+            },
+        })
+    },
+})
+
 export const AthleteAddContent = extendType({
     type: 'Mutation',
     definition(t) {
@@ -131,21 +172,71 @@ export const AthleteAddContent = extendType({
             args: {
                 media_url: stringArg(),
                 caption: nonNull(stringArg()),
+                category: nonNull(stringArg()),
+                start_time: stringArg(),
+                end_time: stringArg(),
             },
             async resolve(_, args, context) {
                 try {
-                    const { media_url, caption } = args
+                    const {
+                        media_url,
+                        caption,
+                        category,
+                        start_time,
+                        end_time,
+                    } = args
                     const athlete_id = login_auth(
                         context?.auth_token,
                         'athlete_id'
                     )?.athlete_id
 
-                    await context.knex_client('content').insert({
-                        athlete_id,
-                        media_url,
-                        caption,
-                    })
-
+                    const content_db_resp = await context
+                        .knex_client('content')
+                        .insert(
+                            {
+                                athlete_id,
+                                media_url,
+                                caption,
+                                category,
+                                start_time,
+                                end_time,
+                            },
+                            ['id']
+                        )
+                    const sub_db_resp = await context
+                        .knex_client('athletes')
+                        .select('subscribers')
+                        .where({ id: athlete_id })
+                    //console.log(sub_db_resp?.[0]?.subscribers)
+                    let subscribers: number[] = JSON.parse(
+                        sub_db_resp?.[0]?.subscribers
+                    )
+                    //console.log(subscribers, 'SUBSCRIBERSSSSS')
+                    if (AUTO_NOTIFICATION_CONTENT.includes(category)) {
+                        const all_athlete_followers: { user_id: number }[] =
+                            await context
+                                .knex_client('interests')
+                                .select('user_id')
+                                .whereRaw(
+                                    'JSON_CONTAINS(athletes, CAST(? AS JSON), "$")',
+                                    [JSON.stringify(athlete_id)]
+                                )
+                        subscribers = [
+                            ...new Set([
+                                ...subscribers,
+                                ...all_athlete_followers.map(
+                                    (follower) => follower?.user_id
+                                ),
+                            ]),
+                        ]
+                    }
+                    const content_insertion_array = subscribers.map((user_id) =>
+                        context.knex_client('notifications').insert({
+                            user_id,
+                            content_id: content_db_resp?.[0],
+                        })
+                    )
+                    Promise.all(content_insertion_array)
                     return {
                         status: 201,
                         error: false,

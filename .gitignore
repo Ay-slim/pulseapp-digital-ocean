@@ -2,4 +2,3 @@ node_modules
 .env
 yarn-error.log
 dist
-sql_dump

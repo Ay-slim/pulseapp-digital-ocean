@@ -1,7 +1,15 @@
-import { enumType, extendType, nonNull, stringArg, list, intArg } from 'nexus'
+import {
+    enumType,
+    extendType,
+    nonNull,
+    stringArg,
+    list,
+    intArg,
+    booleanArg,
+} from 'nexus'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
-import { formatDistance, subDays } from 'date-fns'
+import { formatDistance } from 'date-fns'
 import {
     create_jwt_token,
     AthleteDataType,
@@ -199,10 +207,16 @@ export const UserAddInterests = extendType({
                 athletes: nonNull(list(intArg())),
                 sports: nonNull(list(stringArg())),
                 incentives: nonNull(list(stringArg())),
+                notifications_preference: nonNull(list(stringArg())),
             },
             async resolve(_, args, context) {
                 try {
-                    const { athletes, sports, incentives } = args
+                    const {
+                        athletes,
+                        sports,
+                        incentives,
+                        notifications_preference,
+                    } = args
                     const user_id = login_auth(
                         context?.auth_token,
                         'user_id'
@@ -214,6 +228,9 @@ export const UserAddInterests = extendType({
                             athletes: JSON.stringify(athletes),
                             sports: JSON.stringify(sports),
                             incentives: JSON.stringify(incentives),
+                            notifications_preference: JSON.stringify(
+                                notifications_preference
+                            ),
                         }),
                         context
                             .knex_client('users')
@@ -320,13 +337,7 @@ export const UserDisplayAthletes = extendType({
                 try {
                     const { next_min_id, limit, sports } = args
                     const athlete_query = context.knex_client
-                        .select(
-                            'id',
-                            'display_name',
-                            'image_url',
-                            'sport',
-                            'metadata'
-                        )
+                        .select('id', 'name', 'image_url', 'sport', 'metadata')
                         .from('athletes')
                         .whereIn('sport', sports)
                         .orderBy('id', 'asc')
@@ -340,7 +351,7 @@ export const UserDisplayAthletes = extendType({
                             const parsed_mdata = JSON.parse(resp?.metadata)
                             return {
                                 id: resp?.id,
-                                display_name: resp?.display_name,
+                                name: resp?.name,
                                 image_url: resp?.image_url,
                                 sport: resp?.sport,
                                 incentives: parsed_mdata?.incentives,
@@ -383,10 +394,16 @@ export const UserDisplayContent = extendType({
                 next_min_id: intArg(),
                 limit: nonNull(intArg()),
                 athlete_select_id: intArg(),
+                live_events: booleanArg(),
             },
             async resolve(_, args, context) {
                 try {
-                    const { next_min_id, limit, athlete_select_id } = args
+                    const {
+                        next_min_id,
+                        limit,
+                        athlete_select_id,
+                        live_events,
+                    } = args
                     const { user_id } = login_auth(
                         context?.auth_token,
                         'user_id'
@@ -399,7 +416,7 @@ export const UserDisplayContent = extendType({
                     const athletes_list = JSON.parse(interests_data?.athletes)
                     const content_query = context.knex_client
                         .select(
-                            'athletes.display_name',
+                            'athletes.name',
                             'athletes.image_url',
                             'content.media_url',
                             'content.caption',
@@ -421,6 +438,9 @@ export const UserDisplayContent = extendType({
                             '=',
                             athlete_select_id
                         )
+                    } else if (live_events) {
+                        content_query.whereRaw('content.end_time IS NOT NULL')
+                        content_query.where('content.end_time', '>', Date.now())
                     } else {
                         content_query.whereIn('athletes.id', athletes_list)
                     }
@@ -432,7 +452,7 @@ export const UserDisplayContent = extendType({
                     const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
                     const normalized_db_resp = db_resp?.map((content) => {
                         return {
-                            athlete_display_name: content?.display_name,
+                            athlete_name: content?.name,
                             athlete_image_url: content?.image_url,
                             content_media_url: content?.media_url,
                             content_caption: content?.caption,
@@ -443,11 +463,12 @@ export const UserDisplayContent = extendType({
                             ),
                         }
                     })
+                    //Only returning suggestios on first call to this endpoint, hence the check for next_min_id existence
                     const all_followed_athletes: SuggestionsDataType[] =
                         next_min_id
                             ? []
                             : await context.knex_client
-                                  .select('id', 'display_name', 'image_url')
+                                  .select('id', 'name', 'image_url')
                                   .from('athletes')
                                   .whereIn('id', athletes_list)
                     return {
@@ -491,13 +512,7 @@ export const UserInterestsSuggestions = extendType({
                     // const incentives_list = JSON.parse(interests_data?.incentives)
                     const suggestions: SuggestionsDataType[] = await context
                         .knex_client('athletes')
-                        .select(
-                            'id',
-                            'display_name',
-                            'image_url',
-                            'metadata',
-                            'sport'
-                        )
+                        .select('id', 'name', 'image_url', 'metadata', 'sport')
                         .whereNotIn('id', athletes_list)
                     // const filtered_suggestions = suggestions.map(suggestion => {
                     //     const ath_metadata = JSON.parse(suggestion?.metadata)
@@ -520,3 +535,47 @@ export const UserInterestsSuggestions = extendType({
         })
     },
 })
+
+// export const UserFetchNotifications = extendType({
+//     type: 'Query',
+//     definition(t) {
+//         t.nonNull.field('user_fetch_notifications', {
+//             type: GQLResponse,
+//             args: {},
+//             async resolve(_, __, context) {
+//                 try {
+//                     const user_id = login_auth(context?.auth_token, 'user_id')?.user_id
+//                     const notifications = await context.knex_client
+//                     .select(
+//                         'notifications.id',
+//                         'notifications.content_id',
+//                         'notifications.status',
+//                         'content.caption'
+//                     )
+//                     .from('notifications')
+//                     .join(
+//                         'content',
+//                         'notifications.content_id',
+//                         '=',
+//                         'content.id'
+//                     )
+//                     .where('notifications.user_id', '=', user_id)
+//                     .orderBy('content.created_at', 'desc')
+//                     console.log(notifications)
+//                     return {
+//                         status: 201,
+//                         error: false,
+//                         message: 'Success',
+//                         data: {
+//                             notifications,
+//                         },
+//                     }
+//                 } catch (err) {
+//                     const Error = err as ServerReturnType
+//                     console.error(err)
+//                     return err_return(Error?.status, Error?.message)
+//                 }
+//             },
+//         })
+//     },
+// })
