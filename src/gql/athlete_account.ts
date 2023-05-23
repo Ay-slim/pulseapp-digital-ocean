@@ -72,9 +72,10 @@ export const AthleteSignupMutation = extendType({
                 email: nonNull(stringArg()),
                 name: nonNull(stringArg()),
                 sport: nonNull(stringArg()),
+                country: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
-                const { password, phone, email, name, sport } = args
+                const { password, phone, email, name, sport, country } = args
                 try {
                     const existing_email_check = await context.knex_client
                         .select('email')
@@ -97,6 +98,7 @@ export const AthleteSignupMutation = extendType({
                                 email,
                                 name,
                                 sport,
+                                country,
                             },
                             ['id']
                         )
@@ -129,11 +131,10 @@ export const AthleteUpdateInfoMutation = extendType({
             type: GQLResponse,
             args: {
                 incentives: nonNull(list(stringArg())),
-                country: nonNull(stringArg()),
                 description: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
-                const { incentives, country, description } = args
+                const { incentives, description } = args
                 try {
                     const athlete_id = login_auth(
                         context?.auth_token,
@@ -146,7 +147,7 @@ export const AthleteUpdateInfoMutation = extendType({
                     await context
                         .knex_client('athletes')
                         .where('id', '=', athlete_id)
-                        .update({ metadata, country })
+                        .update({ metadata })
                     return {
                         status: 201,
                         error: false,

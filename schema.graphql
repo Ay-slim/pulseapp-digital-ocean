@@ -42,8 +42,8 @@ enum GenderEnum {
 type Mutation {
   add_content(caption: String!, category: String!, end_time: String, media_url: String, start_time: String): MutationResponse!
   athlete_signin(email: String!, password: String!): MutationResponse!
-  athlete_signup(email: String!, name: String!, password: String!, phone: String!, sport: String!): MutationResponse!
-  athlete_update_info(country: String!, description: String!, incentives: [String]!): MutationResponse!
+  athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): MutationResponse!
+  athlete_update_info(description: String!, incentives: [String]!): MutationResponse!
   interests(athletes: [Int]!, incentives: [String]!, notifications_preference: [String]!, sports: [String]!): MutationResponse!
   signin(email: String!, password: String!): MutationResponse!
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): MutationResponse!

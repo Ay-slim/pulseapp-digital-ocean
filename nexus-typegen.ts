@@ -215,6 +215,7 @@ export interface NexusGenArgTypes {
       password: string; // String!
     }
     athlete_signup: { // args
+      country: string; // String!
       email: string; // String!
       name: string; // String!
       password: string; // String!
@@ -222,7 +223,6 @@ export interface NexusGenArgTypes {
       sport: string; // String!
     }
     athlete_update_info: { // args
-      country: string; // String!
       description: string; // String!
       incentives: Array<string | null>; // [String]!
     }
