@@ -224,6 +224,7 @@ export interface NexusGenArgTypes {
     }
     athlete_update_info: { // args
       description: string; // String!
+      image_url: string; // String!
       incentives: Array<string | null>; // [String]!
     }
     interests: { // args

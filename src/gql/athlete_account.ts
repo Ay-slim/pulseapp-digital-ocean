@@ -132,9 +132,10 @@ export const AthleteUpdateInfoMutation = extendType({
             args: {
                 incentives: nonNull(list(stringArg())),
                 description: nonNull(stringArg()),
+                image_url: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
-                const { incentives, description } = args
+                const { incentives, description, image_url } = args
                 try {
                     const athlete_id = login_auth(
                         context?.auth_token,
@@ -147,7 +148,7 @@ export const AthleteUpdateInfoMutation = extendType({
                     await context
                         .knex_client('athletes')
                         .where('id', '=', athlete_id)
-                        .update({ metadata })
+                        .update({ metadata, image_url })
                     return {
                         status: 201,
                         error: false,
