@@ -11,7 +11,7 @@ type JwtPayloadWithId = JwtPayload & {
 
 export type SuggestionsDataType = {
     id: number
-    display_name: string
+    name: string
     image_url: string
     sport: string
 }
@@ -21,7 +21,7 @@ export type AthleteDataType = SuggestionsDataType & {
 }
 
 export type UserContentType = {
-    display_name: string
+    name: string
     image_url: string
     media_url: string
     caption: string
@@ -34,7 +34,7 @@ const AthleteData = list(
         name: 'AthleteData',
         definition(t) {
             t.int('id')
-            t.string('display_name')
+            t.string('name')
             t.string('image_url')
             t.string('sport')
             t.string('description')
@@ -48,7 +48,7 @@ const SuggestionsData = list(
         name: 'SuggestionsData',
         definition(t) {
             t.int('id')
-            t.string('display_name')
+            t.string('name')
             t.string('image_url')
             t.string('sport')
         },
@@ -59,7 +59,7 @@ const UserContent = list(
     objectType({
         name: 'UserContent',
         definition(t) {
-            t.string('athlete_display_name')
+            t.string('athlete_name')
             t.string('athlete_image_url')
             t.string('content_media_url')
             t.string('content_caption')
