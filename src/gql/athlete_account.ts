@@ -125,7 +125,7 @@ export const AthleteSignupMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status, 'Something went wrong')
                 }
             },
         })
@@ -163,7 +163,7 @@ export const AthleteUpdateInfoMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status, 'Something went wrong')
                 }
             },
         })
@@ -274,6 +274,7 @@ export const AthleteFetchBasics = extendType({
                     const stats: AthleteBioType[] = await knex_client
                         .select(
                             'athletes.name',
+                            'athletes.image_url',
                             knex_client.raw(
                                 '(SELECT COUNT(*) FROM interests WHERE JSON_CONTAINS(athletes, CAST(? AS JSON), "$")) AS follower_count',
                                 [athlete_id]
@@ -332,7 +333,7 @@ export const AthleteFetchTopFollowers = extendType({
                     )?.athlete_id
                     const { knex_client } = context
                     const top_followers: TopFollowersType[] = await knex_client
-                        .select('users.name', 'users.id')
+                        .select('users.name', 'users.id', 'users.email')
                         .from('interests')
                         .join('athletes', (join: any) => {
                             join.on(

@@ -25,11 +25,13 @@ export type AthleteBioType = {
     follower_count: number
     posts_count: number
     events_count: number
+    image_url: string
 }
 
 export type TopFollowersType = {
     name: string
     id: number
+    email: string
 }
 
 export type UserContentType = {
@@ -65,6 +67,7 @@ const AthleteBio = objectType({
     name: 'AthleteBio',
     definition(t) {
         t.string('name')
+        t.string('image_url')
         t.int('follower_count')
         t.int('posts_count')
         t.int('events_count')
@@ -76,6 +79,7 @@ const TopFollowers = objectType({
     definition(t) {
         t.string('name')
         t.int('id')
+        t.string('email')
     },
 })
 
