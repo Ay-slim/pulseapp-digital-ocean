@@ -50,7 +50,7 @@ export const s3_upload = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })

@@ -33,6 +33,7 @@ export interface NexusGenObjects {
   AthleteBio: { // root type
     events_count?: number | null; // Int
     follower_count?: number | null; // Int
+    image_url?: string | null; // String
     name?: string | null; // String
     posts_count?: number | null; // Int
   }
@@ -80,6 +81,7 @@ export interface NexusGenObjects {
     sport?: string | null; // String
   }
   TopFollowers: { // root type
+    email?: string | null; // String
     id?: number | null; // Int
     name?: string | null; // String
   }
@@ -106,6 +108,7 @@ export interface NexusGenFieldTypes {
   AthleteBio: { // field return type
     events_count: number | null; // Int
     follower_count: number | null; // Int
+    image_url: string | null; // String
     name: string | null; // String
     posts_count: number | null; // Int
   }
@@ -173,6 +176,7 @@ export interface NexusGenFieldTypes {
     sport: string | null; // String
   }
   TopFollowers: { // field return type
+    email: string | null; // String
     id: number | null; // Int
     name: string | null; // String
   }
@@ -189,6 +193,7 @@ export interface NexusGenFieldTypeNames {
   AthleteBio: { // field return type name
     events_count: 'Int'
     follower_count: 'Int'
+    image_url: 'String'
     name: 'String'
     posts_count: 'Int'
   }
@@ -256,6 +261,7 @@ export interface NexusGenFieldTypeNames {
     sport: 'String'
   }
   TopFollowers: { // field return type name
+    email: 'String'
     id: 'Int'
     name: 'String'
   }

@@ -90,7 +90,7 @@ export const UserSigninMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(Error?.message)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -152,7 +152,7 @@ export const UserSignupMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -191,7 +191,7 @@ export const UserJoinWaitlist = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -251,7 +251,7 @@ export const UserAddInterests = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -282,7 +282,7 @@ export const UserFetchSports = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -315,7 +315,7 @@ export const UserFetchIncentives = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -378,7 +378,7 @@ export const UserDisplayAthletes = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -484,7 +484,7 @@ export const UserDisplayContent = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -529,7 +529,7 @@ export const UserInterestsSuggestions = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -570,7 +570,7 @@ export const UserFollowAthlete = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })

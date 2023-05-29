@@ -62,7 +62,7 @@ export const AthleteSigninMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(Error?.message)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -125,7 +125,7 @@ export const AthleteSignupMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, 'Something went wrong')
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -163,7 +163,7 @@ export const AthleteUpdateInfoMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, 'Something went wrong')
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -251,7 +251,7 @@ export const AthleteAddContent = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -284,16 +284,12 @@ export const AthleteFetchBasics = extendType({
                                 [athlete_id]
                             ),
                             knex_client.raw(
-                                '(SELECT COUNT(*) FROM interests WHERE JSON_CONTAINS(athletes, CAST(? AS JSON), "$")) AS follower_count',
-                                [athlete_id]
-                            ),
-                            knex_client.raw(
                                 '(SELECT COUNT(*) FROM events WHERE events.athlete_id = ?) AS events_count',
                                 [athlete_id]
                             )
                         )
-                        .from('interests')
-                        .join('athletes', (join: any) => {
+                        .from('athletes')
+                        .leftJoin('interests', (join: any) => {
                             join.on(
                                 knex_client.raw(
                                     'JSON_CONTAINS(athletes, CAST(athletes.id AS JSON), "$")'
@@ -301,6 +297,7 @@ export const AthleteFetchBasics = extendType({
                             )
                         })
                         .whereRaw('athletes.id = ?', [athlete_id])
+                    console.log(stats)
                     return {
                         status: 201,
                         error: false,
@@ -312,7 +309,7 @@ export const AthleteFetchBasics = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -357,7 +354,7 @@ export const AthleteFetchTopFollowers = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -407,7 +404,7 @@ export const AthleteFetchSales = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })

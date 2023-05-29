@@ -211,10 +211,10 @@ export const login_auth = (
     }
 }
 
-export const err_return = (status = 400, message: string): ServerReturnType => {
+export const err_return = (status = 400): ServerReturnType => {
     return {
         status,
         error: true,
-        message,
+        message: 'Something went wrong',
     }
 }
