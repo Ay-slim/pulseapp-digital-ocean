@@ -30,6 +30,12 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  AthleteBio: { // root type
+    events_count?: number | null; // Int
+    follower_count?: number | null; // Int
+    name?: string | null; // String
+    posts_count?: number | null; // Int
+  }
   AthleteData: { // root type
     description?: string | null; // String
     id?: number | null; // Int
@@ -39,6 +45,7 @@ export interface NexusGenObjects {
     sport?: string | null; // String
   }
   AuthData: { // root type
+    athlete_bio?: NexusGenRootTypes['AthleteBio'] | null; // AthleteBio
     athlete_data?: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
     athletes?: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
     completion_status?: string | null; // String
@@ -46,9 +53,12 @@ export interface NexusGenObjects {
     email?: string | null; // String
     incentives?: Array<string | null> | null; // [String]
     max_id?: number | null; // Int
+    sales?: Array<NexusGenRootTypes['Sales'] | null> | null; // [Sales]
+    signed_url?: string | null; // String
     sports?: Array<string | null> | null; // [String]
     suggestions?: Array<NexusGenRootTypes['SuggestionsData'] | null> | null; // [SuggestionsData]
     token?: string | null; // String
+    top_followers?: Array<NexusGenRootTypes['TopFollowers'] | null> | null; // [TopFollowers]
   }
   Mutation: {};
   MutationResponse: { // root type
@@ -58,11 +68,20 @@ export interface NexusGenObjects {
     status: number; // Int!
   }
   Query: {};
+  Sales: { // root type
+    month?: number | null; // Int
+    total_sales?: number | null; // Float
+    year?: number | null; // Int
+  }
   SuggestionsData: { // root type
     id?: number | null; // Int
     image_url?: string | null; // String
     name?: string | null; // String
     sport?: string | null; // String
+  }
+  TopFollowers: { // root type
+    id?: number | null; // Int
+    name?: string | null; // String
   }
   UserContent: { // root type
     athlete_image_url?: string | null; // String
@@ -84,6 +103,12 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  AthleteBio: { // field return type
+    events_count: number | null; // Int
+    follower_count: number | null; // Int
+    name: string | null; // String
+    posts_count: number | null; // Int
+  }
   AthleteData: { // field return type
     description: string | null; // String
     id: number | null; // Int
@@ -93,6 +118,7 @@ export interface NexusGenFieldTypes {
     sport: string | null; // String
   }
   AuthData: { // field return type
+    athlete_bio: NexusGenRootTypes['AthleteBio'] | null; // AthleteBio
     athlete_data: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
     athletes: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
     completion_status: string | null; // String
@@ -100,9 +126,12 @@ export interface NexusGenFieldTypes {
     email: string | null; // String
     incentives: Array<string | null> | null; // [String]
     max_id: number | null; // Int
+    sales: Array<NexusGenRootTypes['Sales'] | null> | null; // [Sales]
+    signed_url: string | null; // String
     sports: Array<string | null> | null; // [String]
     suggestions: Array<NexusGenRootTypes['SuggestionsData'] | null> | null; // [SuggestionsData]
     token: string | null; // String
+    top_followers: Array<NexusGenRootTypes['TopFollowers'] | null> | null; // [TopFollowers]
   }
   Mutation: { // field return type
     add_content: NexusGenRootTypes['MutationResponse']; // MutationResponse!
@@ -110,8 +139,10 @@ export interface NexusGenFieldTypes {
     athlete_signup: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     athlete_update_info: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     interests: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    s3_upload: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signin: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signup: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    user_follow_athlete: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     waitlist: NexusGenRootTypes['MutationResponse']; // MutationResponse!
   }
   MutationResponse: { // field return type
@@ -122,16 +153,28 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     athletes: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    fetch_athlete_basics: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    fetch_athlete_sales: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    fetch_athlete_top_followers: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     fetch_user_content: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     fetch_user_suggestions: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     user_fetch_incentives: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     user_fetch_sports: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+  }
+  Sales: { // field return type
+    month: number | null; // Int
+    total_sales: number | null; // Float
+    year: number | null; // Int
   }
   SuggestionsData: { // field return type
     id: number | null; // Int
     image_url: string | null; // String
     name: string | null; // String
     sport: string | null; // String
+  }
+  TopFollowers: { // field return type
+    id: number | null; // Int
+    name: string | null; // String
   }
   UserContent: { // field return type
     athlete_image_url: string | null; // String
@@ -143,6 +186,12 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  AthleteBio: { // field return type name
+    events_count: 'Int'
+    follower_count: 'Int'
+    name: 'String'
+    posts_count: 'Int'
+  }
   AthleteData: { // field return type name
     description: 'String'
     id: 'Int'
@@ -152,6 +201,7 @@ export interface NexusGenFieldTypeNames {
     sport: 'String'
   }
   AuthData: { // field return type name
+    athlete_bio: 'AthleteBio'
     athlete_data: 'AthleteData'
     athletes: 'AthleteData'
     completion_status: 'String'
@@ -159,9 +209,12 @@ export interface NexusGenFieldTypeNames {
     email: 'String'
     incentives: 'String'
     max_id: 'Int'
+    sales: 'Sales'
+    signed_url: 'String'
     sports: 'String'
     suggestions: 'SuggestionsData'
     token: 'String'
+    top_followers: 'TopFollowers'
   }
   Mutation: { // field return type name
     add_content: 'MutationResponse'
@@ -169,8 +222,10 @@ export interface NexusGenFieldTypeNames {
     athlete_signup: 'MutationResponse'
     athlete_update_info: 'MutationResponse'
     interests: 'MutationResponse'
+    s3_upload: 'MutationResponse'
     signin: 'MutationResponse'
     signup: 'MutationResponse'
+    user_follow_athlete: 'MutationResponse'
     waitlist: 'MutationResponse'
   }
   MutationResponse: { // field return type name
@@ -181,16 +236,28 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     athletes: 'MutationResponse'
+    fetch_athlete_basics: 'MutationResponse'
+    fetch_athlete_sales: 'MutationResponse'
+    fetch_athlete_top_followers: 'MutationResponse'
     fetch_user_content: 'MutationResponse'
     fetch_user_suggestions: 'MutationResponse'
     user_fetch_incentives: 'MutationResponse'
     user_fetch_sports: 'MutationResponse'
+  }
+  Sales: { // field return type name
+    month: 'Int'
+    total_sales: 'Float'
+    year: 'Int'
   }
   SuggestionsData: { // field return type name
     id: 'Int'
     image_url: 'String'
     name: 'String'
     sport: 'String'
+  }
+  TopFollowers: { // field return type name
+    id: 'Int'
+    name: 'String'
   }
   UserContent: { // field return type name
     athlete_image_url: 'String'
@@ -225,13 +292,15 @@ export interface NexusGenArgTypes {
     athlete_update_info: { // args
       description: string; // String!
       image_url: string; // String!
-      incentives: Array<string | null>; // [String]!
     }
     interests: { // args
       athletes: Array<number | null>; // [Int]!
       incentives: Array<string | null>; // [String]!
       notifications_preference: Array<string | null>; // [String]!
       sports: Array<string | null>; // [String]!
+    }
+    s3_upload: { // args
+      file_name: string; // String!
     }
     signin: { // args
       email: string; // String!
@@ -244,6 +313,9 @@ export interface NexusGenArgTypes {
       name: string; // String!
       password: string; // String!
       phone: string; // String!
+    }
+    user_follow_athlete: { // args
+      athlete_id: number; // Int!
     }
     waitlist: { // args
       email: string; // String!

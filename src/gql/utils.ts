@@ -20,6 +20,18 @@ export type AthleteDataType = SuggestionsDataType & {
     metadata: string
 }
 
+export type AthleteBioType = {
+    name: string
+    follower_count: number
+    posts_count: number
+    events_count: number
+}
+
+export type TopFollowersType = {
+    name: string
+    id: number
+}
+
 export type UserContentType = {
     name: string
     image_url: string
@@ -27,6 +39,12 @@ export type UserContentType = {
     caption: string
     id: number
     created_at: string
+}
+
+export type SalesType = {
+    year: number
+    month: number
+    total_sales: number
 }
 
 const AthleteData = list(
@@ -43,6 +61,32 @@ const AthleteData = list(
     })
 )
 
+const AthleteBio = objectType({
+    name: 'AthleteBio',
+    definition(t) {
+        t.string('name')
+        t.int('follower_count')
+        t.int('posts_count')
+        t.int('events_count')
+    },
+})
+
+const TopFollowers = objectType({
+    name: 'TopFollowers',
+    definition(t) {
+        t.string('name')
+        t.int('id')
+    },
+})
+
+const Sales = objectType({
+    name: 'Sales',
+    definition(t) {
+        t.int('year')
+        t.int('month')
+        t.float('total_sales')
+    },
+})
 const SuggestionsData = list(
     objectType({
         name: 'SuggestionsData',
@@ -95,6 +139,16 @@ export const GQLResponse = objectType({
                     })
                     t.list.string('sports')
                     t.list.string('incentives')
+                    t.string('signed_url')
+                    t.field('athlete_bio', {
+                        type: AthleteBio,
+                    })
+                    t.list.field('top_followers', {
+                        type: TopFollowers,
+                    })
+                    t.list.field('sales', {
+                        type: Sales,
+                    })
                 },
             }),
         })

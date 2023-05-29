@@ -29,6 +29,8 @@
     "license": "MIT",
     "dependencies": {
         "@apollo/server": "^4.7.0",
+        "@aws-sdk/client-s3": "^3.338.0",
+        "@aws-sdk/s3-request-presigner": "^3.338.0",
         "bcryptjs": "^2.4.3",
         "date-fns": "^2.30.0",
         "dotenv": "^16.0.3",

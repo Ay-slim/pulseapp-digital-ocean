@@ -1,5 +1,12 @@
-import { extendType, nonNull, stringArg, list } from 'nexus'
-import { GQLResponse, ServerReturnType, login_auth } from './utils'
+import { extendType, nonNull, stringArg } from 'nexus'
+import {
+    GQLResponse,
+    ServerReturnType,
+    login_auth,
+    AthleteBioType,
+    TopFollowersType,
+    SalesType,
+} from './utils'
 import { err_return } from './utils'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
@@ -27,21 +34,22 @@ export const AthleteSigninMutation = extendType({
                         .where({
                             email: email,
                         })
-
-                    if (db_resp?.length != 1)
+                    if (db_resp?.length != 1) {
                         throw {
                             status: 400,
-                            messsage: 'Athlete does not exist!',
+                            message: 'Athlete does not exist!',
                         }
+                    }
                     const { password: hashed_password, id } = db_resp?.[0]
                     const pw_match = hashed_password
                         ? await bcrypt.compare(password, hashed_password)
                         : false
-                    if (!pw_match)
+                    if (!pw_match) {
                         throw {
                             status: 401,
                             message: 'Invalid password!',
                         }
+                    }
                     const token = create_jwt_token(id, 'athlete_id')
                     return {
                         status: 200,
@@ -130,19 +138,17 @@ export const AthleteUpdateInfoMutation = extendType({
         t.nonNull.field('athlete_update_info', {
             type: GQLResponse,
             args: {
-                incentives: nonNull(list(stringArg())),
                 description: nonNull(stringArg()),
                 image_url: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
-                const { incentives, description, image_url } = args
+                const { description, image_url } = args
                 try {
                     const athlete_id = login_auth(
                         context?.auth_token,
                         'athlete_id'
                     )?.athlete_id
                     const metadata = JSON.stringify({
-                        incentives,
                         description,
                     })
                     await context
@@ -241,6 +247,161 @@ export const AthleteAddContent = extendType({
                         status: 201,
                         error: false,
                         message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status, Error?.message)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteFetchBasics = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('fetch_athlete_basics', {
+            type: GQLResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { knex_client } = context
+                    const stats: AthleteBioType[] = await knex_client
+                        .select(
+                            'athletes.name',
+                            knex_client.raw(
+                                '(SELECT COUNT(*) FROM interests WHERE JSON_CONTAINS(athletes, CAST(? AS JSON), "$")) AS follower_count',
+                                [athlete_id]
+                            ),
+                            knex_client.raw(
+                                '(SELECT COUNT(*) FROM content WHERE content.athlete_id = ?) AS posts_count',
+                                [athlete_id]
+                            ),
+                            knex_client.raw(
+                                '(SELECT COUNT(*) FROM interests WHERE JSON_CONTAINS(athletes, CAST(? AS JSON), "$")) AS follower_count',
+                                [athlete_id]
+                            ),
+                            knex_client.raw(
+                                '(SELECT COUNT(*) FROM events WHERE events.athlete_id = ?) AS events_count',
+                                [athlete_id]
+                            )
+                        )
+                        .from('interests')
+                        .join('athletes', (join: any) => {
+                            join.on(
+                                knex_client.raw(
+                                    'JSON_CONTAINS(athletes, CAST(athletes.id AS JSON), "$")'
+                                )
+                            )
+                        })
+                        .whereRaw('athletes.id = ?', [athlete_id])
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            athlete_bio: stats?.[0],
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status, Error?.message)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteFetchTopFollowers = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('fetch_athlete_top_followers', {
+            type: GQLResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { knex_client } = context
+                    const top_followers: TopFollowersType[] = await knex_client
+                        .select('users.name', 'users.id')
+                        .from('interests')
+                        .join('athletes', (join: any) => {
+                            join.on(
+                                knex_client.raw(
+                                    'JSON_CONTAINS(athletes, CAST(athletes.id AS JSON), "$")'
+                                )
+                            )
+                        })
+                        .join('users', 'users.id', '=', 'interests.user_id')
+                        .whereRaw('athletes.id = ?', [athlete_id])
+                        .orderBy('interests.created_at', 'asc')
+                        .limit(5)
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            top_followers,
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status, Error?.message)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteFetchSales = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('fetch_athlete_sales', {
+            type: GQLResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { knex_client } = context
+                    const total_sales: SalesType[] = await knex_client('sales')
+                        .join(
+                            'products',
+                            'sales.product_id',
+                            '=',
+                            'products.id'
+                        )
+                        .select(
+                            knex_client.raw(
+                                'YEAR(sales.created_at) AS year, MONTH(sales.created_at) AS month, SUM(sales.total_value) AS total_sales'
+                            )
+                        )
+                        .where('products.athlete_id', athlete_id)
+                        .groupByRaw(
+                            'YEAR(sales.created_at), MONTH(sales.created_at)'
+                        )
+                        .orderByRaw(
+                            'YEAR(sales.created_at), MONTH(sales.created_at)'
+                        )
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            sales: total_sales,
+                        },
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType

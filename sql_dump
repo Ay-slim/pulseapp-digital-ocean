@@ -290,3 +290,7 @@ VALUES ('[
 
 -- INSERT INTO content (athlete_id, media_url, caption, category, start_time, end_time)
 -- VALUES (5, 'http://dummyimage.com/146x100.png/cc0000/ffffff', 'Big news! My new line of workout gear is now available 🏋️‍♂️', 'draw', NOW(), '2024-12-25');
+
+
+insert into events (athlete_id, product_id, caption, start_time, end_time) values (43, 1, 'I need your help! Which team should I sign with next? Vote now in my poll.', null, '2023-10-19'),
+(43, 1, 'Big announcement coming soon. Stay tuned!', '2022-10-02', '2023-07-18');

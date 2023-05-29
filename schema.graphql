@@ -10,6 +10,13 @@ enum AgeRangeEnum {
   under_18
 }
 
+type AthleteBio {
+  events_count: Int
+  follower_count: Int
+  name: String
+  posts_count: Int
+}
+
 type AthleteData {
   description: String
   id: Int
@@ -20,6 +27,7 @@ type AthleteData {
 }
 
 type AuthData {
+  athlete_bio: AthleteBio
   athlete_data: [AthleteData]
   athletes: [AthleteData]
   completion_status: String
@@ -27,9 +35,12 @@ type AuthData {
   email: String
   incentives: [String]
   max_id: Int
+  sales: [Sales]
+  signed_url: String
   sports: [String]
   suggestions: [SuggestionsData]
   token: String
+  top_followers: [TopFollowers]
 }
 
 enum GenderEnum {
@@ -43,10 +54,12 @@ type Mutation {
   add_content(caption: String!, category: String!, end_time: String, media_url: String, start_time: String): MutationResponse!
   athlete_signin(email: String!, password: String!): MutationResponse!
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): MutationResponse!
-  athlete_update_info(description: String!, image_url: String!, incentives: [String]!): MutationResponse!
+  athlete_update_info(description: String!, image_url: String!): MutationResponse!
   interests(athletes: [Int]!, incentives: [String]!, notifications_preference: [String]!, sports: [String]!): MutationResponse!
+  s3_upload(file_name: String!): MutationResponse!
   signin(email: String!, password: String!): MutationResponse!
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): MutationResponse!
+  user_follow_athlete(athlete_id: Int!): MutationResponse!
   waitlist(email: String!): MutationResponse!
 }
 
@@ -59,10 +72,19 @@ type MutationResponse {
 
 type Query {
   athletes(limit: Int!, next_min_id: Int, sports: [String]!): MutationResponse!
+  fetch_athlete_basics: MutationResponse!
+  fetch_athlete_sales: MutationResponse!
+  fetch_athlete_top_followers: MutationResponse!
   fetch_user_content(athlete_select_id: Int, limit: Int!, live_events: Boolean, next_min_id: Int): MutationResponse!
   fetch_user_suggestions: MutationResponse!
   user_fetch_incentives: MutationResponse!
   user_fetch_sports: MutationResponse!
+}
+
+type Sales {
+  month: Int
+  total_sales: Float
+  year: Int
 }
 
 type SuggestionsData {
@@ -70,6 +92,11 @@ type SuggestionsData {
   image_url: String
   name: String
   sport: String
+}
+
+type TopFollowers {
+  id: Int
+  name: String
 }
 
 type UserContent {

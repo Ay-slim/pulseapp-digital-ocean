@@ -536,6 +536,46 @@ export const UserInterestsSuggestions = extendType({
     },
 })
 
+export const UserFollowAthlete = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('user_follow_athlete', {
+            type: GQLResponse,
+            args: { athlete_id: nonNull(intArg()) },
+            async resolve(_, args, context) {
+                try {
+                    const user_id = login_auth(
+                        context?.auth_token,
+                        'user_id'
+                    )?.user_id
+                    const { athlete_id } = args
+                    const { knex_client } = context
+                    await knex_client('interests')
+                        .update({
+                            athletes: knex_client.raw(
+                                'JSON_ARRAY_APPEND(athletes, "$", ?)',
+                                [athlete_id]
+                            ),
+                        })
+                        .where({ user_id })
+                        .whereRaw(
+                            'NOT JSON_CONTAINS(athletes, CAST(? AS JSON), "$")',
+                            [athlete_id]
+                        )
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status, Error?.message)
+                }
+            },
+        })
+    },
+})
 // export const UserFetchNotifications = extendType({
 //     type: 'Query',
 //     definition(t) {
