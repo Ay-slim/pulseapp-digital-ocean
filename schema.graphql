@@ -57,7 +57,9 @@ type Mutation {
   athlete_signin(email: String!, password: String!): MutationResponse!
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): MutationResponse!
   athlete_update_info(description: String!, image_url: String!): MutationResponse!
+  create_post(caption: String!, media_url: String): MutationResponse!
   create_product(currency: String, media_url: String, name: String!, price: Float!, quantity: Int!): MutationResponse!
+  create_sale(caption: String!, end_time: String, media_url: String, product_id: [Int]!): MutationResponse!
   interests(athletes: [Int]!, incentives: [String]!, notifications_preference: [String]!, sports: [String]!): MutationResponse!
   s3_upload(file_name: String!): MutationResponse!
   signin(email: String!, password: String!): MutationResponse!
@@ -94,7 +96,7 @@ type Query {
 }
 
 type Sales {
-  month: Int
+  month: String
   total_sales: Float
   year: Int
 }

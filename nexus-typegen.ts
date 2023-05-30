@@ -78,7 +78,7 @@ export interface NexusGenObjects {
   }
   Query: {};
   Sales: { // root type
-    month?: number | null; // Int
+    month?: string | null; // String
     total_sales?: number | null; // Float
     year?: number | null; // Int
   }
@@ -150,7 +150,9 @@ export interface NexusGenFieldTypes {
     athlete_signin: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     athlete_signup: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     athlete_update_info: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    create_post: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     create_product: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    create_sale: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     interests: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     s3_upload: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signin: NexusGenRootTypes['MutationResponse']; // MutationResponse!
@@ -183,7 +185,7 @@ export interface NexusGenFieldTypes {
     user_fetch_sports: NexusGenRootTypes['MutationResponse']; // MutationResponse!
   }
   Sales: { // field return type
-    month: number | null; // Int
+    month: string | null; // String
     total_sales: number | null; // Float
     year: number | null; // Int
   }
@@ -245,7 +247,9 @@ export interface NexusGenFieldTypeNames {
     athlete_signin: 'MutationResponse'
     athlete_signup: 'MutationResponse'
     athlete_update_info: 'MutationResponse'
+    create_post: 'MutationResponse'
     create_product: 'MutationResponse'
+    create_sale: 'MutationResponse'
     interests: 'MutationResponse'
     s3_upload: 'MutationResponse'
     signin: 'MutationResponse'
@@ -278,7 +282,7 @@ export interface NexusGenFieldTypeNames {
     user_fetch_sports: 'MutationResponse'
   }
   Sales: { // field return type name
-    month: 'Int'
+    month: 'String'
     total_sales: 'Float'
     year: 'Int'
   }
@@ -327,12 +331,22 @@ export interface NexusGenArgTypes {
       description: string; // String!
       image_url: string; // String!
     }
+    create_post: { // args
+      caption: string; // String!
+      media_url?: string | null; // String
+    }
     create_product: { // args
       currency?: string | null; // String
       media_url?: string | null; // String
       name: string; // String!
       price: number; // Float!
       quantity: number; // Int!
+    }
+    create_sale: { // args
+      caption: string; // String!
+      end_time?: string | null; // String
+      media_url?: string | null; // String
+      product_id: Array<number | null>; // [Int]!
     }
     interests: { // args
       athletes: Array<number | null>; // [Int]!

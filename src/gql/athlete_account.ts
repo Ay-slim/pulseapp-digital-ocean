@@ -1,4 +1,4 @@
-import { extendType, nonNull, stringArg, intArg, floatArg } from 'nexus'
+import { extendType, nonNull, stringArg, intArg, floatArg, list } from 'nexus'
 import {
     GQLResponse,
     ServerReturnType,
@@ -6,6 +6,9 @@ import {
     AthleteBioType,
     TopFollowersType,
     SalesType,
+    SalesRetType,
+    ProductsDataType,
+    month_map,
 } from './utils'
 import { err_return } from './utils'
 import bcrypt from 'bcryptjs'
@@ -393,12 +396,21 @@ export const AthleteFetchSales = extendType({
                         .orderByRaw(
                             'YEAR(sales.created_at), MONTH(sales.created_at)'
                         )
+                    const normalized_sales: SalesRetType[] = total_sales.map(
+                        (sale) => {
+                            return {
+                                year: sale.year,
+                                month: month_map(sale.month),
+                                total_sales: sale.total_sales,
+                            }
+                        }
+                    )
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
-                            sales: total_sales,
+                            sales: normalized_sales,
                         },
                     }
                 } catch (err) {
@@ -467,7 +479,9 @@ export const AthleteFetchProducts = extendType({
                         'athlete_id'
                     )?.athlete_id
                     const { knex_client } = context
-                    const products = await knex_client('products')
+                    const products: ProductsDataType[] = await knex_client(
+                        'products'
+                    )
                         .select(
                             'name',
                             'media_url',
@@ -483,6 +497,84 @@ export const AthleteFetchProducts = extendType({
                         data: {
                             products,
                         },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteCreatePost = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('create_post', {
+            type: GQLResponse,
+            args: {
+                media_url: stringArg(),
+                caption: nonNull(stringArg()),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { media_url, caption } = args
+                    const { knex_client } = context
+                    await knex_client('events').insert({
+                        athlete_id,
+                        category: 'post',
+                        media_url,
+                        caption,
+                    })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteCreateSale = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('create_sale', {
+            type: GQLResponse,
+            args: {
+                media_url: stringArg(),
+                caption: nonNull(stringArg()),
+                product_id: nonNull(list(intArg())),
+                end_time: stringArg(),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { media_url, caption } = args
+                    const { knex_client } = context
+                    await knex_client('events').insert({
+                        athlete_id,
+                        category: 'post',
+                        media_url,
+                        caption,
+                    })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType

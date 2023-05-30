@@ -9,13 +9,50 @@ type JwtPayloadWithId = JwtPayload & {
     athlete_id?: number
 }
 
+export const month_map = (month_num: number) => {
+    switch (month_num) {
+        case 1:
+            return 'January'
+        case 2:
+            return 'February'
+        case 3:
+            return 'March'
+        case 4:
+            return 'April'
+        case 5:
+            return 'May'
+        case 6:
+            return 'June'
+        case 7:
+            return 'July'
+        case 8:
+            return 'August'
+        case 9:
+            return 'September'
+        case 10:
+            return 'October'
+        case 11:
+            return 'November'
+        case 12:
+            return 'December'
+        default:
+            throw new Error('Invalid month number')
+    }
+}
+
 export type SuggestionsDataType = {
     id: number
     name: string
     image_url: string
     sport: string
 }
-
+export type ProductsDataType = {
+    name: string
+    media_url: string
+    price: number
+    currency: string
+    quantity: number
+}
 export type AthleteDataType = SuggestionsDataType & {
     metadata: string
 }
@@ -46,6 +83,12 @@ export type UserContentType = {
 export type SalesType = {
     year: number
     month: number
+    total_sales: number
+}
+
+export type SalesRetType = {
+    year: number
+    month: string
     total_sales: number
 }
 
@@ -87,7 +130,7 @@ const Sales = objectType({
     name: 'Sales',
     definition(t) {
         t.int('year')
-        t.int('month')
+        t.string('month')
         t.float('total_sales')
     },
 })
