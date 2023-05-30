@@ -1,4 +1,4 @@
-import { extendType, nonNull, stringArg } from 'nexus'
+import { extendType, nonNull, stringArg, intArg, floatArg } from 'nexus'
 import {
     GQLResponse,
     ServerReturnType,
@@ -399,6 +399,89 @@ export const AthleteFetchSales = extendType({
                         message: 'Success',
                         data: {
                             sales: total_sales,
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteCreateProduct = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('create_product', {
+            type: GQLResponse,
+            args: {
+                media_url: stringArg(),
+                name: nonNull(stringArg()),
+                price: nonNull(floatArg()),
+                quantity: nonNull(intArg()),
+                currency: stringArg(),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { media_url, name, price, quantity, currency } = args
+                    const { knex_client } = context
+                    await knex_client('products').insert({
+                        athlete_id,
+                        media_url,
+                        name,
+                        price,
+                        quantity,
+                        currency,
+                    })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteFetchProducts = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('fetch_products', {
+            type: GQLResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { knex_client } = context
+                    const products = await knex_client('products')
+                        .select(
+                            'name',
+                            'media_url',
+                            'price',
+                            'currency',
+                            'quantity'
+                        )
+                        .where({ athlete_id })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            products,
                         },
                     }
                 } catch (err) {

@@ -115,6 +115,20 @@ const UserContent = list(
         },
     })
 )
+
+const Products = list(
+    objectType({
+        name: 'Products',
+        definition(t) {
+            t.string('name'),
+                t.string('media_url'),
+                t.float('price'),
+                t.string('currency')
+            t.int('quantity')
+        },
+    })
+)
+
 export const GQLResponse = objectType({
     name: 'MutationResponse',
     definition(t) {
@@ -152,6 +166,9 @@ export const GQLResponse = objectType({
                     })
                     t.list.field('sales', {
                         type: Sales,
+                    })
+                    t.field('products', {
+                        type: Products,
                     })
                 },
             }),
