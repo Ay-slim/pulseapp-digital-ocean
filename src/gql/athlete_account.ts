@@ -287,7 +287,7 @@ export const AthleteFetchBasics = extendType({
                                 [athlete_id]
                             ),
                             knex_client.raw(
-                                `(SELECT COUNT(*) FROM events WHERE events.athlete_id = ? AND events.category <> 'posts') AS events_count`,
+                                `(SELECT COUNT(*) FROM events WHERE events.athlete_id = ? AND events.category <> 'post') AS events_count`,
                                 [athlete_id]
                             )
                         )
