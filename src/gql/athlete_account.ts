@@ -342,7 +342,7 @@ export const AthleteFetchTopFollowers = extendType({
                         .join('users', 'users.id', '=', 'interests.user_id')
                         .whereRaw('athletes.id = ?', [athlete_id])
                         .orderBy('interests.created_at', 'asc')
-                        .limit(5)
+                        .limit(10)
                     return {
                         status: 201,
                         error: false,
