@@ -90,7 +90,7 @@ export const UserSigninMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(Error?.message)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -152,7 +152,7 @@ export const UserSignupMutation = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -191,7 +191,7 @@ export const UserJoinWaitlist = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -251,7 +251,7 @@ export const UserAddInterests = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -282,7 +282,7 @@ export const UserFetchSports = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -315,7 +315,7 @@ export const UserFetchIncentives = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -378,7 +378,7 @@ export const UserDisplayAthletes = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -484,7 +484,7 @@ export const UserDisplayContent = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
@@ -529,13 +529,53 @@ export const UserInterestsSuggestions = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status, Error?.message)
+                    return err_return(Error?.status)
                 }
             },
         })
     },
 })
 
+export const UserFollowAthlete = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('user_follow_athlete', {
+            type: GQLResponse,
+            args: { athlete_id: nonNull(intArg()) },
+            async resolve(_, args, context) {
+                try {
+                    const user_id = login_auth(
+                        context?.auth_token,
+                        'user_id'
+                    )?.user_id
+                    const { athlete_id } = args
+                    const { knex_client } = context
+                    await knex_client('interests')
+                        .update({
+                            athletes: knex_client.raw(
+                                'JSON_ARRAY_APPEND(athletes, "$", ?)',
+                                [athlete_id]
+                            ),
+                        })
+                        .where({ user_id })
+                        .whereRaw(
+                            'NOT JSON_CONTAINS(athletes, CAST(? AS JSON), "$")',
+                            [athlete_id]
+                        )
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
 // export const UserFetchNotifications = extendType({
 //     type: 'Query',
 //     definition(t) {

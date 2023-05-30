@@ -9,15 +9,66 @@ type JwtPayloadWithId = JwtPayload & {
     athlete_id?: number
 }
 
+export const month_map = (month_num: number) => {
+    switch (month_num) {
+        case 1:
+            return 'January'
+        case 2:
+            return 'February'
+        case 3:
+            return 'March'
+        case 4:
+            return 'April'
+        case 5:
+            return 'May'
+        case 6:
+            return 'June'
+        case 7:
+            return 'July'
+        case 8:
+            return 'August'
+        case 9:
+            return 'September'
+        case 10:
+            return 'October'
+        case 11:
+            return 'November'
+        case 12:
+            return 'December'
+        default:
+            throw new Error('Invalid month number')
+    }
+}
+
 export type SuggestionsDataType = {
     id: number
     name: string
     image_url: string
     sport: string
 }
-
+export type ProductsDataType = {
+    name: string
+    media_url: string
+    price: number
+    currency: string
+    quantity: number
+}
 export type AthleteDataType = SuggestionsDataType & {
     metadata: string
+}
+
+export type AthleteBioType = {
+    name: string
+    follower_count: number
+    posts_count: number
+    events_count: number
+    image_url: string
+}
+
+export type TopFollowersType = {
+    name: string
+    id: number
+    email: string
 }
 
 export type UserContentType = {
@@ -27,6 +78,18 @@ export type UserContentType = {
     caption: string
     id: number
     created_at: string
+}
+
+export type SalesType = {
+    year: number
+    month: number
+    total_sales: number
+}
+
+export type SalesRetType = {
+    year: number
+    month: string
+    total_sales: number
 }
 
 const AthleteData = list(
@@ -43,6 +106,34 @@ const AthleteData = list(
     })
 )
 
+const AthleteBio = objectType({
+    name: 'AthleteBio',
+    definition(t) {
+        t.string('name')
+        t.string('image_url')
+        t.int('follower_count')
+        t.int('posts_count')
+        t.int('events_count')
+    },
+})
+
+const TopFollowers = objectType({
+    name: 'TopFollowers',
+    definition(t) {
+        t.string('name')
+        t.int('id')
+        t.string('email')
+    },
+})
+
+const Sales = objectType({
+    name: 'Sales',
+    definition(t) {
+        t.int('year')
+        t.string('month')
+        t.float('total_sales')
+    },
+})
 const SuggestionsData = list(
     objectType({
         name: 'SuggestionsData',
@@ -67,6 +158,20 @@ const UserContent = list(
         },
     })
 )
+
+const Products = list(
+    objectType({
+        name: 'Products',
+        definition(t) {
+            t.string('name'),
+                t.string('media_url'),
+                t.float('price'),
+                t.string('currency')
+            t.int('quantity')
+        },
+    })
+)
+
 export const GQLResponse = objectType({
     name: 'MutationResponse',
     definition(t) {
@@ -95,6 +200,19 @@ export const GQLResponse = objectType({
                     })
                     t.list.string('sports')
                     t.list.string('incentives')
+                    t.string('signed_url')
+                    t.field('athlete_bio', {
+                        type: AthleteBio,
+                    })
+                    t.list.field('top_followers', {
+                        type: TopFollowers,
+                    })
+                    t.list.field('sales', {
+                        type: Sales,
+                    })
+                    t.field('products', {
+                        type: Products,
+                    })
                 },
             }),
         })
@@ -153,10 +271,10 @@ export const login_auth = (
     }
 }
 
-export const err_return = (status = 400, message: string): ServerReturnType => {
+export const err_return = (status = 400): ServerReturnType => {
     return {
         status,
         error: true,
-        message,
+        message: 'Something went wrong',
     }
 }
