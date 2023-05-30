@@ -150,6 +150,7 @@ export interface NexusGenFieldTypes {
     athlete_signin: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     athlete_signup: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     athlete_update_info: NexusGenRootTypes['MutationResponse']; // MutationResponse!
+    create_poll: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     create_post: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     create_product: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     create_sale: NexusGenRootTypes['MutationResponse']; // MutationResponse!
@@ -247,6 +248,7 @@ export interface NexusGenFieldTypeNames {
     athlete_signin: 'MutationResponse'
     athlete_signup: 'MutationResponse'
     athlete_update_info: 'MutationResponse'
+    create_poll: 'MutationResponse'
     create_post: 'MutationResponse'
     create_product: 'MutationResponse'
     create_sale: 'MutationResponse'
@@ -330,6 +332,13 @@ export interface NexusGenArgTypes {
     athlete_update_info: { // args
       description: string; // String!
       image_url: string; // String!
+    }
+    create_poll: { // args
+      caption: string; // String!
+      days?: number | null; // Int
+      hours?: number | null; // Int
+      media_url?: string | null; // String
+      options: string[]; // [String!]!
     }
     create_post: { // args
       caption: string; // String!

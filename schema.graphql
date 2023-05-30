@@ -57,6 +57,7 @@ type Mutation {
   athlete_signin(email: String!, password: String!): MutationResponse!
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): MutationResponse!
   athlete_update_info(description: String!, image_url: String!): MutationResponse!
+  create_poll(caption: String!, days: Int, hours: Int, media_url: String, options: [String!]!): MutationResponse!
   create_post(caption: String!, media_url: String): MutationResponse!
   create_product(currency: String, media_url: String, name: String!, price: Float!, quantity: Int!): MutationResponse!
   create_sale(caption: String!, end_time: String, media_url: String, product_id: [Int]!): MutationResponse!

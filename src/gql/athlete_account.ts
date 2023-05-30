@@ -283,11 +283,11 @@ export const AthleteFetchBasics = extendType({
                                 [athlete_id]
                             ),
                             knex_client.raw(
-                                '(SELECT COUNT(*) FROM content WHERE content.athlete_id = ?) AS posts_count',
+                                `(SELECT COUNT(*) FROM events WHERE events.athlete_id = ? AND events.category = 'post') AS posts_count`,
                                 [athlete_id]
                             ),
                             knex_client.raw(
-                                '(SELECT COUNT(*) FROM events WHERE events.athlete_id = ?) AS events_count',
+                                `(SELECT COUNT(*) FROM events WHERE events.athlete_id = ? AND events.category <> 'posts') AS events_count`,
                                 [athlete_id]
                             )
                         )
@@ -300,7 +300,7 @@ export const AthleteFetchBasics = extendType({
                             )
                         })
                         .whereRaw('athletes.id = ?', [athlete_id])
-                    console.log(stats)
+                    //console.log(stats)
                     return {
                         status: 201,
                         error: false,
@@ -546,6 +546,77 @@ export const AthleteCreatePost = extendType({
     },
 })
 
+export const AthleteCreatePoll = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('create_poll', {
+            type: GQLResponse,
+            args: {
+                media_url: stringArg(),
+                caption: nonNull(stringArg()),
+                options: nonNull(list(nonNull(stringArg()))),
+                days: intArg(),
+                hours: intArg(),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { knex_client } = context
+                    if (!athlete_id) {
+                        console.error('Could not find athlete_id')
+                        throw new Error('Something went wrong')
+                    }
+                    const { media_url, caption, options, days, hours } = args
+                    const poll_options: { [key: string]: any } = {}
+                    options.forEach((option) => {
+                        poll_options[option] = 0
+                    })
+                    const metadata = JSON.stringify({
+                        poll_options,
+                    })
+                    const insert_packet: {
+                        athlete_id: number
+                        media_url?: string | null
+                        caption: string
+                        metadata: string
+                        category: string
+                        start_time?: Date
+                        end_time?: Date
+                    } = {
+                        athlete_id,
+                        media_url,
+                        caption,
+                        category: 'poll',
+                        metadata,
+                    }
+                    if (days || hours) {
+                        const end_time = new Date()
+                        end_time.setDate(end_time.getDate() + (days ?? 0))
+                        end_time.setTime(
+                            end_time.getTime() + (hours ?? 0 * 60 * 60 * 1000)
+                        )
+                        insert_packet['end_time'] = end_time
+                        insert_packet['start_time'] = new Date()
+                    }
+                    await knex_client('events').insert(insert_packet)
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
 export const AthleteCreateSale = extendType({
     type: 'Mutation',
     definition(t) {
@@ -563,14 +634,32 @@ export const AthleteCreateSale = extendType({
                         context?.auth_token,
                         'athlete_id'
                     )?.athlete_id
-                    const { media_url, caption } = args
-                    const { knex_client } = context
-                    await knex_client('events').insert({
+                    if (!athlete_id) {
+                        console.error('Could not find athlete_id')
+                        throw new Error('Something went wrong')
+                    }
+                    const { media_url, caption, product_id, end_time } = args
+                    const insert_packet: {
+                        athlete_id: number
+                        media_url?: string | null
+                        caption: string
+                        product_id: string
+                        category: string
+                        start_time?: Date
+                        end_time?: string
+                    } = {
                         athlete_id,
-                        category: 'post',
                         media_url,
                         caption,
-                    })
+                        product_id: JSON.stringify(product_id),
+                        category: 'sale',
+                    }
+                    if (end_time) {
+                        insert_packet['start_time'] = new Date()
+                        insert_packet['end_time'] = end_time
+                    }
+                    const { knex_client } = context
+                    await knex_client('events').insert(insert_packet)
                     return {
                         status: 201,
                         error: false,
