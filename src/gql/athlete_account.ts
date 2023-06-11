@@ -110,6 +110,12 @@ export const AthleteSignupMutation = extendType({
                                 name,
                                 sport,
                                 country,
+                                metadata: JSON.stringify({
+                                    notifications_preference: [
+                                        'email',
+                                        'phone',
+                                    ],
+                                }),
                             },
                             ['id']
                         )
@@ -173,93 +179,93 @@ export const AthleteUpdateInfoMutation = extendType({
     },
 })
 
-export const AthleteAddContent = extendType({
-    type: 'Mutation',
-    definition(t) {
-        t.nonNull.field('add_content', {
-            type: GQLResponse,
-            args: {
-                media_url: stringArg(),
-                caption: nonNull(stringArg()),
-                category: nonNull(stringArg()),
-                start_time: stringArg(),
-                end_time: stringArg(),
-            },
-            async resolve(_, args, context) {
-                try {
-                    const {
-                        media_url,
-                        caption,
-                        category,
-                        start_time,
-                        end_time,
-                    } = args
-                    const athlete_id = login_auth(
-                        context?.auth_token,
-                        'athlete_id'
-                    )?.athlete_id
+// export const AthleteAddContent = extendType({
+//     type: 'Mutation',
+//     definition(t) {
+//         t.nonNull.field('add_content', {
+//             type: GQLResponse,
+//             args: {
+//                 media_url: stringArg(),
+//                 caption: nonNull(stringArg()),
+//                 category: nonNull(stringArg()),
+//                 start_time: stringArg(),
+//                 end_time: stringArg(),
+//             },
+//             async resolve(_, args, context) {
+//                 try {
+//                     const {
+//                         media_url,
+//                         caption,
+//                         category,
+//                         start_time,
+//                         end_time,
+//                     } = args
+//                     const athlete_id = login_auth(
+//                         context?.auth_token,
+//                         'athlete_id'
+//                     )?.athlete_id
 
-                    const content_db_resp = await context
-                        .knex_client('content')
-                        .insert(
-                            {
-                                athlete_id,
-                                media_url,
-                                caption,
-                                category,
-                                start_time,
-                                end_time,
-                            },
-                            ['id']
-                        )
-                    const sub_db_resp = await context
-                        .knex_client('athletes')
-                        .select('subscribers')
-                        .where({ id: athlete_id })
-                    //console.log(sub_db_resp?.[0]?.subscribers)
-                    let subscribers: number[] = JSON.parse(
-                        sub_db_resp?.[0]?.subscribers
-                    )
-                    //console.log(subscribers, 'SUBSCRIBERSSSSS')
-                    if (AUTO_NOTIFICATION_CONTENT.includes(category)) {
-                        const all_athlete_followers: { user_id: number }[] =
-                            await context
-                                .knex_client('interests')
-                                .select('user_id')
-                                .whereRaw(
-                                    'JSON_CONTAINS(athletes, CAST(? AS JSON), "$")',
-                                    [JSON.stringify(athlete_id)]
-                                )
-                        subscribers = [
-                            ...new Set([
-                                ...subscribers,
-                                ...all_athlete_followers.map(
-                                    (follower) => follower?.user_id
-                                ),
-                            ]),
-                        ]
-                    }
-                    const content_insertion_array = subscribers.map((user_id) =>
-                        context.knex_client('notifications').insert({
-                            user_id,
-                            content_id: content_db_resp?.[0],
-                        })
-                    )
-                    Promise.all(content_insertion_array)
-                    return {
-                        status: 201,
-                        error: false,
-                        message: 'Success',
-                    }
-                } catch (err) {
-                    const Error = err as ServerReturnType
-                    console.error(err)
-                    return err_return(Error?.status)
-                }
-            },
-        })
-    },
-})
+//                     const content_db_resp = await context
+//                         .knex_client('content')
+//                         .insert(
+//                             {
+//                                 athlete_id,
+//                                 media_url,
+//                                 caption,
+//                                 category,
+//                                 start_time,
+//                                 end_time,
+//                             },
+//                             ['id']
+//                         )
+//                     const sub_db_resp = await context
+//                         .knex_client('athletes')
+//                         .select('subscribers')
+//                         .where({ id: athlete_id })
+//                     //console.log(sub_db_resp?.[0]?.subscribers)
+//                     let subscribers: number[] = JSON.parse(
+//                         sub_db_resp?.[0]?.subscribers
+//                     )
+//                     //console.log(subscribers, 'SUBSCRIBERSSSSS')
+//                     if (AUTO_NOTIFICATION_CONTENT.includes(category)) {
+//                         const all_athlete_followers: { user_id: number }[] =
+//                             await context
+//                                 .knex_client('interests')
+//                                 .select('user_id')
+//                                 .whereRaw(
+//                                     'JSON_CONTAINS(athletes, CAST(? AS JSON), "$")',
+//                                     [JSON.stringify(athlete_id)]
+//                                 )
+//                         subscribers = [
+//                             ...new Set([
+//                                 ...subscribers,
+//                                 ...all_athlete_followers.map(
+//                                     (follower) => follower?.user_id
+//                                 ),
+//                             ]),
+//                         ]
+//                     }
+//                     const content_insertion_array = subscribers.map((user_id) =>
+//                         context.knex_client('notifications').insert({
+//                             user_id,
+//                             content_id: content_db_resp?.[0],
+//                         })
+//                     )
+//                     Promise.all(content_insertion_array)
+//                     return {
+//                         status: 201,
+//                         error: false,
+//                         message: 'Success',
+//                     }
+//                 } catch (err) {
+//                     const Error = err as ServerReturnType
+//                     console.error(err)
+//                     return err_return(Error?.status)
+//                 }
+//             },
+//         })
+//     },
+// })
 
 export const AthleteFetchBasics = extendType({
     type: 'Query',
@@ -552,7 +558,6 @@ export const AthleteCreatePoll = extendType({
         t.nonNull.field('create_poll', {
             type: GQLResponse,
             args: {
-                media_url: stringArg(),
                 caption: nonNull(stringArg()),
                 options: nonNull(list(nonNull(stringArg()))),
                 days: intArg(),
@@ -569,7 +574,7 @@ export const AthleteCreatePoll = extendType({
                         console.error('Could not find athlete_id')
                         throw new Error('Something went wrong')
                     }
-                    const { media_url, caption, options, days, hours } = args
+                    const { caption, options, days, hours } = args
                     const poll_options: { [key: string]: any } = {}
                     options.forEach((option) => {
                         poll_options[option] = 0
@@ -579,7 +584,6 @@ export const AthleteCreatePoll = extendType({
                     })
                     const insert_packet: {
                         athlete_id: number
-                        media_url?: string | null
                         caption: string
                         metadata: string
                         category: string
@@ -587,7 +591,6 @@ export const AthleteCreatePoll = extendType({
                         end_time?: Date
                     } = {
                         athlete_id,
-                        media_url,
                         caption,
                         category: 'poll',
                         metadata,
@@ -664,6 +667,101 @@ export const AthleteCreateSale = extendType({
                         status: 201,
                         error: false,
                         message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteUpdateSettingsMutation = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('athlete_update_settings', {
+            type: GQLResponse,
+            args: {
+                description: stringArg(),
+                notifications_preference: list(stringArg()),
+            },
+            async resolve(_, args, context) {
+                const { description, notifications_preference } = args
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { knex_client } = context
+                    let raw_sql: string
+                    if (notifications_preference) {
+                        const notif_len = notifications_preference.length
+                        let notif_string = ''
+                        for (let i = 0; i < notif_len; i++) {
+                            if (i == notif_len - 1) {
+                                notif_string += `"${
+                                    notifications_preference[notif_len - 1]
+                                }"`
+                            } else {
+                                notif_string += `"${notifications_preference}", `
+                            }
+                        }
+                        if (!description) {
+                            raw_sql = `UPDATE athletes SET metadata = JSON_SET(metadata, '$.notifications_preference', '[${notif_string}]') WHERE id = ${athlete_id};`
+                        } else {
+                            raw_sql = `UPDATE athletes SET metadata = JSON_SET(JSON_SET(metadata, '$.notifications_preference', '[${notif_string}]'), '$.description', '${description}') WHERE id = ${athlete_id};`
+                        }
+                    } else {
+                        raw_sql = `UPDATE athletes SET metadata = JSON_SET(metadata, '$.description', '${description}') WHERE id = ${athlete_id};`
+                    }
+                    await knex_client.raw(raw_sql)
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteFetchSettingsQuery = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('athlete_fetch_settings', {
+            type: GQLResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )?.athlete_id
+                    const { knex_client } = context
+                    const metadata_resp: { metadata: string } =
+                        await knex_client('athletes')
+                            .select('metadata')
+                            .where('id', '=', athlete_id)
+                            .first()
+                    const metadata = JSON.parse(metadata_resp?.metadata)
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            settings: {
+                                description: metadata?.description,
+                                notifications_preference:
+                                    metadata?.notifications_preference,
+                            },
+                        },
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType

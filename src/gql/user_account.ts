@@ -267,8 +267,8 @@ export const UserFetchSports = extendType({
             async resolve(_, __, context) {
                 try {
                     login_auth(context?.auth_token, 'user_id')?.user_id
-                    const available_sports = await context
-                        .knex_client('constants')
+                    const { knex_client } = context
+                    const available_sports = await knex_client('constants')
                         .select('sports')
                         .where('id', 1)
                     return {
@@ -397,40 +397,37 @@ export const UserDisplayContent = extendType({
                 live_events: booleanArg(),
             },
             async resolve(_, args, context) {
+                // else if (live_events) {
+                //     // content_query.whereRaw('content.end_time IS NOT NULL')
+                //     // content_query.where('content.end_time', '>', Date.now())
+                // }
                 try {
-                    const {
-                        next_min_id,
-                        limit,
-                        athlete_select_id,
-                        live_events,
-                    } = args
+                    const { next_min_id, limit, athlete_select_id } = args
                     const { user_id } = login_auth(
                         context?.auth_token,
                         'user_id'
                     )
+                    //console.log(user_id)
                     const interests_data = await context
                         .knex_client('interests')
-                        .select('athletes')
+                        .select('athletes', 'sports')
                         .where('user_id', user_id)
                         .first()
+                    //console.log(interests_data, 'INTERESTSSSSSSS')
                     const athletes_list = JSON.parse(interests_data?.athletes)
+                    const sports_list = JSON.parse(interests_data?.sports)
                     const content_query = context.knex_client
                         .select(
                             'athletes.name',
                             'athletes.image_url',
-                            'content.media_url',
-                            'content.caption',
-                            'content.id',
-                            'content.created_at'
+                            'events.media_url',
+                            'events.caption',
+                            'events.id',
+                            'events.created_at'
                         )
                         .from('athletes')
-                        .join(
-                            'content',
-                            'athletes.id',
-                            '=',
-                            'content.athlete_id'
-                        )
-                        .orderBy('content.id', 'asc')
+                        .join('events', 'athletes.id', '=', 'events.athlete_id')
+                        .orderBy('events.id', 'asc')
                         .limit(limit)
                     if (athlete_select_id) {
                         content_query.where(
@@ -438,14 +435,11 @@ export const UserDisplayContent = extendType({
                             '=',
                             athlete_select_id
                         )
-                    } else if (live_events) {
-                        content_query.whereRaw('content.end_time IS NOT NULL')
-                        content_query.where('content.end_time', '>', Date.now())
                     } else {
                         content_query.whereIn('athletes.id', athletes_list)
                     }
                     if (next_min_id) {
-                        content_query.where('content.id', '>', next_min_id)
+                        content_query.where('events.id', '>', next_min_id)
                     }
                     const db_resp: UserContentType[] = await content_query
                     const batch_len = db_resp.length
@@ -470,7 +464,9 @@ export const UserDisplayContent = extendType({
                             : await context.knex_client
                                   .select('id', 'name', 'image_url')
                                   .from('athletes')
-                                  .whereIn('id', athletes_list)
+                                  .whereIn('sport', sports_list)
+                                  .whereNotIn('id', athletes_list)
+                    //console.log(all_followed_athletes, 'ALL FOLLOWEEDDDDD')
                     return {
                         status: 201,
                         error: false,
@@ -618,4 +614,157 @@ export const UserFollowAthlete = extendType({
 //             },
 //         })
 //     },
+// })
+
+// export const UserFetchFeatured = extendType({
+//     type: 'Query',
+//     definition(t) {
+//         t.nonNull.field('user_fetch_featured', {
+//             type: GQLResponse,
+//             args: {
+//                 limit: intArg(),
+//                 next_min_id: intArg()
+//             },
+//             async resolve(_, args, context) {
+//                 try {
+//                     const { user_id } = login_auth(
+//                         context?.auth_token,
+//                         'user_id'
+//                     )
+//                     const limit = args.limit ?? 10
+//                     const {next_min_id} = args
+//                     const {knex_client} = context
+//                     const interests_data = await knex_client('interests')
+//                         .select('athletes')
+//                         .where('user_id', user_id)
+//                         .first()
+//                     const athletes_list = JSON.parse(interests_data?.athletes)
+//                     const featured_query = knex_client.select(
+//                         'events.id',
+//                         'events.athlete_id',
+//                         'events.media_url',
+//                         'events.caption',
+//                         'events.start_time',
+//                         'events.end_time',
+//                         'athletes.name as athlete_name',
+//                         'athletes.image_url as athlete_image',
+//                         'products.name as product_name',
+//                         'products.price as price',
+//                         'products.media_url as product_image'
+//                     ).from('athletes')
+//                     .join(
+//                         'events',
+//                         'athletes.id',
+//                         '=',
+//                         'events.athlete_id'
+//                     ).leftJoin(
+//                         'products',
+//                         'events.product_id',
+//                         '=',
+//                         'products.id'
+//                     )
+//                     .whereIn('athletes.id', athletes_list)
+//                     .orderBy('events.id', 'asc')
+//                     .limit(limit)
+//                     if (next_min_id) {
+//                         featured_query.where('events.id', '>', next_min_id)
+//                     }
+//                     const db_resp = await featured_query
+//                     const batch_len = db_resp.length
+//                     const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
+//                     return {
+//                         status: 201,
+//                         error: false,
+//                         message: 'Success',
+//                         data: {
+//                             featured_events: db_resp,
+//                             max_id,
+//                         },
+//                     }
+//                 }catch (err) {
+//                     const Error = err as ServerReturnType
+//                     console.error(err)
+//                     return err_return(Error?.status)
+//                 }
+
+//             }
+//         })
+//     }
+// })
+
+// export const UserFetchLive = extendType({
+//     type: 'Query',
+//     definition(t) {
+//         t.nonNull.field('user_fetch_live', {
+//             type: GQLResponse,
+//             args: {
+//                 limit: intArg(),
+//                 next_min_id: intArg()
+//             },
+//             async resolve(_, args, context) {
+//                 try {
+//                     const { user_id } = login_auth(
+//                         context?.auth_token,
+//                         'user_id'
+//                     )
+//                     const limit = args.limit ?? 10
+//                     const {next_min_id} = args
+//                     const {knex_client} = context
+//                     const interests_data = await knex_client('interests')
+//                         .select('athletes')
+//                         .where('user_id', user_id)
+//                         .first()
+//                     const athletes_list = JSON.parse(interests_data?.athletes)
+//                     const featured_query = knex_client.select(
+//                         'events.id',
+//                         'events.athlete_id',
+//                         'events.media_url',
+//                         'events.caption',
+//                         'events.start_time',
+//                         'events.end_time',
+//                         'athletes.name as athlete_name',
+//                         'athletes.image_url as athlete_image',
+//                         'products.name as product_name',
+//                         'products.price as price',
+//                         'products.media_url as product_image'
+//                     ).from('athletes')
+//                     .join(
+//                         'events',
+//                         'athletes.id',
+//                         '=',
+//                         'events.athlete_id'
+//                     ).leftJoin(
+//                         'products',
+//                         'events.product_id',
+//                         '=',
+//                         'products.id'
+//                     )
+//                     .whereIn('athletes.id', athletes_list)
+//                     .whereRaw('events.end_time IS NOT NULL')
+//                     .where('events.end_time', '>', Date.now())
+//                     .orderBy('events.id', 'asc')
+//                     .limit(limit)
+//                     if (next_min_id) {
+//                         featured_query.where('events.id', '>', next_min_id)
+//                     }
+//                     const db_resp = await featured_query
+//                     const batch_len = db_resp.length
+//                     const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
+//                     return {
+//                         status: 201,
+//                         error: false,
+//                         message: 'Success',
+//                         data: {
+//                             featured_events: db_resp,
+//                             max_id,
+//                         },
+//                     }
+//                 }catch (err) {
+//                     const Error = err as ServerReturnType
+//                     console.error(err)
+//                     return err_return(Error?.status)
+//                 }
+//             }
+//         })
+//     }
 // })

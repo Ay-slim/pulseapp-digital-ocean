@@ -172,6 +172,14 @@ const Products = list(
     })
 )
 
+const AthleteSettings = objectType({
+    name: 'AthleteSettings',
+    definition(t) {
+        t.string('description')
+        t.list.string('notifications_preference')
+    },
+})
+
 export const GQLResponse = objectType({
     name: 'MutationResponse',
     definition(t) {
@@ -212,6 +220,9 @@ export const GQLResponse = objectType({
                     })
                     t.field('products', {
                         type: Products,
+                    })
+                    t.field('settings', {
+                        type: AthleteSettings,
                     })
                 },
             }),

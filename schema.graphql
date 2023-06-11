@@ -27,6 +27,11 @@ type AthleteData {
   sport: String
 }
 
+type AthleteSettings {
+  description: String
+  notifications_preference: [String]
+}
+
 type AuthData {
   athlete_bio: AthleteBio
   athlete_data: [AthleteData]
@@ -38,6 +43,7 @@ type AuthData {
   max_id: Int
   products: [Products]
   sales: [Sales]
+  settings: AthleteSettings
   signed_url: String
   sports: [String]
   suggestions: [SuggestionsData]
@@ -53,11 +59,11 @@ enum GenderEnum {
 }
 
 type Mutation {
-  add_content(caption: String!, category: String!, end_time: String, media_url: String, start_time: String): MutationResponse!
   athlete_signin(email: String!, password: String!): MutationResponse!
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): MutationResponse!
   athlete_update_info(description: String!, image_url: String!): MutationResponse!
-  create_poll(caption: String!, days: Int, hours: Int, media_url: String, options: [String!]!): MutationResponse!
+  athlete_update_settings(description: String, notifications_preference: [String]): MutationResponse!
+  create_poll(caption: String!, days: Int, hours: Int, options: [String!]!): MutationResponse!
   create_post(caption: String!, media_url: String): MutationResponse!
   create_product(currency: String, media_url: String, name: String!, price: Float!, quantity: Int!): MutationResponse!
   create_sale(caption: String!, end_time: String, media_url: String, product_id: [Int]!): MutationResponse!
@@ -85,6 +91,7 @@ type Products {
 }
 
 type Query {
+  athlete_fetch_settings: MutationResponse!
   athletes(limit: Int!, next_min_id: Int, sports: [String]!): MutationResponse!
   fetch_athlete_basics: MutationResponse!
   fetch_athlete_sales: MutationResponse!
