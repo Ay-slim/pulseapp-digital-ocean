@@ -47,6 +47,7 @@ export type SuggestionsDataType = {
     sport: string
 }
 export type ProductsDataType = {
+    id: number
     name: string
     media_url: string
     price: number
@@ -60,8 +61,8 @@ export type AthleteDataType = SuggestionsDataType & {
 export type AthleteBioType = {
     name: string
     follower_count: number
-    posts_count: number
-    events_count: number
+    fixed_items_count: number
+    variable_items_count: number
     image_url: string
 }
 

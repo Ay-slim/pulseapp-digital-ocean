@@ -10,20 +10,27 @@ import {
     ProductsDataType,
     month_map,
 } from './utils'
-import { err_return } from './utils'
+import { err_return, create_jwt_token } from './utils'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
-import { create_jwt_token } from './utils'
+import {
+    TokenResponse,
+    BaseResponse,
+    AthleteFetchBasicsResponse,
+    AthleteTopFollowersResponse,
+    AthleteSalesResponse,
+    AthleteProductsFetchResponse,
+    AthleteSettingsFetchResponse,
+} from './response_types'
 
 dotenv.config()
-const AUTO_NOTIFICATION_CONTENT = ['draw', 'poll']
 
 /* ALL CONTRACTS RELATED TO USER ACCOUNT MANAGEMENT*/
 export const AthleteSigninMutation = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('athlete_signin', {
-            type: GQLResponse,
+            type: TokenResponse,
             args: {
                 email: nonNull(stringArg()),
                 password: nonNull(stringArg()),
@@ -76,7 +83,7 @@ export const AthleteSignupMutation = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('athlete_signup', {
-            type: GQLResponse,
+            type: TokenResponse,
             args: {
                 password: nonNull(stringArg()),
                 phone: nonNull(stringArg()),
@@ -145,7 +152,7 @@ export const AthleteUpdateInfoMutation = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('athlete_update_info', {
-            type: GQLResponse,
+            type: BaseResponse,
             args: {
                 description: nonNull(stringArg()),
                 image_url: nonNull(stringArg()),
@@ -271,7 +278,7 @@ export const AthleteFetchBasics = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('fetch_athlete_basics', {
-            type: GQLResponse,
+            type: AthleteFetchBasicsResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -285,26 +292,29 @@ export const AthleteFetchBasics = extendType({
                             'athletes.name',
                             'athletes.image_url',
                             knex_client.raw(
-                                '(SELECT COUNT(*) FROM interests WHERE JSON_CONTAINS(athletes, CAST(? AS JSON), "$")) AS follower_count',
+                                '(SELECT COUNT(*) FROM users_athletes WHERE athlete_id = ?) AS follower_count',
                                 [athlete_id]
                             ),
                             knex_client.raw(
-                                `(SELECT COUNT(*) FROM events WHERE events.athlete_id = ? AND events.category = 'post') AS posts_count`,
+                                `(SELECT COUNT(*) FROM products WHERE athlete_id = ? AND exclusive = 'false') AS fixed_items_count`,
                                 [athlete_id]
                             ),
                             knex_client.raw(
-                                `(SELECT COUNT(*) FROM events WHERE events.athlete_id = ? AND events.category <> 'post') AS events_count`,
+                                `(SELECT COUNT(*) FROM products WHERE athlete_id = ? AND exclusive = 'true') AS variable_items_count`,
                                 [athlete_id]
                             )
                         )
                         .from('athletes')
-                        .leftJoin('interests', (join: any) => {
-                            join.on(
-                                knex_client.raw(
-                                    'JSON_CONTAINS(athletes, CAST(athletes.id AS JSON), "$")'
-                                )
-                            )
-                        })
+                        .leftJoin(
+                            'users_athletes',
+                            'athletes.id',
+                            'users_athletes.athlete_id'
+                        )
+                        .leftJoin(
+                            'products',
+                            'athletes.id',
+                            'products.athlete_id'
+                        )
                         .whereRaw('athletes.id = ?', [athlete_id])
                     //console.log(stats)
                     return {
@@ -329,7 +339,7 @@ export const AthleteFetchTopFollowers = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('fetch_athlete_top_followers', {
-            type: GQLResponse,
+            type: AthleteTopFollowersResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -340,17 +350,15 @@ export const AthleteFetchTopFollowers = extendType({
                     const { knex_client } = context
                     const top_followers: TopFollowersType[] = await knex_client
                         .select('users.name', 'users.id', 'users.email')
-                        .from('interests')
-                        .join('athletes', (join: any) => {
-                            join.on(
-                                knex_client.raw(
-                                    'JSON_CONTAINS(athletes, CAST(athletes.id AS JSON), "$")'
-                                )
-                            )
-                        })
-                        .join('users', 'users.id', '=', 'interests.user_id')
-                        .whereRaw('athletes.id = ?', [athlete_id])
-                        .orderBy('interests.created_at', 'asc')
+                        .from('users')
+                        .join(
+                            'users_athletes',
+                            'users.id',
+                            '=',
+                            'users_athletes.user_id'
+                        )
+                        .whereRaw('users_athletes.athlete_id = ?', [athlete_id])
+                        .orderBy('users_athletes.created_at', 'asc')
                         .limit(10)
                     return {
                         status: 201,
@@ -374,7 +382,7 @@ export const AthleteFetchSales = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('fetch_athlete_sales', {
-            type: GQLResponse,
+            type: AthleteSalesResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -429,34 +437,135 @@ export const AthleteFetchSales = extendType({
     },
 })
 
-export const AthleteCreateProduct = extendType({
+export const AthleteCreateFixedItem = extendType({
     type: 'Mutation',
     definition(t) {
-        t.nonNull.field('create_product', {
-            type: GQLResponse,
+        t.nonNull.field('create_fixed_product', {
+            type: BaseResponse,
             args: {
                 media_url: stringArg(),
                 name: nonNull(stringArg()),
                 price: nonNull(floatArg()),
                 quantity: nonNull(intArg()),
+                description: nonNull(stringArg()),
                 currency: stringArg(),
+                category: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
                 try {
                     const athlete_id = login_auth(
                         context?.auth_token,
                         'athlete_id'
-                    )?.athlete_id
-                    const { media_url, name, price, quantity, currency } = args
-                    const { knex_client } = context
-                    await knex_client('products').insert({
-                        athlete_id,
+                    ).athlete_id
+                    const {
                         media_url,
                         name,
                         price,
                         quantity,
                         currency,
-                    })
+                        description,
+                        category,
+                    } = args
+                    const { knex_client } = context
+                    const metadata = JSON.stringify({ category })
+                    const insert_object: {
+                        athlete_id?: number
+                        media_url?: string | null
+                        name: string
+                        price: number
+                        quantity: number
+                        description: string
+                        metadata: string
+                        currency?: string
+                    } = {
+                        athlete_id,
+                        media_url,
+                        name,
+                        price,
+                        quantity,
+                        description,
+                        metadata,
+                    }
+                    if (currency) {
+                        insert_object['currency'] = currency
+                    }
+                    await knex_client('products').insert(insert_object)
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteCreateVariableItem = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('create_variable_product', {
+            type: BaseResponse,
+            args: {
+                media_url: stringArg(),
+                name: nonNull(stringArg()),
+                price: nonNull(floatArg()),
+                quantity: nonNull(intArg()),
+                description: nonNull(stringArg()),
+                currency: stringArg(),
+                category: stringArg(),
+                end_time: nonNull(stringArg()),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const athlete_id = login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    ).athlete_id
+                    const {
+                        media_url,
+                        name,
+                        price,
+                        quantity,
+                        currency,
+                        description,
+                        category,
+                        end_time,
+                    } = args
+                    const { knex_client } = context
+                    const metadata = JSON.stringify({ category })
+                    const insert_object: {
+                        athlete_id?: number
+                        media_url?: string | null
+                        name: string
+                        price: number
+                        quantity: number
+                        description: string
+                        metadata: string
+                        currency?: string
+                        end_time: string
+                        exclusive: string
+                        start_time: Date
+                    } = {
+                        athlete_id,
+                        media_url,
+                        name,
+                        price,
+                        quantity,
+                        description,
+                        exclusive: 'true',
+                        metadata,
+                        start_time: new Date(),
+                        end_time,
+                    }
+                    if (currency) {
+                        insert_object['currency'] = currency
+                    }
+                    await knex_client('products').insert(insert_object)
                     return {
                         status: 201,
                         error: false,
@@ -476,7 +585,7 @@ export const AthleteFetchProducts = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('fetch_products', {
-            type: GQLResponse,
+            type: AthleteProductsFetchResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -489,6 +598,7 @@ export const AthleteFetchProducts = extendType({
                         'products'
                     )
                         .select(
+                            'id',
                             'name',
                             'media_url',
                             'price',
@@ -514,175 +624,69 @@ export const AthleteFetchProducts = extendType({
     },
 })
 
-export const AthleteCreatePost = extendType({
-    type: 'Mutation',
-    definition(t) {
-        t.nonNull.field('create_post', {
-            type: GQLResponse,
-            args: {
-                media_url: stringArg(),
-                caption: nonNull(stringArg()),
-            },
-            async resolve(_, args, context) {
-                try {
-                    const athlete_id = login_auth(
-                        context?.auth_token,
-                        'athlete_id'
-                    )?.athlete_id
-                    const { media_url, caption } = args
-                    const { knex_client } = context
-                    await knex_client('events').insert({
-                        athlete_id,
-                        category: 'post',
-                        media_url,
-                        caption,
-                    })
-                    return {
-                        status: 201,
-                        error: false,
-                        message: 'Success',
-                    }
-                } catch (err) {
-                    const Error = err as ServerReturnType
-                    console.error(err)
-                    return err_return(Error?.status)
-                }
-            },
-        })
-    },
-})
-
-export const AthleteCreatePoll = extendType({
-    type: 'Mutation',
-    definition(t) {
-        t.nonNull.field('create_poll', {
-            type: GQLResponse,
-            args: {
-                caption: nonNull(stringArg()),
-                options: nonNull(list(nonNull(stringArg()))),
-                days: intArg(),
-                hours: intArg(),
-            },
-            async resolve(_, args, context) {
-                try {
-                    const athlete_id = login_auth(
-                        context?.auth_token,
-                        'athlete_id'
-                    )?.athlete_id
-                    const { knex_client } = context
-                    if (!athlete_id) {
-                        console.error('Could not find athlete_id')
-                        throw new Error('Something went wrong')
-                    }
-                    const { caption, options, days, hours } = args
-                    const poll_options: { [key: string]: any } = {}
-                    options.forEach((option) => {
-                        poll_options[option] = 0
-                    })
-                    const metadata = JSON.stringify({
-                        poll_options,
-                    })
-                    const insert_packet: {
-                        athlete_id: number
-                        caption: string
-                        metadata: string
-                        category: string
-                        start_time?: Date
-                        end_time?: Date
-                    } = {
-                        athlete_id,
-                        caption,
-                        category: 'poll',
-                        metadata,
-                    }
-                    if (days || hours) {
-                        const end_time = new Date()
-                        end_time.setDate(end_time.getDate() + (days ?? 0))
-                        end_time.setTime(
-                            end_time.getTime() + (hours ?? 0 * 60 * 60 * 1000)
-                        )
-                        insert_packet['end_time'] = end_time
-                        insert_packet['start_time'] = new Date()
-                    }
-                    await knex_client('events').insert(insert_packet)
-                    return {
-                        status: 201,
-                        error: false,
-                        message: 'Success',
-                    }
-                } catch (err) {
-                    const Error = err as ServerReturnType
-                    console.error(err)
-                    return err_return(Error?.status)
-                }
-            },
-        })
-    },
-})
-
-export const AthleteCreateSale = extendType({
-    type: 'Mutation',
-    definition(t) {
-        t.nonNull.field('create_sale', {
-            type: GQLResponse,
-            args: {
-                media_url: stringArg(),
-                caption: nonNull(stringArg()),
-                product_id: nonNull(list(intArg())),
-                end_time: stringArg(),
-            },
-            async resolve(_, args, context) {
-                try {
-                    const athlete_id = login_auth(
-                        context?.auth_token,
-                        'athlete_id'
-                    )?.athlete_id
-                    if (!athlete_id) {
-                        console.error('Could not find athlete_id')
-                        throw new Error('Something went wrong')
-                    }
-                    const { media_url, caption, product_id, end_time } = args
-                    const insert_packet: {
-                        athlete_id: number
-                        media_url?: string | null
-                        caption: string
-                        product_id: string
-                        category: string
-                        start_time?: Date
-                        end_time?: string
-                    } = {
-                        athlete_id,
-                        media_url,
-                        caption,
-                        product_id: JSON.stringify(product_id),
-                        category: 'sale',
-                    }
-                    if (end_time) {
-                        insert_packet['start_time'] = new Date()
-                        insert_packet['end_time'] = end_time
-                    }
-                    const { knex_client } = context
-                    await knex_client('events').insert(insert_packet)
-                    return {
-                        status: 201,
-                        error: false,
-                        message: 'Success',
-                    }
-                } catch (err) {
-                    const Error = err as ServerReturnType
-                    console.error(err)
-                    return err_return(Error?.status)
-                }
-            },
-        })
-    },
-})
+// export const AthleteCreateSale = extendType({
+//     type: 'Mutation',
+//     definition(t) {
+//         t.nonNull.field('create_sale', {
+//             type: GQLResponse,
+//             args: {
+//                 media_url: stringArg(),
+//                 caption: nonNull(stringArg()),
+//                 product_id: nonNull(list(intArg())),
+//                 end_time: stringArg(),
+//             },
+//             async resolve(_, args, context) {
+//                 try {
+//                     const athlete_id = login_auth(
+//                         context?.auth_token,
+//                         'athlete_id'
+//                     )?.athlete_id
+//                     if (!athlete_id) {
+//                         console.error('Could not find athlete_id')
+//                         throw new Error('Something went wrong')
+//                     }
+//                     const { media_url, caption, product_id, end_time } = args
+//                     const insert_packet: {
+//                         athlete_id: number
+//                         media_url?: string | null
+//                         caption: string
+//                         product_id: string
+//                         category: string
+//                         start_time?: Date
+//                         end_time?: string
+//                     } = {
+//                         athlete_id,
+//                         media_url,
+//                         caption,
+//                         product_id: JSON.stringify(product_id),
+//                         category: 'sale',
+//                     }
+//                     if (end_time) {
+//                         insert_packet['start_time'] = new Date()
+//                         insert_packet['end_time'] = end_time
+//                     }
+//                     const { knex_client } = context
+//                     await knex_client('events').insert(insert_packet)
+//                     return {
+//                         status: 201,
+//                         error: false,
+//                         message: 'Success',
+//                     }
+//                 } catch (err) {
+//                     const Error = err as ServerReturnType
+//                     console.error(err)
+//                     return err_return(Error?.status)
+//                 }
+//             },
+//         })
+//     },
+// })
 
 export const AthleteUpdateSettingsMutation = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('athlete_update_settings', {
-            type: GQLResponse,
+            type: BaseResponse,
             args: {
                 description: stringArg(),
                 notifications_preference: list(stringArg()),
@@ -736,7 +740,7 @@ export const AthleteFetchSettingsQuery = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('athlete_fetch_settings', {
-            type: GQLResponse,
+            type: AthleteSettingsFetchResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -750,16 +754,20 @@ export const AthleteFetchSettingsQuery = extendType({
                             .select('metadata')
                             .where('id', '=', athlete_id)
                             .first()
-                    const metadata = JSON.parse(metadata_resp?.metadata)
+                    console.log(metadata_resp)
+                    const metadata: {
+                        description: string
+                        notifications_preference: string[]
+                    } = JSON.parse(metadata_resp?.metadata)
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
                             settings: {
-                                description: metadata?.description,
+                                description: metadata.description,
                                 notifications_preference:
-                                    metadata?.notifications_preference,
+                                    metadata.notifications_preference,
                             },
                         },
                     }

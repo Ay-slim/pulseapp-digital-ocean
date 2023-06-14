@@ -1,25 +1,24 @@
-import {
-    enumType,
-    extendType,
-    nonNull,
-    stringArg,
-    list,
-    intArg,
-    booleanArg,
-} from 'nexus'
+import { enumType, extendType, nonNull, stringArg, list, intArg } from 'nexus'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
-import { formatDistance } from 'date-fns'
+//import { formatDistance } from 'date-fns'
 import {
     create_jwt_token,
     AthleteDataType,
     err_return,
-    GQLResponse,
     ServerReturnType,
     login_auth,
-    UserContentType,
     SuggestionsDataType,
 } from './utils'
+import {
+    TokenResponse,
+    UserSigninResponse,
+    BaseResponse,
+    UserFetchSportsResponse,
+    UserFetchAthletesResponse,
+    UserFetchSuggestionsResponse,
+    UserFetchIncentivesResponse,
+} from './response_types'
 
 dotenv.config()
 
@@ -44,7 +43,7 @@ export const UserSigninMutation = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('signin', {
-            type: GQLResponse,
+            type: UserSigninResponse,
             args: {
                 email: nonNull(stringArg()),
                 password: nonNull(stringArg()),
@@ -101,7 +100,7 @@ export const UserSignupMutation = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('signup', {
-            type: GQLResponse,
+            type: TokenResponse,
             args: {
                 password: nonNull(stringArg()),
                 phone: nonNull(stringArg()),
@@ -163,7 +162,7 @@ export const UserJoinWaitlist = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('waitlist', {
-            type: GQLResponse,
+            type: BaseResponse,
             args: {
                 email: nonNull(stringArg()),
             },
@@ -184,9 +183,6 @@ export const UserJoinWaitlist = extendType({
                         status: 200,
                         error: false,
                         message: 'Success',
-                        data: {
-                            email,
-                        },
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType
@@ -202,7 +198,7 @@ export const UserAddInterests = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('interests', {
-            type: GQLResponse,
+            type: BaseResponse,
             args: {
                 athletes: nonNull(list(intArg())),
                 sports: nonNull(list(stringArg())),
@@ -217,36 +213,38 @@ export const UserAddInterests = extendType({
                         incentives,
                         notifications_preference,
                     } = args
+                    const { knex_client } = context
                     const user_id = login_auth(
                         context?.auth_token,
                         'user_id'
                     )?.user_id
 
                     await Promise.all([
-                        context.knex_client('interests').insert({
+                        knex_client('interests').insert({
                             user_id,
-                            athletes: JSON.stringify(athletes),
                             sports: JSON.stringify(sports),
                             incentives: JSON.stringify(incentives),
                             notifications_preference: JSON.stringify(
                                 notifications_preference
                             ),
                         }),
-                        context
-                            .knex_client('users')
-                            .where('id', user_id)
-                            .update({
-                                info_completion: 'complete',
+                        knex_client('users').where('id', user_id).update({
+                            info_completion: 'complete',
+                        }),
+                        ...[
+                            athletes.map((athlete_id) => {
+                                knex_client('users_athletes').insert({
+                                    athlete_id,
+                                    user_id,
+                                })
                             }),
+                        ],
                     ])
 
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
-                        data: {
-                            completion_status: 'complete',
-                        },
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType
@@ -262,7 +260,7 @@ export const UserFetchSports = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('user_fetch_sports', {
-            type: GQLResponse,
+            type: UserFetchSportsResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -293,7 +291,7 @@ export const UserFetchIncentives = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('user_fetch_incentives', {
-            type: GQLResponse,
+            type: UserFetchIncentivesResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -326,7 +324,7 @@ export const UserDisplayAthletes = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('athletes', {
-            type: GQLResponse,
+            type: UserFetchAthletesResponse,
             args: {
                 next_min_id: intArg(),
                 limit: nonNull(intArg()),
@@ -334,9 +332,10 @@ export const UserDisplayAthletes = extendType({
             },
             async resolve(_, args, context) {
                 login_auth(context?.auth_token, 'user_id')
+                const { knex_client } = context
                 try {
                     const { next_min_id, limit, sports } = args
-                    const athlete_query = context.knex_client
+                    const athlete_query = knex_client
                         .select('id', 'name', 'image_url', 'sport', 'metadata')
                         .from('athletes')
                         .whereIn('sport', sports)
@@ -354,7 +353,6 @@ export const UserDisplayAthletes = extendType({
                                 name: resp?.name,
                                 image_url: resp?.image_url,
                                 sport: resp?.sport,
-                                incentives: parsed_mdata?.incentives,
                                 description: parsed_mdata?.description,
                             }
                         } catch (err) {
@@ -385,113 +383,113 @@ export const UserDisplayAthletes = extendType({
     },
 })
 
-export const UserDisplayContent = extendType({
-    type: 'Query',
-    definition(t) {
-        t.nonNull.field('fetch_user_content', {
-            type: GQLResponse,
-            args: {
-                next_min_id: intArg(),
-                limit: nonNull(intArg()),
-                athlete_select_id: intArg(),
-                live_events: booleanArg(),
-            },
-            async resolve(_, args, context) {
-                // else if (live_events) {
-                //     // content_query.whereRaw('content.end_time IS NOT NULL')
-                //     // content_query.where('content.end_time', '>', Date.now())
-                // }
-                try {
-                    const { next_min_id, limit, athlete_select_id } = args
-                    const { user_id } = login_auth(
-                        context?.auth_token,
-                        'user_id'
-                    )
-                    //console.log(user_id)
-                    const interests_data = await context
-                        .knex_client('interests')
-                        .select('athletes', 'sports')
-                        .where('user_id', user_id)
-                        .first()
-                    //console.log(interests_data, 'INTERESTSSSSSSS')
-                    const athletes_list = JSON.parse(interests_data?.athletes)
-                    const sports_list = JSON.parse(interests_data?.sports)
-                    const content_query = context.knex_client
-                        .select(
-                            'athletes.name',
-                            'athletes.image_url',
-                            'events.media_url',
-                            'events.caption',
-                            'events.id',
-                            'events.created_at'
-                        )
-                        .from('athletes')
-                        .join('events', 'athletes.id', '=', 'events.athlete_id')
-                        .orderBy('events.id', 'asc')
-                        .limit(limit)
-                    if (athlete_select_id) {
-                        content_query.where(
-                            'athletes.id',
-                            '=',
-                            athlete_select_id
-                        )
-                    } else {
-                        content_query.whereIn('athletes.id', athletes_list)
-                    }
-                    if (next_min_id) {
-                        content_query.where('events.id', '>', next_min_id)
-                    }
-                    const db_resp: UserContentType[] = await content_query
-                    const batch_len = db_resp.length
-                    const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
-                    const normalized_db_resp = db_resp?.map((content) => {
-                        return {
-                            athlete_name: content?.name,
-                            athlete_image_url: content?.image_url,
-                            content_media_url: content?.media_url,
-                            content_caption: content?.caption,
-                            distance: formatDistance(
-                                new Date(content?.created_at),
-                                new Date(),
-                                { addSuffix: true }
-                            ),
-                        }
-                    })
-                    //Only returning suggestios on first call to this endpoint, hence the check for next_min_id existence
-                    const all_followed_athletes: SuggestionsDataType[] =
-                        next_min_id
-                            ? []
-                            : await context.knex_client
-                                  .select('id', 'name', 'image_url')
-                                  .from('athletes')
-                                  .whereIn('sport', sports_list)
-                                  .whereNotIn('id', athletes_list)
-                    //console.log(all_followed_athletes, 'ALL FOLLOWEEDDDDD')
-                    return {
-                        status: 201,
-                        error: false,
-                        message: 'Success',
-                        data: {
-                            content_data: normalized_db_resp,
-                            athletes: all_followed_athletes,
-                            max_id,
-                        },
-                    }
-                } catch (err) {
-                    const Error = err as ServerReturnType
-                    console.error(err)
-                    return err_return(Error?.status)
-                }
-            },
-        })
-    },
-})
+// export const UserDisplayContent = extendType({
+//     type: 'Query',
+//     definition(t) {
+//         t.nonNull.field('fetch_user_content', {
+//             type: GQLResponse,
+//             args: {
+//                 next_min_id: intArg(),
+//                 limit: nonNull(intArg()),
+//                 athlete_select_id: intArg(),
+//                 live_events: booleanArg(),
+//             },
+//             async resolve(_, args, context) {
+//                 // else if (live_events) {
+//                 //     // content_query.whereRaw('content.end_time IS NOT NULL')
+//                 //     // content_query.where('content.end_time', '>', Date.now())
+//                 // }
+//                 try {
+//                     const { next_min_id, limit, athlete_select_id } = args
+//                     const { user_id } = login_auth(
+//                         context?.auth_token,
+//                         'user_id'
+//                     )
+//                     //console.log(user_id)
+//                     const interests_data = await context
+//                         .knex_client('interests')
+//                         .select('athletes', 'sports')
+//                         .where('user_id', user_id)
+//                         .first()
+//                     //console.log(interests_data, 'INTERESTSSSSSSS')
+//                     const athletes_list = JSON.parse(interests_data?.athletes)
+//                     const sports_list = JSON.parse(interests_data?.sports)
+//                     const content_query = context.knex_client
+//                         .select(
+//                             'athletes.name',
+//                             'athletes.image_url',
+//                             'events.media_url',
+//                             'events.caption',
+//                             'events.id',
+//                             'events.created_at'
+//                         )
+//                         .from('athletes')
+//                         .join('events', 'athletes.id', '=', 'events.athlete_id')
+//                         .orderBy('events.id', 'asc')
+//                         .limit(limit)
+//                     if (athlete_select_id) {
+//                         content_query.where(
+//                             'athletes.id',
+//                             '=',
+//                             athlete_select_id
+//                         )
+//                     } else {
+//                         content_query.whereIn('athletes.id', athletes_list)
+//                     }
+//                     if (next_min_id) {
+//                         content_query.where('events.id', '>', next_min_id)
+//                     }
+//                     const db_resp: UserContentType[] = await content_query
+//                     const batch_len = db_resp.length
+//                     const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
+//                     const normalized_db_resp = db_resp?.map((content) => {
+//                         return {
+//                             athlete_name: content?.name,
+//                             athlete_image_url: content?.image_url,
+//                             content_media_url: content?.media_url,
+//                             content_caption: content?.caption,
+//                             distance: formatDistance(
+//                                 new Date(content?.created_at),
+//                                 new Date(),
+//                                 { addSuffix: true }
+//                             ),
+//                         }
+//                     })
+//                     //Only returning suggestios on first call to this endpoint, hence the check for next_min_id existence
+//                     const all_followed_athletes: SuggestionsDataType[] =
+//                         next_min_id
+//                             ? []
+//                             : await context.knex_client
+//                                   .select('id', 'name', 'image_url')
+//                                   .from('athletes')
+//                                   .whereIn('sport', sports_list)
+//                                   .whereNotIn('id', athletes_list)
+//                     //console.log(all_followed_athletes, 'ALL FOLLOWEEDDDDD')
+//                     return {
+//                         status: 201,
+//                         error: false,
+//                         message: 'Success',
+//                         data: {
+//                             content_data: normalized_db_resp,
+//                             athletes: all_followed_athletes,
+//                             max_id,
+//                         },
+//                     }
+//                 } catch (err) {
+//                     const Error = err as ServerReturnType
+//                     console.error(err)
+//                     return err_return(Error?.status)
+//                 }
+//             },
+//         })
+//     },
+// })
 
 export const UserInterestsSuggestions = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('fetch_user_suggestions', {
-            type: GQLResponse,
+            type: UserFetchSuggestionsResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -499,13 +497,17 @@ export const UserInterestsSuggestions = extendType({
                         context?.auth_token,
                         'user_id'
                     )?.user_id
-                    const interests_data = await context
-                        .knex_client('interests')
-                        .select('athletes', 'incentives')
-                        .where('user_id', user_id)
-                        .first()
-                    const athletes_list = JSON.parse(interests_data?.athletes)
+                    const { knex_client } = context
+                    // const interests_data = await context
+                    //     .knex_client('interests')
+                    //     .select('athletes', 'incentives')
+                    //     .where('user_id', user_id)
+                    //     .first()
+                    //const athletes_list = JSON.parse(interests_data?.athletes)
                     // const incentives_list = JSON.parse(interests_data?.incentives)
+                    const athletes_list = knex_client('users_athletes')
+                        .select('athlete_id')
+                        .where({ user_id })
                     const suggestions: SuggestionsDataType[] = await context
                         .knex_client('athletes')
                         .select('id', 'name', 'image_url', 'metadata', 'sport')
@@ -536,7 +538,7 @@ export const UserFollowAthlete = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('user_follow_athlete', {
-            type: GQLResponse,
+            type: BaseResponse,
             args: { athlete_id: nonNull(intArg()) },
             async resolve(_, args, context) {
                 try {
@@ -546,18 +548,22 @@ export const UserFollowAthlete = extendType({
                     )?.user_id
                     const { athlete_id } = args
                     const { knex_client } = context
-                    await knex_client('interests')
-                        .update({
-                            athletes: knex_client.raw(
-                                'JSON_ARRAY_APPEND(athletes, "$", ?)',
-                                [athlete_id]
-                            ),
-                        })
-                        .where({ user_id })
-                        .whereRaw(
-                            'NOT JSON_CONTAINS(athletes, CAST(? AS JSON), "$")',
-                            [athlete_id]
-                        )
+                    // await knex_client('interests')
+                    //     .update({
+                    //         athletes: knex_client.raw(
+                    //             'JSON_ARRAY_APPEND(athletes, "$", ?)',
+                    //             [athlete_id]
+                    //         ),
+                    //     })
+                    //     .where({ user_id })
+                    //     .whereRaw(
+                    //         'NOT JSON_CONTAINS(athletes, CAST(? AS JSON), "$")',
+                    //         [athlete_id]
+                    //     )
+                    await knex_client('users_athletes').insert({
+                        user_id,
+                        athlete_id,
+                    })
                     return {
                         status: 201,
                         error: false,

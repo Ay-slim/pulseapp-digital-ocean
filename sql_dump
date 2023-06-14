@@ -257,7 +257,7 @@ Sports mock data
 
 INSERT INTO constants (sports, incentives) 
 VALUES ('[
-        "Football (Soccer)",
+        "Football",
         "Cricket",
         "Basketball",
         "Field Hockey",

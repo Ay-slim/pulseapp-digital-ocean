@@ -4,7 +4,7 @@ export async function up(knex: Knex): Promise<void> {
     return knex.schema.createTable('interests', (table: Knex.TableBuilder) => {
         table.increments('id').notNullable()
         table.integer('user_id').unsigned().notNullable()
-        table.jsonb('athletes')
+        table.jsonb('notifications_preference')
         table.jsonb('sports')
         table.jsonb('incentives')
         table.timestamp('created_at').defaultTo(knex.fn.now())
