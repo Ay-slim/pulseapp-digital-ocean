@@ -8,6 +8,9 @@ export async function up(knex: Knex): Promise<void> {
         table.integer('quantity').defaultTo(1)
         table.double('total_value')
         table.jsonb('metadata')
+        table
+            .enum('status', ['pending', 'delivered', 'processing', 'shipped'])
+            .defaultTo('pending')
         table.timestamp('created_at').defaultTo(knex.fn.now())
         table.timestamp('updated_at').defaultTo(knex.fn.now())
     })

@@ -114,7 +114,8 @@ export const UserSignupMutation = extendType({
                 const gender = args?.gender
                 const age_range = args?.age_range
                 try {
-                    const existing_email_check = await context.knex_client
+                    const { knex_client } = context
+                    const existing_email_check = await knex_client
                         .select('email')
                         .from('users')
                         .where({
@@ -126,20 +127,37 @@ export const UserSignupMutation = extendType({
                         )
                     const salt = bcrypt.genSaltSync(10)
                     const hashed_password = bcrypt.hashSync(password, salt)
-                    const insert_ret = await context
-                        .knex_client('users')
-                        .insert(
-                            {
-                                password: hashed_password,
-                                phone,
-                                email,
-                                name,
-                                gender,
-                                age_range,
-                            },
-                            ['id']
-                        )
-                    const token = create_jwt_token(insert_ret?.[0], 'user_id')
+                    const insert_ret: number[] = await knex_client(
+                        'users'
+                    ).insert(
+                        {
+                            password: hashed_password,
+                            phone,
+                            email,
+                            name,
+                            gender,
+                            age_range,
+                        },
+                        ['id']
+                    )
+                    const token = create_jwt_token(insert_ret[0], 'user_id')
+                    const welcome_notif_packet = {
+                        user_id: insert_ret[0],
+                        message:
+                            'Welcome to Scientia! You have received 3 points as signing bonus',
+                        event: 'signup',
+                    }
+                    const welcome_points = {
+                        user_id: insert_ret[0],
+                        units: 3,
+                        event: 'signup',
+                    }
+                    await Promise.all([
+                        knex_client('notifications').insert(
+                            welcome_notif_packet
+                        ),
+                        knex_client('points').insert(welcome_points),
+                    ])
                     return {
                         status: 201,
                         error: false,
