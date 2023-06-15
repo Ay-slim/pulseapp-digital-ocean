@@ -754,7 +754,6 @@ export const AthleteFetchSettingsQuery = extendType({
                             .select('metadata')
                             .where('id', '=', athlete_id)
                             .first()
-                    console.log(metadata_resp)
                     const metadata: {
                         description: string
                         notifications_preference: string[]
