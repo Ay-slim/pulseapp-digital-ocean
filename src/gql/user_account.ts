@@ -250,7 +250,7 @@ export const UserAddInterests = extendType({
                         context?.auth_token,
                         'user_id'
                     )
-                    await Promise.all([
+                    const db_updates_array = [
                         knex_client('interests').insert({
                             user_id,
                             sports: JSON.stringify(sports),
@@ -262,15 +262,14 @@ export const UserAddInterests = extendType({
                         knex_client('users').where('id', user_id).update({
                             info_completion: 'complete',
                         }),
-                        ...[
-                            athletes.map((athlete_id) => {
-                                knex_client('users_athletes').insert({
-                                    athlete_id,
-                                    user_id,
-                                })
-                            }),
-                        ],
-                    ])
+                        ...athletes.map((athlete_id) => {
+                            return knex_client('users_athletes').insert({
+                                athlete_id,
+                                user_id,
+                            })
+                        }),
+                    ]
+                    await Promise.all(db_updates_array)
 
                     return {
                         status: 201,
