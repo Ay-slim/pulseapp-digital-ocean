@@ -2,12 +2,29 @@
 ### Do not make changes to this file directly
 
 
+type ActivityTmpl {
+  athlete: String
+  distance: String
+  id: Int
+  image_url: String
+  name: String
+  status: String
+}
+
 enum AgeRangeEnum {
   above_fortyfive
   eighteen_to_twentyfour
   thirtyfive_to_fortyfour
   twentyfive_to_thirtyfour
   under_18
+}
+
+type AthleteBasicStats {
+  fixed_items_count: Int
+  follower_count: Int
+  image_url: String
+  name: String
+  variable_items_count: Int
 }
 
 type AthleteBio {
@@ -27,6 +44,74 @@ type AthleteData {
   sport: String
 }
 
+type AthleteFetchBasicsResponse {
+  data: AthleteFetchBasicsResponseData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type AthleteFetchBasicsResponseData {
+  athlete_bio: AthleteBasicStats
+}
+
+type AthleteProductsFetchData {
+  products: [ProductsTmpl]
+}
+
+type AthleteProductsFetchResponse {
+  data: AthleteProductsFetchData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type AthleteResData {
+  description: String
+  id: Int
+  image_url: String
+  name: String
+  sport: String
+}
+
+type AthleteSalesData {
+  sales: [SalesTmpl]
+}
+
+type AthleteSalesResponse {
+  data: AthleteSalesData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type AthleteSettings {
+  description: String
+  notifications_preference: [String]
+}
+
+type AthleteSettingsFetchData {
+  settings: SettingsTmpl
+}
+
+type AthleteSettingsFetchResponse {
+  data: AthleteSettingsFetchData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type AthleteTopFollowersData {
+  top_followers: [TopFollowerStats]
+}
+
+type AthleteTopFollowersResponse {
+  data: AthleteTopFollowersData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
 type AuthData {
   athlete_bio: AthleteBio
   athlete_data: [AthleteData]
@@ -38,11 +123,18 @@ type AuthData {
   max_id: Int
   products: [Products]
   sales: [Sales]
+  settings: AthleteSettings
   signed_url: String
   sports: [String]
   suggestions: [SuggestionsData]
   token: String
   top_followers: [TopFollowers]
+}
+
+type BaseResponse {
+  error: Boolean!
+  message: String!
+  status: Int!
 }
 
 enum GenderEnum {
@@ -53,20 +145,21 @@ enum GenderEnum {
 }
 
 type Mutation {
-  add_content(caption: String!, category: String!, end_time: String, media_url: String, start_time: String): MutationResponse!
-  athlete_signin(email: String!, password: String!): MutationResponse!
-  athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): MutationResponse!
-  athlete_update_info(description: String!, image_url: String!): MutationResponse!
-  create_poll(caption: String!, days: Int, hours: Int, media_url: String, options: [String!]!): MutationResponse!
-  create_post(caption: String!, media_url: String): MutationResponse!
-  create_product(currency: String, media_url: String, name: String!, price: Float!, quantity: Int!): MutationResponse!
-  create_sale(caption: String!, end_time: String, media_url: String, product_id: [Int]!): MutationResponse!
-  interests(athletes: [Int]!, incentives: [String]!, notifications_preference: [String]!, sports: [String]!): MutationResponse!
+  athlete_signin(email: String!, password: String!): TokenResponse!
+  athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): TokenResponse!
+  athlete_update_info(description: String!, image_url: String!): BaseResponse!
+  athlete_update_settings(description: String, notifications_preference: [String]): BaseResponse!
+  create_fixed_product(category: String!, currency: String, description: String!, media_url: String, name: String!, price: Float!, quantity: Int!): BaseResponse!
+  create_product(category: String, currency: String, description: String!, end_time: String, media_url: String, name: String!, price: Float!, quantity: Int!): BaseResponse!
+  interests(athletes: [Int]!, incentives: [String]!, notifications_preference: [String]!, sports: [String]!): BaseResponse!
   s3_upload(file_name: String!): MutationResponse!
-  signin(email: String!, password: String!): MutationResponse!
-  signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): MutationResponse!
-  user_follow_athlete(athlete_id: Int!): MutationResponse!
-  waitlist(email: String!): MutationResponse!
+  signin(email: String!, password: String!): UserSigninResponse!
+  signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
+  user_create_sale(product_id: Int!, quantity: Int, total_value: Float!): BaseResponse!
+  user_follow_athlete(athlete_id: Int!): BaseResponse!
+  user_mark_read_notifications: BaseResponse!
+  user_update_notif_settings(notifications_preference: [String]!): BaseResponse!
+  waitlist(email: String!): BaseResponse!
 }
 
 type MutationResponse {
@@ -74,6 +167,15 @@ type MutationResponse {
   error: Boolean!
   message: String!
   status: Int!
+}
+
+type NotifsTmpl {
+  distance: String
+  event: String
+  headline: String
+  id: Int
+  message: String
+  status: String
 }
 
 type Products {
@@ -84,22 +186,47 @@ type Products {
   quantity: Int
 }
 
+type ProductsTmpl {
+  currency: String
+  id: Int
+  media_url: String
+  name: String
+  price: Float
+  quantity: Int
+}
+
 type Query {
-  athletes(limit: Int!, next_min_id: Int, sports: [String]!): MutationResponse!
-  fetch_athlete_basics: MutationResponse!
-  fetch_athlete_sales: MutationResponse!
-  fetch_athlete_top_followers: MutationResponse!
-  fetch_products: MutationResponse!
-  fetch_user_content(athlete_select_id: Int, limit: Int!, live_events: Boolean, next_min_id: Int): MutationResponse!
-  fetch_user_suggestions: MutationResponse!
-  user_fetch_incentives: MutationResponse!
-  user_fetch_sports: MutationResponse!
+  athlete_fetch_settings: AthleteSettingsFetchResponse!
+  athletes(limit: Int!, next_min_id: Int, sports: [String]!): UserFetchAthletesResponse!
+  fetch_athlete_basics: AthleteFetchBasicsResponse!
+  fetch_athlete_sales: AthleteSalesResponse!
+  fetch_athlete_top_followers: AthleteTopFollowersResponse!
+  fetch_products: AthleteProductsFetchResponse!
+  fetch_user_suggestions: UserFetchSuggestionsResponse!
+  user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
+  user_fetch_incentives: UserFetchIncentivesResponse!
+  user_fetch_notif_settings: UserFetchNotifSettingsResponse!
+  user_fetch_notifications: UserFetchNotificationsResponse!
+  user_fetch_sports: UserFetchSportsResponse!
+  user_following(limit: Int!, next_min_id: Int): UserFetchAthletesResponse!
+  user_unread_notifications: UserUnreadNotificationsResponse!
 }
 
 type Sales {
   month: String
   total_sales: Float
   year: Int
+}
+
+type SalesTmpl {
+  month: String
+  total_sales: Float
+  year: Int
+}
+
+type SettingsTmpl {
+  description: String
+  notifications_preference: [String]
 }
 
 type SuggestionsData {
@@ -109,10 +236,38 @@ type SuggestionsData {
   sport: String
 }
 
+type SuggestionsResData {
+  id: Int
+  image_url: String
+  name: String
+  sport: String
+}
+
+type TokenData {
+  token: String
+}
+
+type TokenResponse {
+  data: TokenData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type TopFollowerStats {
+  email: String
+  id: Int
+  name: String
+}
+
 type TopFollowers {
   email: String
   id: Int
   name: String
+}
+
+type UnreadNotifsData {
+  unread_count: Int
 }
 
 type UserContent {
@@ -121,4 +276,103 @@ type UserContent {
   content_caption: String
   content_media_url: String
   distance: String
+}
+
+type UserFetchActivityResponse {
+  data: UserFetchFollowingData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchAthletesResponse {
+  data: UserFetchAthletesResponseData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchAthletesResponseData {
+  athlete_data: [AthleteResData]
+  max_id: Int
+}
+
+type UserFetchFollowingData {
+  activity: [ActivityTmpl]
+  max_id: Int
+  points: Int
+}
+
+type UserFetchIncentivesData {
+  incentives: [String]
+}
+
+type UserFetchIncentivesResponse {
+  data: UserFetchIncentivesData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchNotifSettingsData {
+  notifications_preference: [String]
+}
+
+type UserFetchNotifSettingsResponse {
+  data: UserFetchNotifSettingsData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchNotificationsData {
+  notifications: [NotifsTmpl]
+}
+
+type UserFetchNotificationsResponse {
+  data: UserFetchNotificationsData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchSportsData {
+  sports: [String]
+}
+
+type UserFetchSportsResponse {
+  data: UserFetchSportsData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchSuggestionsResponse {
+  data: UserFetchSuggestionsResponseData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchSuggestionsResponseData {
+  suggestions: [SuggestionsResData]
+}
+
+type UserSigninData {
+  completion_status: String
+  token: String
+}
+
+type UserSigninResponse {
+  data: UserSigninData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserUnreadNotificationsResponse {
+  data: UnreadNotifsData
+  error: Boolean!
+  message: String!
+  status: Int!
 }

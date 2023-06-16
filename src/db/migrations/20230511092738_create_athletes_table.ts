@@ -5,11 +5,10 @@ export async function up(knex: Knex): Promise<void> {
         table.increments('id').notNullable()
         table.string('email').notNullable().index().unique()
         table.string('name', 60).notNullable()
-        table.string('display_name').notNullable()
         table.string('password').notNullable()
         table.string('phone').notNullable()
         table.string('sport').notNullable()
-        table.string('country').notNullable()
+        table.string('country')
         table.jsonb('metadata') //Incentives, description
         table.string('image_url')
         table.timestamp('created_at').defaultTo(knex.fn.now())
