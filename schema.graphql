@@ -169,7 +169,9 @@ type MutationResponse {
 }
 
 type NotifsTmpl {
+  distance: String
   event: String
+  headline: String
   id: Int
   message: String
   status: String

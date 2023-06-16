@@ -147,7 +147,9 @@ export interface NexusGenObjects {
     status: number; // Int!
   }
   NotifsTmpl: { // root type
+    distance?: string | null; // String
     event?: string | null; // String
+    headline?: string | null; // String
     id?: number | null; // Int
     message?: string | null; // String
     status?: string | null; // String
@@ -450,7 +452,9 @@ export interface NexusGenFieldTypes {
     status: number; // Int!
   }
   NotifsTmpl: { // field return type
+    distance: string | null; // String
     event: string | null; // String
+    headline: string | null; // String
     id: number | null; // Int
     message: string | null; // String
     status: string | null; // String
@@ -758,7 +762,9 @@ export interface NexusGenFieldTypeNames {
     status: 'Int'
   }
   NotifsTmpl: { // field return type name
+    distance: 'String'
     event: 'String'
+    headline: 'String'
     id: 'Int'
     message: 'String'
     status: 'String'

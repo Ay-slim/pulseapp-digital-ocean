@@ -157,6 +157,7 @@ export const UserSignupMutation = extendType({
                     const token = create_jwt_token(insert_ret[0], 'user_id')
                     const welcome_notif_packet = {
                         user_id: insert_ret[0],
+                        headline: 'Signing bonus!',
                         message:
                             'Welcome to Scientia! You have received 3 points as signing bonus',
                         event: 'signup',
@@ -843,16 +844,41 @@ export const UserFetchNotifications = extendType({
                         message: string
                         status: string
                         event: string
+                        headline: string
+                        created_at: string
                     }[] = await knex_client('notifications')
-                        .select('id', 'message', 'status', 'event')
+                        .select(
+                            'id',
+                            'message',
+                            'status',
+                            'event',
+                            'headline',
+                            'created_at'
+                        )
                         .where({ user_id })
                         .orderBy('created_at', 'desc')
+                    const normalized_notifications = notifications?.map(
+                        (notification) => {
+                            return {
+                                id: notification.id,
+                                status: notification.status,
+                                message: notification.message,
+                                event: notification.event,
+                                headline: notification.headline,
+                                distance: formatDistance(
+                                    new Date(notification.created_at),
+                                    new Date(),
+                                    { addSuffix: true }
+                                ),
+                            }
+                        }
+                    )
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
-                            notifications,
+                            notifications: normalized_notifications,
                         },
                     }
                 } catch (err) {

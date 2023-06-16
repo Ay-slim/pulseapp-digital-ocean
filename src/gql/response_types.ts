@@ -342,6 +342,8 @@ const NotifsTmpl = objectType({
         t.string('message')
         t.string('status')
         t.string('event')
+        t.string('headline')
+        t.string('distance')
     },
 })
 
