@@ -31,6 +31,7 @@ import {
     UserFetchActivityResponse,
     UserFetchNotificationsResponse,
     UserFetchNotifSettingsResponse,
+    UserUnreadNotificationsResponse,
 } from './response_types'
 
 dotenv.config()
@@ -841,8 +842,9 @@ export const UserFetchNotifications = extendType({
                         id: number
                         message: string
                         status: string
+                        event: string
                     }[] = await knex_client('notifications')
-                        .select('id', 'message', 'status')
+                        .select('id', 'message', 'status', 'event')
                         .where({ user_id })
                         .orderBy('created_at', 'desc')
                     return {
@@ -946,26 +948,30 @@ export const UserFetchNotifSettingsQuery = extendType({
     },
 })
 
-export const UserSignout = extendType({
-    type: 'Mutation',
+export const userFetchUnreadNotifications = extendType({
+    type: 'Query',
     definition(t) {
-        t.nonNull.field('user_logout', {
-            type: BaseResponse,
+        t.nonNull.field('user_unread_notifications', {
+            type: UserUnreadNotificationsResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
-                    const { auth_token } = context
-                    const { user_id } = await login_auth(auth_token, 'user_id')
-                    const token = auth_token.replace('Bearer ', '')
                     const { knex_client } = context
-                    await knex_client('blacklisted_tokens').insert({
-                        user_id,
-                        token,
-                    })
+                    const { user_id } = await login_auth(
+                        context?.auth_token,
+                        'user_id'
+                    )
+                    const [count] = await knex_client.raw(
+                        `SELECT COUNT(*) AS count FROM NOTIFICATIONS WHERE user_id = ${user_id} AND status = 'unread'`
+                    )
+                    const unread_count = count[0]?.count
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
+                        data: {
+                            unread_count,
+                        },
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType
@@ -976,3 +982,34 @@ export const UserSignout = extendType({
         })
     },
 })
+
+// export const UserSignout = extendType({
+//     type: 'Mutation',
+//     definition(t) {
+//         t.nonNull.field('user_logout', {
+//             type: BaseResponse,
+//             args: {},
+//             async resolve(_, __, context) {
+//                 try {
+//                     const { auth_token } = context
+//                     const { user_id } = await login_auth(auth_token, 'user_id')
+//                     const token = auth_token.replace('Bearer ', '')
+//                     const { knex_client } = context
+//                     await knex_client('blacklisted_tokens').insert({
+//                         user_id,
+//                         token,
+//                     })
+//                     return {
+//                         status: 201,
+//                         error: false,
+//                         message: 'Success',
+//                     }
+//                 } catch (err) {
+//                     const Error = err as ServerReturnType
+//                     console.error(err)
+//                     return err_return(Error?.status)
+//                 }
+//             },
+//         })
+//     },
+// })

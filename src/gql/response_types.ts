@@ -341,6 +341,7 @@ const NotifsTmpl = objectType({
         t.int('id')
         t.string('message')
         t.string('status')
+        t.string('event')
     },
 })
 
@@ -374,6 +375,23 @@ export const UserFetchNotifSettingsResponse = objectType({
                 name: 'UserFetchNotifSettingsData',
                 definition(t) {
                     t.list.string('notifications_preference')
+                },
+            }),
+        })
+    },
+})
+
+export const UserUnreadNotificationsResponse = objectType({
+    name: 'UserUnreadNotificationsResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UnreadNotifsData',
+                definition(t) {
+                    t.int('unread_count')
                 },
             }),
         })

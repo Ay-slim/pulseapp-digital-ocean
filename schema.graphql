@@ -157,7 +157,6 @@ type Mutation {
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
   user_create_sale(product_id: Int!, quantity: Int, total_value: Float!): BaseResponse!
   user_follow_athlete(athlete_id: Int!): BaseResponse!
-  user_logout: BaseResponse!
   user_update_notif_settings(notifications_preference: [String]!): BaseResponse!
   waitlist(email: String!): BaseResponse!
 }
@@ -170,6 +169,7 @@ type MutationResponse {
 }
 
 type NotifsTmpl {
+  event: String
   id: Int
   message: String
   status: String
@@ -206,6 +206,7 @@ type Query {
   user_fetch_notifications: UserFetchNotificationsResponse!
   user_fetch_sports: UserFetchSportsResponse!
   user_following(limit: Int!, next_min_id: Int): UserFetchAthletesResponse!
+  user_unread_notifications: UserUnreadNotificationsResponse!
 }
 
 type Sales {
@@ -260,6 +261,10 @@ type TopFollowers {
   email: String
   id: Int
   name: String
+}
+
+type UnreadNotifsData {
+  unread_count: Int
 }
 
 type UserContent {
@@ -357,6 +362,13 @@ type UserSigninData {
 
 type UserSigninResponse {
   data: UserSigninData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserUnreadNotificationsResponse {
+  data: UnreadNotifsData
   error: Boolean!
   message: String!
   status: Int!

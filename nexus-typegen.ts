@@ -147,6 +147,7 @@ export interface NexusGenObjects {
     status: number; // Int!
   }
   NotifsTmpl: { // root type
+    event?: string | null; // String
     id?: number | null; // Int
     message?: string | null; // String
     status?: string | null; // String
@@ -211,6 +212,9 @@ export interface NexusGenObjects {
     email?: string | null; // String
     id?: number | null; // Int
     name?: string | null; // String
+  }
+  UnreadNotifsData: { // root type
+    unread_count?: number | null; // Int
   }
   UserContent: { // root type
     athlete_image_url?: string | null; // String
@@ -291,6 +295,12 @@ export interface NexusGenObjects {
   }
   UserSigninResponse: { // root type
     data?: NexusGenRootTypes['UserSigninData'] | null; // UserSigninData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UserUnreadNotificationsResponse: { // root type
+    data?: NexusGenRootTypes['UnreadNotifsData'] | null; // UnreadNotifsData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
@@ -430,7 +440,6 @@ export interface NexusGenFieldTypes {
     signup: NexusGenRootTypes['TokenResponse']; // TokenResponse!
     user_create_sale: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     user_follow_athlete: NexusGenRootTypes['BaseResponse']; // BaseResponse!
-    user_logout: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     user_update_notif_settings: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     waitlist: NexusGenRootTypes['BaseResponse']; // BaseResponse!
   }
@@ -441,6 +450,7 @@ export interface NexusGenFieldTypes {
     status: number; // Int!
   }
   NotifsTmpl: { // field return type
+    event: string | null; // String
     id: number | null; // Int
     message: string | null; // String
     status: string | null; // String
@@ -474,6 +484,7 @@ export interface NexusGenFieldTypes {
     user_fetch_notifications: NexusGenRootTypes['UserFetchNotificationsResponse']; // UserFetchNotificationsResponse!
     user_fetch_sports: NexusGenRootTypes['UserFetchSportsResponse']; // UserFetchSportsResponse!
     user_following: NexusGenRootTypes['UserFetchAthletesResponse']; // UserFetchAthletesResponse!
+    user_unread_notifications: NexusGenRootTypes['UserUnreadNotificationsResponse']; // UserUnreadNotificationsResponse!
   }
   Sales: { // field return type
     month: string | null; // String
@@ -519,6 +530,9 @@ export interface NexusGenFieldTypes {
     email: string | null; // String
     id: number | null; // Int
     name: string | null; // String
+  }
+  UnreadNotifsData: { // field return type
+    unread_count: number | null; // Int
   }
   UserContent: { // field return type
     athlete_image_url: string | null; // String
@@ -599,6 +613,12 @@ export interface NexusGenFieldTypes {
   }
   UserSigninResponse: { // field return type
     data: NexusGenRootTypes['UserSigninData'] | null; // UserSigninData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UserUnreadNotificationsResponse: { // field return type
+    data: NexusGenRootTypes['UnreadNotifsData'] | null; // UnreadNotifsData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
@@ -728,7 +748,6 @@ export interface NexusGenFieldTypeNames {
     signup: 'TokenResponse'
     user_create_sale: 'BaseResponse'
     user_follow_athlete: 'BaseResponse'
-    user_logout: 'BaseResponse'
     user_update_notif_settings: 'BaseResponse'
     waitlist: 'BaseResponse'
   }
@@ -739,6 +758,7 @@ export interface NexusGenFieldTypeNames {
     status: 'Int'
   }
   NotifsTmpl: { // field return type name
+    event: 'String'
     id: 'Int'
     message: 'String'
     status: 'String'
@@ -772,6 +792,7 @@ export interface NexusGenFieldTypeNames {
     user_fetch_notifications: 'UserFetchNotificationsResponse'
     user_fetch_sports: 'UserFetchSportsResponse'
     user_following: 'UserFetchAthletesResponse'
+    user_unread_notifications: 'UserUnreadNotificationsResponse'
   }
   Sales: { // field return type name
     month: 'String'
@@ -817,6 +838,9 @@ export interface NexusGenFieldTypeNames {
     email: 'String'
     id: 'Int'
     name: 'String'
+  }
+  UnreadNotifsData: { // field return type name
+    unread_count: 'Int'
   }
   UserContent: { // field return type name
     athlete_image_url: 'String'
@@ -897,6 +921,12 @@ export interface NexusGenFieldTypeNames {
   }
   UserSigninResponse: { // field return type name
     data: 'UserSigninData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
+  UserUnreadNotificationsResponse: { // field return type name
+    data: 'UnreadNotifsData'
     error: 'Boolean'
     message: 'String'
     status: 'Int'
