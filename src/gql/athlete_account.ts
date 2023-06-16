@@ -8,6 +8,8 @@ import {
     SalesRetType,
     ProductsDataType,
     month_map,
+    create_product_notifications,
+    ProductNotifArgs,
 } from './utils'
 import { err_return, create_jwt_token } from './utils'
 import bcrypt from 'bcryptjs'
@@ -38,7 +40,7 @@ export const AthleteSigninMutation = extendType({
                 const { email, password } = args
                 try {
                     const db_resp = await context.knex_client
-                        .select('password', 'id')
+                        .select('password', 'id', 'name')
                         .from('athletes')
                         .where({
                             email: email,
@@ -49,7 +51,7 @@ export const AthleteSigninMutation = extendType({
                             message: 'Athlete does not exist!',
                         }
                     }
-                    const { password: hashed_password, id } = db_resp?.[0]
+                    const { password: hashed_password, id, name } = db_resp?.[0]
                     const pw_match = hashed_password
                         ? await bcrypt.compare(password, hashed_password)
                         : false
@@ -59,7 +61,7 @@ export const AthleteSigninMutation = extendType({
                             message: 'Invalid password!',
                         }
                     }
-                    const token = create_jwt_token(id, 'athlete_id')
+                    const token = create_jwt_token(id, 'athlete_id', name)
                     return {
                         status: 200,
                         error: false,
@@ -127,7 +129,8 @@ export const AthleteSignupMutation = extendType({
                         )
                     const token = create_jwt_token(
                         insert_ret?.[0],
-                        'athlete_id'
+                        'athlete_id',
+                        name
                     )
                     return {
                         status: 201,
@@ -400,7 +403,19 @@ export const AthleteCreateFixedItem = extendType({
                     if (currency) {
                         insert_object['currency'] = currency
                     }
-                    await knex_client('products').insert(insert_object)
+                    const [product_id]: number[] = await knex_client(
+                        'products'
+                    ).insert(insert_object, ['id'])
+                    // const notifications_args: ProductNotifArgs= {
+                    //     athlete_id: athlete_id!,
+                    //     knex_client,
+                    //     product_id,
+                    //     headline: "New pr",
+                    // }
+                    // create_product_notifications({
+                    //     athlete_id: athlete_id!,
+
+                    // })
                     return {
                         status: 201,
                         error: false,

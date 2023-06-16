@@ -157,6 +157,7 @@ type Mutation {
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
   user_create_sale(product_id: Int!, quantity: Int, total_value: Float!): BaseResponse!
   user_follow_athlete(athlete_id: Int!): BaseResponse!
+  user_mark_read_notifications: BaseResponse!
   user_update_notif_settings(notifications_preference: [String]!): BaseResponse!
   waitlist(email: String!): BaseResponse!
 }

@@ -442,6 +442,7 @@ export interface NexusGenFieldTypes {
     signup: NexusGenRootTypes['TokenResponse']; // TokenResponse!
     user_create_sale: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     user_follow_athlete: NexusGenRootTypes['BaseResponse']; // BaseResponse!
+    user_mark_read_notifications: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     user_update_notif_settings: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     waitlist: NexusGenRootTypes['BaseResponse']; // BaseResponse!
   }
@@ -752,6 +753,7 @@ export interface NexusGenFieldTypeNames {
     signup: 'TokenResponse'
     user_create_sale: 'BaseResponse'
     user_follow_athlete: 'BaseResponse'
+    user_mark_read_notifications: 'BaseResponse'
     user_update_notif_settings: 'BaseResponse'
     waitlist: 'BaseResponse'
   }

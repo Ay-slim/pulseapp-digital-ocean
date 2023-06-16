@@ -66,7 +66,7 @@ export const UserSigninMutation = extendType({
                 const { email, password } = args
                 try {
                     const db_resp = await context.knex_client
-                        .select('password', 'id', 'info_completion')
+                        .select('password', 'id', 'info_completion', 'name')
                         .from('users')
                         .where({
                             email: email,
@@ -81,6 +81,7 @@ export const UserSigninMutation = extendType({
                         password: hashed_password,
                         id,
                         info_completion,
+                        name,
                     } = db_resp?.[0]
                     const pw_match = hashed_password
                         ? await bcrypt.compare(password, hashed_password)
@@ -90,7 +91,7 @@ export const UserSigninMutation = extendType({
                             status: 401,
                             message: 'Invalid password!',
                         }
-                    const token = create_jwt_token(id, 'user_id')
+                    const token = create_jwt_token(id, 'user_id', name)
                     return {
                         status: 200,
                         error: false,
@@ -154,7 +155,11 @@ export const UserSignupMutation = extendType({
                         },
                         ['id']
                     )
-                    const token = create_jwt_token(insert_ret[0], 'user_id')
+                    const token = create_jwt_token(
+                        insert_ret[0],
+                        'user_id',
+                        name
+                    )
                     const welcome_notif_packet = {
                         user_id: insert_ret[0],
                         headline: 'Signing bonus!',
@@ -1009,33 +1014,32 @@ export const userFetchUnreadNotifications = extendType({
     },
 })
 
-// export const UserSignout = extendType({
-//     type: 'Mutation',
-//     definition(t) {
-//         t.nonNull.field('user_logout', {
-//             type: BaseResponse,
-//             args: {},
-//             async resolve(_, __, context) {
-//                 try {
-//                     const { auth_token } = context
-//                     const { user_id } = await login_auth(auth_token, 'user_id')
-//                     const token = auth_token.replace('Bearer ', '')
-//                     const { knex_client } = context
-//                     await knex_client('blacklisted_tokens').insert({
-//                         user_id,
-//                         token,
-//                     })
-//                     return {
-//                         status: 201,
-//                         error: false,
-//                         message: 'Success',
-//                     }
-//                 } catch (err) {
-//                     const Error = err as ServerReturnType
-//                     console.error(err)
-//                     return err_return(Error?.status)
-//                 }
-//             },
-//         })
-//     },
-// })
+export const UserUpdateReadNotifications = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('user_mark_read_notifications', {
+            type: BaseResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const { knex_client, auth_token } = context
+                    const { user_id } = await login_auth(auth_token, 'user_id')
+                    await knex_client('notifications')
+                        .update({
+                            status: 'read',
+                        })
+                        .where({ user_id })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})

@@ -1,12 +1,14 @@
 import { objectType, list } from 'nexus'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import { Knex } from 'knex'
 
 dotenv.config()
 
 type JwtPayloadWithId = JwtPayload & {
     user_id?: number
     athlete_id?: number
+    name?: string
 }
 
 export const month_map = (month_num: number) => {
@@ -243,9 +245,15 @@ export type ServerReturnType = {
     message: string
 }
 
-export const create_jwt_token = (id: number, sign_key: string): string => {
+export const create_jwt_token = (
+    id: number,
+    sign_key: string,
+    name: string
+): string => {
     const jwt_secret = process.env.JWT_SECRET_KEY
-    const token = jwt_secret ? jwt.sign({ [sign_key]: id }, jwt_secret) : ''
+    const token = jwt_secret
+        ? jwt.sign({ [sign_key]: id, name }, jwt_secret)
+        : ''
     if (!token)
         throw {
             status: 400,
@@ -288,4 +296,36 @@ export const err_return = (status = 400): ServerReturnType => {
         error: true,
         message: 'Something went wrong',
     }
+}
+export type ProductNotifArgs = {
+    knex_client: Knex
+    athlete_id: number
+    product_id: number
+    headline: string
+    message: string
+}
+type ProductNotifComponentType = {
+    user_id: number
+    email: string
+    notification_preference: string | null
+}
+export const create_product_notifications = async (args: ProductNotifArgs) => {
+    const { knex_client, athlete_id, product_id, headline, message } = args
+    const db_resp = await knex_client.raw(
+        `SELECT users_athletes.user_id as user_id, users.email, interests.notifications_preference FROM users_athletes JOIN interests ON users_athletes.user_id = interests.user_id JOIN users ON users_athletes.user_id = users.id WHERE users_athletes.athlete_id = ${athlete_id}`
+    )
+    const db_resp_dest: ProductNotifComponentType[] = db_resp[0]
+    const user_ids = db_resp_dest.map((resp) => {
+        return resp.user_id
+    })
+    await Promise.all(
+        user_ids.map((user_id) => {
+            knex_client('notifications').insert({
+                user_id,
+                headline,
+                message,
+                product_id,
+            })
+        })
+    )
 }
