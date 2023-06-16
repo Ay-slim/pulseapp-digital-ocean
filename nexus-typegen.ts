@@ -435,7 +435,7 @@ export interface NexusGenFieldTypes {
     athlete_update_info: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     athlete_update_settings: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     create_fixed_product: NexusGenRootTypes['BaseResponse']; // BaseResponse!
-    create_variable_product: NexusGenRootTypes['BaseResponse']; // BaseResponse!
+    create_product: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     interests: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     s3_upload: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signin: NexusGenRootTypes['UserSigninResponse']; // UserSigninResponse!
@@ -746,7 +746,7 @@ export interface NexusGenFieldTypeNames {
     athlete_update_info: 'BaseResponse'
     athlete_update_settings: 'BaseResponse'
     create_fixed_product: 'BaseResponse'
-    create_variable_product: 'BaseResponse'
+    create_product: 'BaseResponse'
     interests: 'BaseResponse'
     s3_upload: 'MutationResponse'
     signin: 'UserSigninResponse'
@@ -972,11 +972,11 @@ export interface NexusGenArgTypes {
       price: number; // Float!
       quantity: number; // Int!
     }
-    create_variable_product: { // args
+    create_product: { // args
       category?: string | null; // String
       currency?: string | null; // String
       description: string; // String!
-      end_time: string; // String!
+      end_time?: string | null; // String
       media_url?: string | null; // String
       name: string; // String!
       price: number; // Float!

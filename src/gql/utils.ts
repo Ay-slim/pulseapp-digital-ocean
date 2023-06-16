@@ -318,6 +318,7 @@ export const create_product_notifications = async (args: ProductNotifArgs) => {
     const user_ids = db_resp_dest.map((resp) => {
         return resp.user_id
     })
+
     await Promise.all(
         user_ids.map((user_id) => {
             return knex_client('notifications').insert({

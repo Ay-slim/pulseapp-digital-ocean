@@ -351,88 +351,10 @@ export const AthleteFetchSales = extendType({
     },
 })
 
-export const AthleteCreateFixedItem = extendType({
+export const AthleteCreateProduct = extendType({
     type: 'Mutation',
     definition(t) {
-        t.nonNull.field('create_fixed_product', {
-            type: BaseResponse,
-            args: {
-                media_url: stringArg(),
-                name: nonNull(stringArg()),
-                price: nonNull(floatArg()),
-                quantity: nonNull(intArg()),
-                description: nonNull(stringArg()),
-                currency: stringArg(),
-                category: nonNull(stringArg()),
-            },
-            async resolve(_, args, context) {
-                try {
-                    const { athlete_id, name: athlete_name } = await login_auth(
-                        context?.auth_token,
-                        'athlete_id'
-                    )
-                    const {
-                        media_url,
-                        name,
-                        price,
-                        quantity,
-                        currency,
-                        description,
-                        category,
-                    } = args
-                    const { knex_client } = context
-                    const metadata = JSON.stringify({ category })
-                    const insert_object: {
-                        athlete_id?: number
-                        media_url?: string | null
-                        name: string
-                        price: number
-                        quantity: number
-                        description: string
-                        metadata: string
-                        currency?: string
-                    } = {
-                        athlete_id,
-                        media_url,
-                        name,
-                        price,
-                        quantity,
-                        description,
-                        metadata,
-                    }
-                    if (currency) {
-                        insert_object['currency'] = currency
-                    }
-                    const [product_id]: number[] = await knex_client(
-                        'products'
-                    ).insert(insert_object, ['id'])
-                    const notifications_args: ProductNotifArgs = {
-                        athlete_id: athlete_id!,
-                        knex_client,
-                        product_id,
-                        headline: 'New product drop!',
-                        message: `${athlete_name} who you follow on Scientia has just dropped a new product. Click here or visit the store to shop now!`,
-                    }
-                    create_product_notifications(notifications_args)
-                    return {
-                        status: 201,
-                        error: false,
-                        message: 'Success',
-                    }
-                } catch (err) {
-                    const Error = err as ServerReturnType
-                    console.error(err)
-                    return err_return(Error?.status)
-                }
-            },
-        })
-    },
-})
-
-export const AthleteCreateVariableItem = extendType({
-    type: 'Mutation',
-    definition(t) {
-        t.nonNull.field('create_variable_product', {
+        t.nonNull.field('create_product', {
             type: BaseResponse,
             args: {
                 media_url: stringArg(),
@@ -442,7 +364,7 @@ export const AthleteCreateVariableItem = extendType({
                 description: nonNull(stringArg()),
                 currency: stringArg(),
                 category: stringArg(),
-                end_time: nonNull(stringArg()),
+                end_time: stringArg(),
             },
             async resolve(_, args, context) {
                 try {
@@ -471,7 +393,7 @@ export const AthleteCreateVariableItem = extendType({
                         description: string
                         metadata: string
                         currency?: string
-                        end_time: string
+                        end_time?: string | null
                         exclusive: string
                         start_time: Date
                     } = {
@@ -481,7 +403,7 @@ export const AthleteCreateVariableItem = extendType({
                         price,
                         quantity,
                         description,
-                        exclusive: 'true',
+                        exclusive: end_time ? 'true' : 'false',
                         metadata,
                         start_time: new Date(),
                         end_time,
@@ -496,8 +418,12 @@ export const AthleteCreateVariableItem = extendType({
                         athlete_id: athlete_id!,
                         knex_client,
                         product_id,
-                        headline: 'Limited time product drop!',
-                        message: `${athlete_name} who you follow on Scientia has just dropped a new product which will no longer be available soon. Head to the stores for details and shop now!`,
+                        headline: end_time
+                            ? 'Limited time product drop!'
+                            : 'New product drop!',
+                        message: end_time
+                            ? `${athlete_name} who you follow on Scientia has just dropped a new product which will no longer be available soon. Head to the stores for details and shop now!`
+                            : `${athlete_name} who you follow on Scientia has just dropped a new product. Click here or visit the store to shop now!`,
                     }
                     create_product_notifications(notifications_args)
                     return {
