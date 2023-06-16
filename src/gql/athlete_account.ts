@@ -367,7 +367,7 @@ export const AthleteCreateFixedItem = extendType({
             },
             async resolve(_, args, context) {
                 try {
-                    const { athlete_id } = await login_auth(
+                    const { athlete_id, name: athlete_name } = await login_auth(
                         context?.auth_token,
                         'athlete_id'
                     )
@@ -406,16 +406,14 @@ export const AthleteCreateFixedItem = extendType({
                     const [product_id]: number[] = await knex_client(
                         'products'
                     ).insert(insert_object, ['id'])
-                    // const notifications_args: ProductNotifArgs= {
-                    //     athlete_id: athlete_id!,
-                    //     knex_client,
-                    //     product_id,
-                    //     headline: "New pr",
-                    // }
-                    // create_product_notifications({
-                    //     athlete_id: athlete_id!,
-
-                    // })
+                    const notifications_args: ProductNotifArgs = {
+                        athlete_id: athlete_id!,
+                        knex_client,
+                        product_id,
+                        headline: 'New product drop!',
+                        message: `${athlete_name} who you follow on Scientia has just dropped a new product. Click here or visit the store to shop now!`,
+                    }
+                    create_product_notifications(notifications_args)
                     return {
                         status: 201,
                         error: false,
@@ -448,7 +446,7 @@ export const AthleteCreateVariableItem = extendType({
             },
             async resolve(_, args, context) {
                 try {
-                    const { athlete_id } = await login_auth(
+                    const { athlete_id, name: athlete_name } = await login_auth(
                         context?.auth_token,
                         'athlete_id'
                     )
@@ -491,7 +489,17 @@ export const AthleteCreateVariableItem = extendType({
                     if (currency) {
                         insert_object['currency'] = currency
                     }
-                    await knex_client('products').insert(insert_object)
+                    const [product_id]: number[] = await knex_client(
+                        'products'
+                    ).insert(insert_object)
+                    const notifications_args: ProductNotifArgs = {
+                        athlete_id: athlete_id!,
+                        knex_client,
+                        product_id,
+                        headline: 'Limited time product drop!',
+                        message: `${athlete_name} who you follow on Scientia has just dropped a new product which will no longer be available soon. Head to the stores for details and shop now!`,
+                    }
+                    create_product_notifications(notifications_args)
                     return {
                         status: 201,
                         error: false,

@@ -304,7 +304,7 @@ export type ProductNotifArgs = {
     headline: string
     message: string
 }
-type ProductNotifComponentType = {
+type NotifComponentType = {
     user_id: number
     email: string
     notification_preference: string | null
@@ -314,13 +314,13 @@ export const create_product_notifications = async (args: ProductNotifArgs) => {
     const db_resp = await knex_client.raw(
         `SELECT users_athletes.user_id as user_id, users.email, interests.notifications_preference FROM users_athletes JOIN interests ON users_athletes.user_id = interests.user_id JOIN users ON users_athletes.user_id = users.id WHERE users_athletes.athlete_id = ${athlete_id}`
     )
-    const db_resp_dest: ProductNotifComponentType[] = db_resp[0]
+    const db_resp_dest: NotifComponentType[] = db_resp[0]
     const user_ids = db_resp_dest.map((resp) => {
         return resp.user_id
     })
     await Promise.all(
         user_ids.map((user_id) => {
-            knex_client('notifications').insert({
+            return knex_client('notifications').insert({
                 user_id,
                 headline,
                 message,
@@ -329,3 +329,23 @@ export const create_product_notifications = async (args: ProductNotifArgs) => {
         })
     )
 }
+
+// export type SaleNotifArgs = {
+//     knex_client: Knex
+//     sale_id: number
+//     user_id: number
+//     product_id: number
+//     headline: string
+//     message: string
+// }
+
+// export const create_sale_notifications = async (args: SaleNotifArgs) => {
+//     const { knex_client, sale_id, product_id, headline, message, user_id } = args
+//     const db_resp = await knex_client.raw(`SELECT `)
+//     await knex_client('notifications').insert({
+//         user_id,
+//         sale_id,
+//         message: "Thank you for initiating this purchase! Please proceed to check out and make a payment to complete it.",
+//         headline: ""
+//     })
+// }
