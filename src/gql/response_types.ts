@@ -301,3 +301,81 @@ export const AthleteSettingsFetchResponse = objectType({
         })
     },
 })
+
+const ActivityTmpl = objectType({
+    name: 'ActivityTmpl',
+    definition(t) {
+        t.int('id')
+        t.string('name')
+        t.string('athlete')
+        t.string('distance')
+        t.string('status')
+        t.string('image_url')
+    },
+})
+
+export const UserFetchActivityResponse = objectType({
+    name: 'UserFetchActivityResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UserFetchFollowingData',
+                definition(t) {
+                    t.list.field('activity', {
+                        type: ActivityTmpl,
+                    })
+                    t.int('max_id')
+                    t.int('points')
+                },
+            }),
+        })
+    },
+})
+
+const NotifsTmpl = objectType({
+    name: 'NotifsTmpl',
+    definition(t) {
+        t.int('id')
+        t.string('message')
+        t.string('status')
+    },
+})
+
+export const UserFetchNotificationsResponse = objectType({
+    name: 'UserFetchNotificationsResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UserFetchNotificationsData',
+                definition(t) {
+                    t.list.field('notifications', {
+                        type: NotifsTmpl,
+                    })
+                },
+            }),
+        })
+    },
+})
+
+export const UserFetchNotifSettingsResponse = objectType({
+    name: 'UserFetchNotifSettingsResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UserFetchNotifSettingsData',
+                definition(t) {
+                    t.list.string('notifications_preference')
+                },
+            }),
+        })
+    },
+})

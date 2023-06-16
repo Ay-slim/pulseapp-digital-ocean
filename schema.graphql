@@ -2,6 +2,15 @@
 ### Do not make changes to this file directly
 
 
+type ActivityTmpl {
+  athlete: String
+  distance: String
+  id: Int
+  image_url: String
+  name: String
+  status: String
+}
+
 enum AgeRangeEnum {
   above_fortyfive
   eighteen_to_twentyfour
@@ -146,7 +155,10 @@ type Mutation {
   s3_upload(file_name: String!): MutationResponse!
   signin(email: String!, password: String!): UserSigninResponse!
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
+  user_create_sale(product_id: Int!, quantity: Int, total_value: Float!): BaseResponse!
   user_follow_athlete(athlete_id: Int!): BaseResponse!
+  user_logout: BaseResponse!
+  user_update_notif_settings(notifications_preference: [String]!): BaseResponse!
   waitlist(email: String!): BaseResponse!
 }
 
@@ -155,6 +167,12 @@ type MutationResponse {
   error: Boolean!
   message: String!
   status: Int!
+}
+
+type NotifsTmpl {
+  id: Int
+  message: String
+  status: String
 }
 
 type Products {
@@ -182,8 +200,12 @@ type Query {
   fetch_athlete_top_followers: AthleteTopFollowersResponse!
   fetch_products: AthleteProductsFetchResponse!
   fetch_user_suggestions: UserFetchSuggestionsResponse!
+  user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
   user_fetch_incentives: UserFetchIncentivesResponse!
+  user_fetch_notif_settings: UserFetchNotifSettingsResponse!
+  user_fetch_notifications: UserFetchNotificationsResponse!
   user_fetch_sports: UserFetchSportsResponse!
+  user_following(limit: Int!, next_min_id: Int): UserFetchAthletesResponse!
 }
 
 type Sales {
@@ -248,6 +270,13 @@ type UserContent {
   distance: String
 }
 
+type UserFetchActivityResponse {
+  data: UserFetchFollowingData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
 type UserFetchAthletesResponse {
   data: UserFetchAthletesResponseData
   error: Boolean!
@@ -260,12 +289,40 @@ type UserFetchAthletesResponseData {
   max_id: Int
 }
 
+type UserFetchFollowingData {
+  activity: [ActivityTmpl]
+  max_id: Int
+  points: Int
+}
+
 type UserFetchIncentivesData {
   incentives: [String]
 }
 
 type UserFetchIncentivesResponse {
   data: UserFetchIncentivesData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchNotifSettingsData {
+  notifications_preference: [String]
+}
+
+type UserFetchNotifSettingsResponse {
+  data: UserFetchNotifSettingsData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UserFetchNotificationsData {
+  notifications: [NotifsTmpl]
+}
+
+type UserFetchNotificationsResponse {
+  data: UserFetchNotificationsData
   error: Boolean!
   message: String!
   status: Int!

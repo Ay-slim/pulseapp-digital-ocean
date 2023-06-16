@@ -30,6 +30,14 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  ActivityTmpl: { // root type
+    athlete?: string | null; // String
+    distance?: string | null; // String
+    id?: number | null; // Int
+    image_url?: string | null; // String
+    name?: string | null; // String
+    status?: string | null; // String
+  }
   AthleteBasicStats: { // root type
     fixed_items_count?: number | null; // Int
     follower_count?: number | null; // Int
@@ -138,6 +146,11 @@ export interface NexusGenObjects {
     message: string; // String!
     status: number; // Int!
   }
+  NotifsTmpl: { // root type
+    id?: number | null; // Int
+    message?: string | null; // String
+    status?: string | null; // String
+  }
   Products: { // root type
     currency?: string | null; // String
     media_url?: string | null; // String
@@ -206,6 +219,12 @@ export interface NexusGenObjects {
     content_media_url?: string | null; // String
     distance?: string | null; // String
   }
+  UserFetchActivityResponse: { // root type
+    data?: NexusGenRootTypes['UserFetchFollowingData'] | null; // UserFetchFollowingData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
   UserFetchAthletesResponse: { // root type
     data?: NexusGenRootTypes['UserFetchAthletesResponseData'] | null; // UserFetchAthletesResponseData
     error: boolean; // Boolean!
@@ -216,11 +235,34 @@ export interface NexusGenObjects {
     athlete_data?: Array<NexusGenRootTypes['AthleteResData'] | null> | null; // [AthleteResData]
     max_id?: number | null; // Int
   }
+  UserFetchFollowingData: { // root type
+    activity?: Array<NexusGenRootTypes['ActivityTmpl'] | null> | null; // [ActivityTmpl]
+    max_id?: number | null; // Int
+    points?: number | null; // Int
+  }
   UserFetchIncentivesData: { // root type
     incentives?: Array<string | null> | null; // [String]
   }
   UserFetchIncentivesResponse: { // root type
     data?: NexusGenRootTypes['UserFetchIncentivesData'] | null; // UserFetchIncentivesData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UserFetchNotifSettingsData: { // root type
+    notifications_preference?: Array<string | null> | null; // [String]
+  }
+  UserFetchNotifSettingsResponse: { // root type
+    data?: NexusGenRootTypes['UserFetchNotifSettingsData'] | null; // UserFetchNotifSettingsData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UserFetchNotificationsData: { // root type
+    notifications?: Array<NexusGenRootTypes['NotifsTmpl'] | null> | null; // [NotifsTmpl]
+  }
+  UserFetchNotificationsResponse: { // root type
+    data?: NexusGenRootTypes['UserFetchNotificationsData'] | null; // UserFetchNotificationsData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
@@ -266,6 +308,14 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  ActivityTmpl: { // field return type
+    athlete: string | null; // String
+    distance: string | null; // String
+    id: number | null; // Int
+    image_url: string | null; // String
+    name: string | null; // String
+    status: string | null; // String
+  }
   AthleteBasicStats: { // field return type
     fixed_items_count: number | null; // Int
     follower_count: number | null; // Int
@@ -378,7 +428,10 @@ export interface NexusGenFieldTypes {
     s3_upload: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signin: NexusGenRootTypes['UserSigninResponse']; // UserSigninResponse!
     signup: NexusGenRootTypes['TokenResponse']; // TokenResponse!
+    user_create_sale: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     user_follow_athlete: NexusGenRootTypes['BaseResponse']; // BaseResponse!
+    user_logout: NexusGenRootTypes['BaseResponse']; // BaseResponse!
+    user_update_notif_settings: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     waitlist: NexusGenRootTypes['BaseResponse']; // BaseResponse!
   }
   MutationResponse: { // field return type
@@ -386,6 +439,11 @@ export interface NexusGenFieldTypes {
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
+  }
+  NotifsTmpl: { // field return type
+    id: number | null; // Int
+    message: string | null; // String
+    status: string | null; // String
   }
   Products: { // field return type
     currency: string | null; // String
@@ -410,8 +468,12 @@ export interface NexusGenFieldTypes {
     fetch_athlete_top_followers: NexusGenRootTypes['AthleteTopFollowersResponse']; // AthleteTopFollowersResponse!
     fetch_products: NexusGenRootTypes['AthleteProductsFetchResponse']; // AthleteProductsFetchResponse!
     fetch_user_suggestions: NexusGenRootTypes['UserFetchSuggestionsResponse']; // UserFetchSuggestionsResponse!
+    user_activity: NexusGenRootTypes['UserFetchActivityResponse']; // UserFetchActivityResponse!
     user_fetch_incentives: NexusGenRootTypes['UserFetchIncentivesResponse']; // UserFetchIncentivesResponse!
+    user_fetch_notif_settings: NexusGenRootTypes['UserFetchNotifSettingsResponse']; // UserFetchNotifSettingsResponse!
+    user_fetch_notifications: NexusGenRootTypes['UserFetchNotificationsResponse']; // UserFetchNotificationsResponse!
     user_fetch_sports: NexusGenRootTypes['UserFetchSportsResponse']; // UserFetchSportsResponse!
+    user_following: NexusGenRootTypes['UserFetchAthletesResponse']; // UserFetchAthletesResponse!
   }
   Sales: { // field return type
     month: string | null; // String
@@ -465,6 +527,12 @@ export interface NexusGenFieldTypes {
     content_media_url: string | null; // String
     distance: string | null; // String
   }
+  UserFetchActivityResponse: { // field return type
+    data: NexusGenRootTypes['UserFetchFollowingData'] | null; // UserFetchFollowingData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
   UserFetchAthletesResponse: { // field return type
     data: NexusGenRootTypes['UserFetchAthletesResponseData'] | null; // UserFetchAthletesResponseData
     error: boolean; // Boolean!
@@ -475,11 +543,34 @@ export interface NexusGenFieldTypes {
     athlete_data: Array<NexusGenRootTypes['AthleteResData'] | null> | null; // [AthleteResData]
     max_id: number | null; // Int
   }
+  UserFetchFollowingData: { // field return type
+    activity: Array<NexusGenRootTypes['ActivityTmpl'] | null> | null; // [ActivityTmpl]
+    max_id: number | null; // Int
+    points: number | null; // Int
+  }
   UserFetchIncentivesData: { // field return type
     incentives: Array<string | null> | null; // [String]
   }
   UserFetchIncentivesResponse: { // field return type
     data: NexusGenRootTypes['UserFetchIncentivesData'] | null; // UserFetchIncentivesData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UserFetchNotifSettingsData: { // field return type
+    notifications_preference: Array<string | null> | null; // [String]
+  }
+  UserFetchNotifSettingsResponse: { // field return type
+    data: NexusGenRootTypes['UserFetchNotifSettingsData'] | null; // UserFetchNotifSettingsData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UserFetchNotificationsData: { // field return type
+    notifications: Array<NexusGenRootTypes['NotifsTmpl'] | null> | null; // [NotifsTmpl]
+  }
+  UserFetchNotificationsResponse: { // field return type
+    data: NexusGenRootTypes['UserFetchNotificationsData'] | null; // UserFetchNotificationsData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
@@ -515,6 +606,14 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  ActivityTmpl: { // field return type name
+    athlete: 'String'
+    distance: 'String'
+    id: 'Int'
+    image_url: 'String'
+    name: 'String'
+    status: 'String'
+  }
   AthleteBasicStats: { // field return type name
     fixed_items_count: 'Int'
     follower_count: 'Int'
@@ -627,7 +726,10 @@ export interface NexusGenFieldTypeNames {
     s3_upload: 'MutationResponse'
     signin: 'UserSigninResponse'
     signup: 'TokenResponse'
+    user_create_sale: 'BaseResponse'
     user_follow_athlete: 'BaseResponse'
+    user_logout: 'BaseResponse'
+    user_update_notif_settings: 'BaseResponse'
     waitlist: 'BaseResponse'
   }
   MutationResponse: { // field return type name
@@ -635,6 +737,11 @@ export interface NexusGenFieldTypeNames {
     error: 'Boolean'
     message: 'String'
     status: 'Int'
+  }
+  NotifsTmpl: { // field return type name
+    id: 'Int'
+    message: 'String'
+    status: 'String'
   }
   Products: { // field return type name
     currency: 'String'
@@ -659,8 +766,12 @@ export interface NexusGenFieldTypeNames {
     fetch_athlete_top_followers: 'AthleteTopFollowersResponse'
     fetch_products: 'AthleteProductsFetchResponse'
     fetch_user_suggestions: 'UserFetchSuggestionsResponse'
+    user_activity: 'UserFetchActivityResponse'
     user_fetch_incentives: 'UserFetchIncentivesResponse'
+    user_fetch_notif_settings: 'UserFetchNotifSettingsResponse'
+    user_fetch_notifications: 'UserFetchNotificationsResponse'
     user_fetch_sports: 'UserFetchSportsResponse'
+    user_following: 'UserFetchAthletesResponse'
   }
   Sales: { // field return type name
     month: 'String'
@@ -714,6 +825,12 @@ export interface NexusGenFieldTypeNames {
     content_media_url: 'String'
     distance: 'String'
   }
+  UserFetchActivityResponse: { // field return type name
+    data: 'UserFetchFollowingData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
   UserFetchAthletesResponse: { // field return type name
     data: 'UserFetchAthletesResponseData'
     error: 'Boolean'
@@ -724,11 +841,34 @@ export interface NexusGenFieldTypeNames {
     athlete_data: 'AthleteResData'
     max_id: 'Int'
   }
+  UserFetchFollowingData: { // field return type name
+    activity: 'ActivityTmpl'
+    max_id: 'Int'
+    points: 'Int'
+  }
   UserFetchIncentivesData: { // field return type name
     incentives: 'String'
   }
   UserFetchIncentivesResponse: { // field return type name
     data: 'UserFetchIncentivesData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
+  UserFetchNotifSettingsData: { // field return type name
+    notifications_preference: 'String'
+  }
+  UserFetchNotifSettingsResponse: { // field return type name
+    data: 'UserFetchNotifSettingsData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
+  UserFetchNotificationsData: { // field return type name
+    notifications: 'NotifsTmpl'
+  }
+  UserFetchNotificationsResponse: { // field return type name
+    data: 'UserFetchNotificationsData'
     error: 'Boolean'
     message: 'String'
     status: 'Int'
@@ -825,8 +965,16 @@ export interface NexusGenArgTypes {
       password: string; // String!
       phone: string; // String!
     }
+    user_create_sale: { // args
+      product_id: number; // Int!
+      quantity?: number | null; // Int
+      total_value: number; // Float!
+    }
     user_follow_athlete: { // args
       athlete_id: number; // Int!
+    }
+    user_update_notif_settings: { // args
+      notifications_preference: Array<string | null>; // [String]!
     }
     waitlist: { // args
       email: string; // String!
@@ -837,6 +985,14 @@ export interface NexusGenArgTypes {
       limit: number; // Int!
       next_min_id?: number | null; // Int
       sports: Array<string | null>; // [String]!
+    }
+    user_activity: { // args
+      limit: number; // Int!
+      next_min_id?: number | null; // Int
+    }
+    user_following: { // args
+      limit: number; // Int!
+      next_min_id?: number | null; // Int
     }
   }
 }

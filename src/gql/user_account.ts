@@ -1,7 +1,16 @@
-import { enumType, extendType, nonNull, stringArg, list, intArg } from 'nexus'
+import {
+    enumType,
+    extendType,
+    nonNull,
+    stringArg,
+    list,
+    intArg,
+    queryType,
+    floatArg,
+} from 'nexus'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
-//import { formatDistance } from 'date-fns'
+import { formatDistance } from 'date-fns'
 import {
     create_jwt_token,
     AthleteDataType,
@@ -9,6 +18,7 @@ import {
     ServerReturnType,
     login_auth,
     SuggestionsDataType,
+    UserActivityType,
 } from './utils'
 import {
     TokenResponse,
@@ -18,6 +28,9 @@ import {
     UserFetchAthletesResponse,
     UserFetchSuggestionsResponse,
     UserFetchIncentivesResponse,
+    UserFetchActivityResponse,
+    UserFetchNotificationsResponse,
+    UserFetchNotifSettingsResponse,
 } from './response_types'
 
 dotenv.config()
@@ -150,6 +163,7 @@ export const UserSignupMutation = extendType({
                     const welcome_points = {
                         user_id: insert_ret[0],
                         units: 3,
+                        total: 3,
                         event: 'signup',
                     }
                     await Promise.all([
@@ -232,11 +246,10 @@ export const UserAddInterests = extendType({
                         notifications_preference,
                     } = args
                     const { knex_client } = context
-                    const user_id = login_auth(
+                    const { user_id } = await login_auth(
                         context?.auth_token,
                         'user_id'
-                    )?.user_id
-
+                    )
                     await Promise.all([
                         knex_client('interests').insert({
                             user_id,
@@ -282,7 +295,7 @@ export const UserFetchSports = extendType({
             args: {},
             async resolve(_, __, context) {
                 try {
-                    login_auth(context?.auth_token, 'user_id')?.user_id
+                    await login_auth(context?.auth_token, 'user_id')
                     const { knex_client } = context
                     const available_sports = await knex_client('constants')
                         .select('sports')
@@ -313,7 +326,7 @@ export const UserFetchIncentives = extendType({
             args: {},
             async resolve(_, __, context) {
                 try {
-                    login_auth(context?.auth_token, 'user_id')?.user_id
+                    await login_auth(context?.auth_token, 'user_id')
                     const available_incentives = await context
                         .knex_client('constants')
                         .select('incentives')
@@ -511,10 +524,10 @@ export const UserInterestsSuggestions = extendType({
             args: {},
             async resolve(_, __, context) {
                 try {
-                    const user_id = login_auth(
+                    const { user_id } = await login_auth(
                         context?.auth_token,
                         'user_id'
-                    )?.user_id
+                    )
                     const { knex_client } = context
                     // const interests_data = await context
                     //     .knex_client('interests')
@@ -560,10 +573,10 @@ export const UserFollowAthlete = extendType({
             args: { athlete_id: nonNull(intArg()) },
             async resolve(_, args, context) {
                 try {
-                    const user_id = login_auth(
+                    const { user_id } = await login_auth(
                         context?.auth_token,
                         'user_id'
-                    )?.user_id
+                    )
                     const { athlete_id } = args
                     const { knex_client } = context
                     // await knex_client('interests')
@@ -596,199 +609,371 @@ export const UserFollowAthlete = extendType({
         })
     },
 })
-// export const UserFetchNotifications = extendType({
-//     type: 'Query',
-//     definition(t) {
-//         t.nonNull.field('user_fetch_notifications', {
-//             type: GQLResponse,
-//             args: {},
-//             async resolve(_, __, context) {
-//                 try {
-//                     const user_id = login_auth(context?.auth_token, 'user_id')?.user_id
-//                     const notifications = await context.knex_client
-//                     .select(
-//                         'notifications.id',
-//                         'notifications.content_id',
-//                         'notifications.status',
-//                         'content.caption'
-//                     )
-//                     .from('notifications')
-//                     .join(
-//                         'content',
-//                         'notifications.content_id',
-//                         '=',
-//                         'content.id'
-//                     )
-//                     .where('notifications.user_id', '=', user_id)
-//                     .orderBy('content.created_at', 'desc')
-//                     console.log(notifications)
-//                     return {
-//                         status: 201,
-//                         error: false,
-//                         message: 'Success',
-//                         data: {
-//                             notifications,
-//                         },
-//                     }
-//                 } catch (err) {
-//                     const Error = err as ServerReturnType
-//                     console.error(err)
-//                     return err_return(Error?.status, Error?.message)
-//                 }
-//             },
-//         })
-//     },
-// })
 
-// export const UserFetchFeatured = extendType({
-//     type: 'Query',
-//     definition(t) {
-//         t.nonNull.field('user_fetch_featured', {
-//             type: GQLResponse,
-//             args: {
-//                 limit: intArg(),
-//                 next_min_id: intArg()
-//             },
-//             async resolve(_, args, context) {
-//                 try {
-//                     const { user_id } = login_auth(
-//                         context?.auth_token,
-//                         'user_id'
-//                     )
-//                     const limit = args.limit ?? 10
-//                     const {next_min_id} = args
-//                     const {knex_client} = context
-//                     const interests_data = await knex_client('interests')
-//                         .select('athletes')
-//                         .where('user_id', user_id)
-//                         .first()
-//                     const athletes_list = JSON.parse(interests_data?.athletes)
-//                     const featured_query = knex_client.select(
-//                         'events.id',
-//                         'events.athlete_id',
-//                         'events.media_url',
-//                         'events.caption',
-//                         'events.start_time',
-//                         'events.end_time',
-//                         'athletes.name as athlete_name',
-//                         'athletes.image_url as athlete_image',
-//                         'products.name as product_name',
-//                         'products.price as price',
-//                         'products.media_url as product_image'
-//                     ).from('athletes')
-//                     .join(
-//                         'events',
-//                         'athletes.id',
-//                         '=',
-//                         'events.athlete_id'
-//                     ).leftJoin(
-//                         'products',
-//                         'events.product_id',
-//                         '=',
-//                         'products.id'
-//                     )
-//                     .whereIn('athletes.id', athletes_list)
-//                     .orderBy('events.id', 'asc')
-//                     .limit(limit)
-//                     if (next_min_id) {
-//                         featured_query.where('events.id', '>', next_min_id)
-//                     }
-//                     const db_resp = await featured_query
-//                     const batch_len = db_resp.length
-//                     const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
-//                     return {
-//                         status: 201,
-//                         error: false,
-//                         message: 'Success',
-//                         data: {
-//                             featured_events: db_resp,
-//                             max_id,
-//                         },
-//                     }
-//                 }catch (err) {
-//                     const Error = err as ServerReturnType
-//                     console.error(err)
-//                     return err_return(Error?.status)
-//                 }
+export const UserFetchFollowing = queryType({
+    definition(t) {
+        t.nonNull.field('user_following', {
+            type: UserFetchAthletesResponse,
+            args: {
+                next_min_id: intArg(),
+                limit: nonNull(intArg()),
+            },
+            async resolve(_, args, context) {
+                const { user_id } = await login_auth(
+                    context?.auth_token,
+                    'user_id'
+                )
+                const { knex_client } = context
+                try {
+                    const { next_min_id, limit } = args
+                    const athlete_query = knex_client('athletes')
+                        .join(
+                            'users_athletes',
+                            'athletes.id',
+                            '=',
+                            'users_athletes.athlete_id'
+                        )
+                        .select(
+                            'athletes.id',
+                            'athletes.name',
+                            'athletes.image_url',
+                            'athletes.sport',
+                            'athletes.metadata'
+                        )
+                        .whereRaw(`users_athletes.user_id = ${user_id}`)
+                        .orderBy('athletes.id', 'asc')
+                        .limit(limit)
+                    if (next_min_id) {
+                        athlete_query.where('athletes.id', '>', next_min_id)
+                    }
+                    const db_resp: AthleteDataType[] = await athlete_query
+                    const ret_value = db_resp.map((resp) => {
+                        try {
+                            const parsed_mdata = JSON.parse(resp?.metadata)
+                            return {
+                                id: resp?.id,
+                                name: resp?.name,
+                                image_url: resp?.image_url,
+                                sport: resp?.sport,
+                                description: parsed_mdata?.description,
+                            }
+                        } catch (err) {
+                            throw {
+                                status: 400,
+                                message: 'Could not parse athlete metadata',
+                            }
+                        }
+                    })
+                    const batch_len = db_resp.length
+                    const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            athlete_data: ret_value,
+                            max_id,
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
 
-//             }
-//         })
-//     }
-// })
+export const UserFetchActivity = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('user_activity', {
+            type: UserFetchActivityResponse,
+            args: {
+                next_min_id: intArg(),
+                limit: nonNull(intArg()),
+            },
+            async resolve(_, args, context) {
+                const { user_id } = await login_auth(
+                    context?.auth_token,
+                    'user_id'
+                )
+                const { knex_client } = context
+                try {
+                    const { next_min_id, limit } = args
+                    const activity_query = knex_client('sales')
+                        .leftJoin(
+                            'products',
+                            'sales.product_id',
+                            '=',
+                            'products.id'
+                        )
+                        .leftJoin(
+                            'athletes',
+                            'products.athlete_id',
+                            '=',
+                            'athletes.id'
+                        )
+                        .select(
+                            'sales.id',
+                            'products.name',
+                            'athletes.name as athlete',
+                            'sales.created_at',
+                            'sales.status',
+                            'products.media_url'
+                        )
+                        .whereRaw(`sales.user_id = ${user_id}`)
+                        .orderBy('sales.id', 'asc')
+                        .limit(limit)
+                    if (next_min_id) {
+                        activity_query.where('sales.id', '>', next_min_id)
+                    }
+                    const points_query = knex_client('points')
+                        .select('total')
+                        .orderBy('id', 'desc')
+                        .limit(1)
+                        .first()
+                    const [db_sales_resp, db_points_resp]: [
+                        UserActivityType[],
+                        { total: number }
+                    ] = await Promise.all([activity_query, points_query])
+                    const normalized_db_resp = db_sales_resp?.map(
+                        (activity) => {
+                            return {
+                                name: activity.name,
+                                status: activity.status,
+                                media_url: activity.media_url,
+                                athlete: activity.athlete,
+                                id: activity.id,
+                                distance: formatDistance(
+                                    new Date(activity.created_at),
+                                    new Date(),
+                                    { addSuffix: true }
+                                ),
+                            }
+                        }
+                    )
+                    const batch_len = db_sales_resp.length
+                    const max_id = batch_len
+                        ? db_sales_resp[batch_len - 1]?.id
+                        : 0
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            activity: normalized_db_resp,
+                            max_id,
+                            points: db_points_resp?.total ?? 0,
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
 
-// export const UserFetchLive = extendType({
-//     type: 'Query',
-//     definition(t) {
-//         t.nonNull.field('user_fetch_live', {
-//             type: GQLResponse,
-//             args: {
-//                 limit: intArg(),
-//                 next_min_id: intArg()
-//             },
-//             async resolve(_, args, context) {
-//                 try {
-//                     const { user_id } = login_auth(
-//                         context?.auth_token,
-//                         'user_id'
-//                     )
-//                     const limit = args.limit ?? 10
-//                     const {next_min_id} = args
-//                     const {knex_client} = context
-//                     const interests_data = await knex_client('interests')
-//                         .select('athletes')
-//                         .where('user_id', user_id)
-//                         .first()
-//                     const athletes_list = JSON.parse(interests_data?.athletes)
-//                     const featured_query = knex_client.select(
-//                         'events.id',
-//                         'events.athlete_id',
-//                         'events.media_url',
-//                         'events.caption',
-//                         'events.start_time',
-//                         'events.end_time',
-//                         'athletes.name as athlete_name',
-//                         'athletes.image_url as athlete_image',
-//                         'products.name as product_name',
-//                         'products.price as price',
-//                         'products.media_url as product_image'
-//                     ).from('athletes')
-//                     .join(
-//                         'events',
-//                         'athletes.id',
-//                         '=',
-//                         'events.athlete_id'
-//                     ).leftJoin(
-//                         'products',
-//                         'events.product_id',
-//                         '=',
-//                         'products.id'
-//                     )
-//                     .whereIn('athletes.id', athletes_list)
-//                     .whereRaw('events.end_time IS NOT NULL')
-//                     .where('events.end_time', '>', Date.now())
-//                     .orderBy('events.id', 'asc')
-//                     .limit(limit)
-//                     if (next_min_id) {
-//                         featured_query.where('events.id', '>', next_min_id)
-//                     }
-//                     const db_resp = await featured_query
-//                     const batch_len = db_resp.length
-//                     const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
-//                     return {
-//                         status: 201,
-//                         error: false,
-//                         message: 'Success',
-//                         data: {
-//                             featured_events: db_resp,
-//                             max_id,
-//                         },
-//                     }
-//                 }catch (err) {
-//                     const Error = err as ServerReturnType
-//                     console.error(err)
-//                     return err_return(Error?.status)
-//                 }
-//             }
-//         })
-//     }
-// })
+export const UserCreateSale = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('user_create_sale', {
+            type: BaseResponse,
+            args: {
+                product_id: nonNull(intArg()),
+                quantity: intArg(),
+                total_value: nonNull(floatArg()),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const { user_id } = await login_auth(
+                        context?.auth_token,
+                        'user_id'
+                    )
+                    const { product_id, quantity, total_value } = args
+                    const { knex_client } = context
+                    const sales_packet: {
+                        user_id: number
+                        product_id: number
+                        quantity?: number
+                        total_value: number
+                    } = {
+                        user_id: user_id!,
+                        product_id,
+                        total_value,
+                    }
+                    if (quantity) {
+                        sales_packet['quantity'] = quantity
+                    }
+                    await knex_client('sales').insert(sales_packet)
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const UserFetchNotifications = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('user_fetch_notifications', {
+            type: UserFetchNotificationsResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const { knex_client } = context
+                    const { user_id } = await login_auth(
+                        context?.auth_token,
+                        'user_id'
+                    )
+                    const notifications: {
+                        id: number
+                        message: string
+                        status: string
+                    }[] = await knex_client('notifications')
+                        .select('id', 'message', 'status')
+                        .where({ user_id })
+                        .orderBy('created_at', 'desc')
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            notifications,
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const UserUpdateSettingsMutation = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('user_update_notif_settings', {
+            type: BaseResponse,
+            args: {
+                notifications_preference: nonNull(list(stringArg())),
+            },
+            async resolve(_, args, context) {
+                const { notifications_preference } = args
+                try {
+                    const { user_id } = await login_auth(
+                        context?.auth_token,
+                        'user_id'
+                    )
+                    const { knex_client } = context
+                    await knex_client('interests')
+                        .update({
+                            notifications_preference: JSON.stringify(
+                                notifications_preference
+                            ),
+                        })
+                        .where('user_id', '=', user_id)
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const UserFetchNotifSettingsQuery = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('user_fetch_notif_settings', {
+            type: UserFetchNotifSettingsResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const { user_id } = await login_auth(
+                        context?.auth_token,
+                        'user_id'
+                    )
+                    const { knex_client } = context
+                    const notif_settings_resp: {
+                        notifications_preference: string
+                    } = await knex_client('interests')
+                        .select('notifications_preference')
+                        .where('user_id', '=', user_id)
+                        .first()
+                    if (!notif_settings_resp) {
+                        throw new Error(
+                            'Registration incomplete. No default notification preferences set'
+                        )
+                    }
+                    const { notifications_preference } = notif_settings_resp
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            notifications_preference: JSON.parse(
+                                notifications_preference
+                            ),
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const UserSignout = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('user_logout', {
+            type: BaseResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const { auth_token } = context
+                    const { user_id } = await login_auth(auth_token, 'user_id')
+                    const token = auth_token.replace('Bearer ', '')
+                    const { knex_client } = context
+                    await knex_client('blacklisted_tokens').insert({
+                        user_id,
+                        token,
+                    })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})

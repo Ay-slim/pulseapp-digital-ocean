@@ -1,6 +1,8 @@
 import { objectType, list } from 'nexus'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import { knex } from 'knex'
+import knex_config from '../db/knexfile'
 
 dotenv.config()
 
@@ -72,11 +74,11 @@ export type TopFollowersType = {
     email: string
 }
 
-export type UserContentType = {
+export type UserActivityType = {
     name: string
-    image_url: string
+    status: string
     media_url: string
-    caption: string
+    athlete: string
     id: number
     created_at: string
 }
@@ -254,10 +256,10 @@ export const create_jwt_token = (id: number, sign_key: string): string => {
     return token
 }
 
-export const login_auth = (
+export const login_auth = async (
     bearer_token: string,
     sign_key: string
-): JwtPayloadWithId => {
+): Promise<JwtPayloadWithId> => {
     try {
         const token = bearer_token.replace('Bearer ', '')
         if (!token) {
@@ -274,7 +276,14 @@ export const login_auth = (
         if (!jwt_payload || !(jwt_payload as JwtPayloadWithId)?.[sign_key]) {
             throw new Error('Unable to extract value from token')
         }
-
+        const env = process.env.NODE_ENV
+        const knex_client = knex(knex_config[env!])
+        const db_resp = await knex_client('blacklisted_tokens')
+            .select('token')
+            .where({ token })
+        if (db_resp?.length > 0) {
+            throw new Error('Blacklisted token, login again!')
+        }
         return jwt_payload as JwtPayloadWithId
     } catch (err) {
         const Error = err as ServerReturnType
