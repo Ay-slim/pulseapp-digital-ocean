@@ -165,7 +165,7 @@ export const UserSignupMutation = extendType({
                         headline: 'Signing bonus!',
                         message:
                             'Welcome to Scientia! You have received 3 points as signing bonus',
-                        event: 'signup',
+                        event: 'point',
                     }
                     const welcome_points = {
                         user_id: insert_ret[0],
