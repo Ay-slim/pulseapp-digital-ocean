@@ -993,7 +993,7 @@ export const userFetchUnreadNotifications = extendType({
                         'user_id'
                     )
                     const [count] = await knex_client.raw(
-                        `SELECT COUNT(*) AS count FROM NOTIFICATIONS WHERE user_id = ${user_id} AND status = 'unread'`
+                        `SELECT COUNT(*) AS count FROM notifications WHERE user_id = ${user_id} AND status = 'unread'`
                     )
                     const unread_count = count[0]?.count
                     return {
