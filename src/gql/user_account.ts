@@ -162,9 +162,9 @@ export const UserSignupMutation = extendType({
                     )
                     const welcome_notif_packet = {
                         user_id: insert_ret[0],
-                        headline: 'Signing bonus!',
+                        headline: 'Welcome bonus!',
                         message:
-                            'Welcome to Scientia! You have received 3 points as signing bonus',
+                            'Welcome to Scientia, you have received 3 points for signing up!',
                         event: 'point',
                     }
                     const welcome_points = {
