@@ -149,7 +149,6 @@ type Mutation {
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): TokenResponse!
   athlete_update_info(description: String!, image_url: String!): BaseResponse!
   athlete_update_settings(description: String, notifications_preference: [String]): BaseResponse!
-  create_fixed_product(category: String!, currency: String, description: String!, media_url: String, name: String!, price: Float!, quantity: Int!): BaseResponse!
   create_product(category: String, currency: String, description: String!, end_time: String, media_url: String, name: String!, price: Float!, quantity: Int!): BaseResponse!
   interests(athletes: [Int]!, incentives: [String]!, notifications_preference: [String]!, sports: [String]!): BaseResponse!
   s3_upload(file_name: String!): MutationResponse!
