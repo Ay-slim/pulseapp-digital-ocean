@@ -7,13 +7,13 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_S3_BUCKET } = process.env
-if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
-    throw new Error('No AWS config found')
-}
+// if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
+//     throw new Error('No AWS config found')
+// }
 const client = new S3Client({
     credentials: {
-        accessKeyId: AWS_ACCESS_KEY_ID,
-        secretAccessKey: AWS_SECRET_ACCESS_KEY,
+        accessKeyId: AWS_ACCESS_KEY_ID!,
+        secretAccessKey: AWS_SECRET_ACCESS_KEY!,
     },
     region: 'us-east-1',
 })

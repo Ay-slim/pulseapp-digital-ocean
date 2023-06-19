@@ -5,13 +5,13 @@
     "main": "index.ts",
     "scripts": {
         "build": "yarn generate && tsc",
-        "start": "yarn knex migrate:latest && node dist/src/index.js",
+        "start": "node dist/src/index.js",
         "dev": "yarn knex migrate:latest && ts-node-dev --transpile-only --no-notify --exit-child src/index.ts",
         "generate": "ts-node --transpile-only src/schema.ts",
         "lint": "eslint src/**/*.ts",
         "format": "eslint src/**/*.ts --fix",
         "prepare": "husky install",
-        "knex": "./node_modules/.bin/knex --knexfile src/db/knexfile.ts"
+        "knex": "cd dist && ../node_modules/.bin/knex --knexfile src/db/knexfile.js"
     },
     "husky": {
         "hooks": {
