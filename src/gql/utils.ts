@@ -77,7 +77,7 @@ export type TopFollowersType = {
 export type UserActivityType = {
     name: string
     status: string
-    media_url: string
+    media_urls: string
     athlete: string
     id: number
     created_at: string

@@ -741,7 +741,7 @@ export const UserFetchActivity = extendType({
                             'athletes.name as athlete',
                             'sales.created_at',
                             'sales.status',
-                            'products.media_url'
+                            'products.media_urls'
                         )
                         .whereRaw(`sales.user_id = ${user_id}`)
                         .orderBy('sales.id', 'asc')
@@ -760,10 +760,12 @@ export const UserFetchActivity = extendType({
                     ] = await Promise.all([activity_query, points_query])
                     const normalized_db_resp = db_sales_resp?.map(
                         (activity) => {
+                            const media_url_list =
+                                JSON.parse(activity.media_urls ?? null) ?? []
                             return {
                                 name: activity.name,
                                 status: activity.status,
-                                media_url: activity.media_url,
+                                image_url: media_url_list[0],
                                 athlete: activity.athlete,
                                 id: activity.id,
                                 distance: formatDistance(
