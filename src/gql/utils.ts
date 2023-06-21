@@ -2,6 +2,7 @@ import { objectType, list } from 'nexus'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { Knex } from 'knex'
+import nodemailer, { TransportOptions } from 'nodemailer'
 
 dotenv.config()
 
@@ -9,6 +10,7 @@ type JwtPayloadWithId = JwtPayload & {
     user_id?: number
     athlete_id?: number
     name?: string
+    email?: string
 }
 
 export const month_map = (month_num: number) => {
@@ -48,13 +50,11 @@ export type SuggestionsDataType = {
     image_url: string
     sport: string
 }
-export type ProductsDataType = {
-    id: number
-    name: string
-    media_url: string
-    price: number
-    currency: string
-    quantity: number
+export type UserAthleteStoreType = {
+    athlete_name: string
+    image_url: string
+    products: string
+    number_of_visits: number
 }
 export type AthleteDataType = SuggestionsDataType & {
     metadata: string
@@ -248,11 +248,12 @@ export type ServerReturnType = {
 export const create_jwt_token = (
     id: number,
     sign_key: string,
-    name: string
+    name: string,
+    email: string
 ): string => {
     const jwt_secret = process.env.JWT_SECRET_KEY
     const token = jwt_secret
-        ? jwt.sign({ [sign_key]: id, name }, jwt_secret)
+        ? jwt.sign({ [sign_key]: id, name, email }, jwt_secret)
         : ''
     if (!token)
         throw {
@@ -307,28 +308,86 @@ export type ProductNotifArgs = {
 type NotifComponentType = {
     user_id: number
     email: string
-    notification_preference: string | null
+    notifications_preference: string | null
 }
-export const create_product_notifications = async (args: ProductNotifArgs) => {
-    const { knex_client, athlete_id, product_id, headline, message } = args
-    const db_resp = await knex_client.raw(
-        `SELECT users_athletes.user_id as user_id, users.email, interests.notifications_preference FROM users_athletes JOIN interests ON users_athletes.user_id = interests.user_id JOIN users ON users_athletes.user_id = users.id WHERE users_athletes.athlete_id = ${athlete_id}`
-    )
-    const db_resp_dest: NotifComponentType[] = db_resp[0]
-    const user_ids = db_resp_dest.map((resp) => {
-        return resp.user_id
-    })
-
-    await Promise.all(
-        user_ids.map((user_id) => {
-            return knex_client('notifications').insert({
-                user_id,
-                headline,
-                message,
-                product_id,
+const join_string_list = (string_list: string[]) => {
+    const string_len = string_list.length
+    let joined_string = ''
+    for (let i = 0; i < string_len; i++) {
+        console.log(string_list[i], 'each rec')
+        if (i === 0) {
+            joined_string += string_list[i]
+        } else {
+            joined_string += `, ${string_list[i]}`
+        }
+    }
+    return joined_string
+}
+export const send_email_notifications = async (
+    emails: string[],
+    subject: string,
+    body: string
+) => {
+    try {
+        const transporter = nodemailer.createTransport({
+            port: process.env.SMTP_PORT,
+            secure: false,
+            host: process.env.SMTP_HOST,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASSWORD,
+            },
+        } as TransportOptions)
+        await Promise.all(
+            emails.map((email) => {
+                transporter.sendMail({
+                    from: '"Zara from Scientia" <no_reply@scientia.com>',
+                    to: email,
+                    subject: subject,
+                    text: body,
+                })
+                console.log(`${subject} email notification sent to: ${email}`)
             })
+        )
+    } catch (err) {
+        console.error(`Email error: ${err}`)
+    }
+}
+
+export const create_product_notifications = async (args: ProductNotifArgs) => {
+    try {
+        const { knex_client, athlete_id, product_id, headline, message } = args
+        const db_resp = await knex_client.raw(
+            `SELECT users_athletes.user_id as user_id, users.email, interests.notifications_preference FROM users_athletes JOIN interests ON users_athletes.user_id = interests.user_id JOIN users ON users_athletes.user_id = users.id WHERE users_athletes.athlete_id = ${athlete_id}`
+        )
+        const db_resp_dest: NotifComponentType[] = db_resp[0]
+        const user_ids = db_resp_dest.map((resp) => {
+            return resp.user_id
         })
-    )
+
+        await Promise.all(
+            user_ids.map((user_id) => {
+                return knex_client('notifications').insert({
+                    user_id,
+                    headline,
+                    message,
+                    product_id,
+                })
+            })
+        )
+        const follower_emails = db_resp_dest
+            .filter((resp_val) => {
+                const notif_prefs =
+                    JSON.parse(resp_val.notifications_preference! ?? null) ?? []
+                return notif_prefs.includes('email')
+            })
+            .map((resp_val) => {
+                return resp_val.email
+            })
+        await send_email_notifications(follower_emails, headline, message)
+    } catch (err) {
+        console.error(err)
+    }
 }
 
 // export type SaleNotifArgs = {

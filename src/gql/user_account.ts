@@ -19,6 +19,8 @@ import {
     login_auth,
     SuggestionsDataType,
     UserActivityType,
+    UserAthleteStoreType,
+    send_email_notifications,
 } from './utils'
 import {
     TokenResponse,
@@ -32,6 +34,8 @@ import {
     UserFetchNotificationsResponse,
     UserFetchNotifSettingsResponse,
     UserUnreadNotificationsResponse,
+    UsersFetchAthleteStore,
+    UsersFetchProduct,
 } from './response_types'
 
 dotenv.config()
@@ -91,7 +95,7 @@ export const UserSigninMutation = extendType({
                             status: 401,
                             message: 'Invalid password!',
                         }
-                    const token = create_jwt_token(id, 'user_id', name)
+                    const token = create_jwt_token(id, 'user_id', name, email)
                     return {
                         status: 200,
                         error: false,
@@ -158,7 +162,8 @@ export const UserSignupMutation = extendType({
                     const token = create_jwt_token(
                         insert_ret[0],
                         'user_id',
-                        name
+                        name,
+                        email
                     )
                     const welcome_notif_packet = {
                         user_id: insert_ret[0],
@@ -253,7 +258,7 @@ export const UserAddInterests = extendType({
                         notifications_preference,
                     } = args
                     const { knex_client } = context
-                    const { user_id } = await login_auth(
+                    const { user_id, email } = await login_auth(
                         context?.auth_token,
                         'user_id'
                     )
@@ -277,6 +282,15 @@ export const UserAddInterests = extendType({
                         }),
                     ]
                     await Promise.all(db_updates_array)
+                    if (notifications_preference.includes('email')) {
+                        const body =
+                            "We're glad you completed your signup! Login to your profile to get the latest exclusive stuff from your favorite athletes! We can't wait to show you around."
+                        send_email_notifications(
+                            [email!],
+                            'Welcome to Scientia!',
+                            body
+                        )
+                    }
 
                     return {
                         status: 201,
@@ -1033,6 +1047,157 @@ export const UserUpdateReadNotifications = extendType({
                         status: 201,
                         error: false,
                         message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const UserFetchAthleteStore = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('user_fetch_athlete_store', {
+            type: UsersFetchAthleteStore,
+            args: {
+                athlete_id: nonNull(intArg()),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const { athlete_id } = args
+                    const { knex_client, auth_token } = context
+                    const { user_id } = await login_auth(auth_token, 'user_id')
+                    const products: UserAthleteStoreType[] = await knex_client
+                        .select(
+                            'athletes.name as athlete_name',
+                            'athletes.image_url',
+                            knex_client.raw(
+                                `(SELECT COUNT(*) FROM store_visits WHERE athlete_id = ${athlete_id}) AS number_of_visits`
+                            ),
+                            knex_client.raw(`
+                        (
+                          SELECT JSON_ARRAYAGG(
+                            JSON_OBJECT(
+                              'id', products.id,
+                              'name', products.name,
+                              'media_urls', products.media_urls,
+                              'price', products.price,
+                              'currency', products.currency,
+                              'quantity', products.quantity,
+                              'exlusive', products.exclusive,
+                              'end_time', products.end_time
+                            )
+                          )
+                          FROM products
+                          WHERE products.athlete_id = athletes.id AND products.deleted_at IS NULL
+                        ) AS products
+                      `)
+                        )
+                        .from('athletes')
+                        .where('athletes.id', athlete_id)
+
+                    const products_list: {
+                        id: number
+                        name: string
+                        price: number
+                        currency: string
+                        end_time: string | null
+                        exclusive: string
+                        quantity: number
+                        media_urls: string[]
+                    }[] = JSON.parse(products[0].products)
+
+                    await knex_client('store_visits').insert({
+                        user_id,
+                        athlete_id,
+                    })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            number_of_visits: products[0]?.number_of_visits,
+                            athlete_name: products[0]?.athlete_name,
+                            image_url: products[0]?.image_url,
+                            products: products_list,
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const UserFetchProduct = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('user_fetch_product', {
+            type: UsersFetchProduct,
+            args: {
+                product_id: nonNull(intArg()),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const { auth_token, knex_client } = context
+                    const { product_id } = args
+                    const { user_id } = await login_auth(auth_token, 'user_id')
+                    const product: {
+                        name: string
+                        price: number
+                        currency: string
+                        end_time: string | null
+                        exclusive: string
+                        quantity: number
+                        media_urls: string
+                        description: string
+                        total_views: number
+                    } = await knex_client('products')
+                        .select(
+                            'name',
+                            'media_urls',
+                            'price',
+                            'currency',
+                            'quantity',
+                            'exclusive',
+                            'end_time',
+                            'description',
+                            knex_client.raw(
+                                `(SELECT COUNT(*) FROM product_views WHERE product_id = ${product_id}) AS total_views`
+                            )
+                        )
+                        .where('id', product_id)
+                        .whereRaw('deleted_at IS NULL')
+                        .first()
+
+                    await knex_client('product_views').insert({
+                        user_id,
+                        product_id,
+                    })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            product: {
+                                name: product.name,
+                                price: product.price,
+                                currency: product.currency,
+                                end_time: product.end_time,
+                                exclusive: product.exclusive,
+                                quantity: product.quantity,
+                                media_urls: JSON.parse(product.media_urls),
+                                description: product.description,
+                                total_views: product.total_views,
+                            },
+                        },
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType

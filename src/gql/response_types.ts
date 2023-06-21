@@ -245,15 +245,61 @@ export const AthleteSalesResponse = objectType({
     },
 })
 
-const ProductsTmpl = objectType({
+export const ProductsTmpl = objectType({
     name: 'ProductsTmpl',
     definition(t) {
+        t.int('id')
         t.string('name'),
-            t.string('media_url'),
+            t.list.string('media_urls'),
             t.float('price'),
             t.string('currency')
+        t.string('end_time')
+        t.string('exclusive')
         t.int('quantity')
-        t.int('id')
+        t.string('description')
+        t.int('total_views')
+        t.int('unique_views')
+    },
+})
+
+export const UsersFetchAthleteStore = objectType({
+    name: 'UsersFetchAthleteStore',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UsersAthleteStoreData',
+                definition(t) {
+                    t.nonNull.string('athlete_name')
+                    t.int('number_of_visits')
+                    t.string('image_url')
+                    t.list.field('products', {
+                        type: ProductsTmpl,
+                    })
+                },
+            }),
+        })
+    },
+})
+
+export const UsersFetchProduct = objectType({
+    name: 'UsersFetchProduct',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UsersProductData',
+                definition(t) {
+                    t.field('product', {
+                        type: ProductsTmpl,
+                    })
+                },
+            }),
+        })
     },
 })
 
@@ -265,7 +311,7 @@ export const AthleteProductsFetchResponse = objectType({
         t.nonNull.string('message')
         t.field('data', {
             type: objectType({
-                name: 'AthleteProductsFetchData',
+                name: 'AthletesProductData',
                 definition(t) {
                     t.list.field('products', {
                         type: ProductsTmpl,

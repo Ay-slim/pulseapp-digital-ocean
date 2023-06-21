@@ -69,11 +69,8 @@ export interface NexusGenObjects {
   AthleteFetchBasicsResponseData: { // root type
     athlete_bio?: NexusGenRootTypes['AthleteBasicStats'] | null; // AthleteBasicStats
   }
-  AthleteProductsFetchData: { // root type
-    products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
-  }
   AthleteProductsFetchResponse: { // root type
-    data?: NexusGenRootTypes['AthleteProductsFetchData'] | null; // AthleteProductsFetchData
+    data?: NexusGenRootTypes['AthletesProductData'] | null; // AthletesProductData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
@@ -115,6 +112,9 @@ export interface NexusGenObjects {
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
+  }
+  AthletesProductData: { // root type
+    products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   AuthData: { // root type
     athlete_bio?: NexusGenRootTypes['AthleteBio'] | null; // AthleteBio
@@ -163,11 +163,16 @@ export interface NexusGenObjects {
   }
   ProductsTmpl: { // root type
     currency?: string | null; // String
+    description?: string | null; // String
+    end_time?: string | null; // String
+    exclusive?: string | null; // String
     id?: number | null; // Int
-    media_url?: string | null; // String
+    media_urls?: Array<string | null> | null; // [String]
     name?: string | null; // String
     price?: number | null; // Float
     quantity?: number | null; // Int
+    total_views?: number | null; // Int
+    unique_views?: number | null; // Int
   }
   Query: {};
   Sales: { // root type
@@ -307,6 +312,27 @@ export interface NexusGenObjects {
     message: string; // String!
     status: number; // Int!
   }
+  UsersAthleteStoreData: { // root type
+    athlete_name: string; // String!
+    image_url?: string | null; // String
+    number_of_visits?: number | null; // Int
+    products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+  }
+  UsersFetchAthleteStore: { // root type
+    data?: NexusGenRootTypes['UsersAthleteStoreData'] | null; // UsersAthleteStoreData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UsersFetchProduct: { // root type
+    data?: NexusGenRootTypes['UsersProductData'] | null; // UsersProductData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UsersProductData: { // root type
+    product?: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -359,11 +385,8 @@ export interface NexusGenFieldTypes {
   AthleteFetchBasicsResponseData: { // field return type
     athlete_bio: NexusGenRootTypes['AthleteBasicStats'] | null; // AthleteBasicStats
   }
-  AthleteProductsFetchData: { // field return type
-    products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
-  }
   AthleteProductsFetchResponse: { // field return type
-    data: NexusGenRootTypes['AthleteProductsFetchData'] | null; // AthleteProductsFetchData
+    data: NexusGenRootTypes['AthletesProductData'] | null; // AthletesProductData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
@@ -406,6 +429,9 @@ export interface NexusGenFieldTypes {
     message: string; // String!
     status: number; // Int!
   }
+  AthletesProductData: { // field return type
+    products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+  }
   AuthData: { // field return type
     athlete_bio: NexusGenRootTypes['AthleteBio'] | null; // AthleteBio
     athlete_data: Array<NexusGenRootTypes['AthleteData'] | null> | null; // [AthleteData]
@@ -430,6 +456,7 @@ export interface NexusGenFieldTypes {
     status: number; // Int!
   }
   Mutation: { // field return type
+    athlete_delete_products: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     athlete_signin: NexusGenRootTypes['TokenResponse']; // TokenResponse!
     athlete_signup: NexusGenRootTypes['TokenResponse']; // TokenResponse!
     athlete_update_info: NexusGenRootTypes['BaseResponse']; // BaseResponse!
@@ -468,24 +495,31 @@ export interface NexusGenFieldTypes {
   }
   ProductsTmpl: { // field return type
     currency: string | null; // String
+    description: string | null; // String
+    end_time: string | null; // String
+    exclusive: string | null; // String
     id: number | null; // Int
-    media_url: string | null; // String
+    media_urls: Array<string | null> | null; // [String]
     name: string | null; // String
     price: number | null; // Float
     quantity: number | null; // Int
+    total_views: number | null; // Int
+    unique_views: number | null; // Int
   }
   Query: { // field return type
+    athlete_fetch_products: NexusGenRootTypes['AthleteProductsFetchResponse']; // AthleteProductsFetchResponse!
     athlete_fetch_settings: NexusGenRootTypes['AthleteSettingsFetchResponse']; // AthleteSettingsFetchResponse!
     athletes: NexusGenRootTypes['UserFetchAthletesResponse']; // UserFetchAthletesResponse!
     fetch_athlete_basics: NexusGenRootTypes['AthleteFetchBasicsResponse']; // AthleteFetchBasicsResponse!
     fetch_athlete_sales: NexusGenRootTypes['AthleteSalesResponse']; // AthleteSalesResponse!
     fetch_athlete_top_followers: NexusGenRootTypes['AthleteTopFollowersResponse']; // AthleteTopFollowersResponse!
-    fetch_products: NexusGenRootTypes['AthleteProductsFetchResponse']; // AthleteProductsFetchResponse!
     fetch_user_suggestions: NexusGenRootTypes['UserFetchSuggestionsResponse']; // UserFetchSuggestionsResponse!
     user_activity: NexusGenRootTypes['UserFetchActivityResponse']; // UserFetchActivityResponse!
+    user_fetch_athlete_store: NexusGenRootTypes['UsersFetchAthleteStore']; // UsersFetchAthleteStore!
     user_fetch_incentives: NexusGenRootTypes['UserFetchIncentivesResponse']; // UserFetchIncentivesResponse!
     user_fetch_notif_settings: NexusGenRootTypes['UserFetchNotifSettingsResponse']; // UserFetchNotifSettingsResponse!
     user_fetch_notifications: NexusGenRootTypes['UserFetchNotificationsResponse']; // UserFetchNotificationsResponse!
+    user_fetch_product: NexusGenRootTypes['UsersFetchProduct']; // UsersFetchProduct!
     user_fetch_sports: NexusGenRootTypes['UserFetchSportsResponse']; // UserFetchSportsResponse!
     user_following: NexusGenRootTypes['UserFetchAthletesResponse']; // UserFetchAthletesResponse!
     user_unread_notifications: NexusGenRootTypes['UserUnreadNotificationsResponse']; // UserUnreadNotificationsResponse!
@@ -627,6 +661,27 @@ export interface NexusGenFieldTypes {
     message: string; // String!
     status: number; // Int!
   }
+  UsersAthleteStoreData: { // field return type
+    athlete_name: string; // String!
+    image_url: string | null; // String
+    number_of_visits: number | null; // Int
+    products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+  }
+  UsersFetchAthleteStore: { // field return type
+    data: NexusGenRootTypes['UsersAthleteStoreData'] | null; // UsersAthleteStoreData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UsersFetchProduct: { // field return type
+    data: NexusGenRootTypes['UsersProductData'] | null; // UsersProductData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  UsersProductData: { // field return type
+    product: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
+  }
 }
 
 export interface NexusGenFieldTypeNames {
@@ -669,11 +724,8 @@ export interface NexusGenFieldTypeNames {
   AthleteFetchBasicsResponseData: { // field return type name
     athlete_bio: 'AthleteBasicStats'
   }
-  AthleteProductsFetchData: { // field return type name
-    products: 'ProductsTmpl'
-  }
   AthleteProductsFetchResponse: { // field return type name
-    data: 'AthleteProductsFetchData'
+    data: 'AthletesProductData'
     error: 'Boolean'
     message: 'String'
     status: 'Int'
@@ -716,6 +768,9 @@ export interface NexusGenFieldTypeNames {
     message: 'String'
     status: 'Int'
   }
+  AthletesProductData: { // field return type name
+    products: 'ProductsTmpl'
+  }
   AuthData: { // field return type name
     athlete_bio: 'AthleteBio'
     athlete_data: 'AthleteData'
@@ -740,6 +795,7 @@ export interface NexusGenFieldTypeNames {
     status: 'Int'
   }
   Mutation: { // field return type name
+    athlete_delete_products: 'BaseResponse'
     athlete_signin: 'TokenResponse'
     athlete_signup: 'TokenResponse'
     athlete_update_info: 'BaseResponse'
@@ -778,24 +834,31 @@ export interface NexusGenFieldTypeNames {
   }
   ProductsTmpl: { // field return type name
     currency: 'String'
+    description: 'String'
+    end_time: 'String'
+    exclusive: 'String'
     id: 'Int'
-    media_url: 'String'
+    media_urls: 'String'
     name: 'String'
     price: 'Float'
     quantity: 'Int'
+    total_views: 'Int'
+    unique_views: 'Int'
   }
   Query: { // field return type name
+    athlete_fetch_products: 'AthleteProductsFetchResponse'
     athlete_fetch_settings: 'AthleteSettingsFetchResponse'
     athletes: 'UserFetchAthletesResponse'
     fetch_athlete_basics: 'AthleteFetchBasicsResponse'
     fetch_athlete_sales: 'AthleteSalesResponse'
     fetch_athlete_top_followers: 'AthleteTopFollowersResponse'
-    fetch_products: 'AthleteProductsFetchResponse'
     fetch_user_suggestions: 'UserFetchSuggestionsResponse'
     user_activity: 'UserFetchActivityResponse'
+    user_fetch_athlete_store: 'UsersFetchAthleteStore'
     user_fetch_incentives: 'UserFetchIncentivesResponse'
     user_fetch_notif_settings: 'UserFetchNotifSettingsResponse'
     user_fetch_notifications: 'UserFetchNotificationsResponse'
+    user_fetch_product: 'UsersFetchProduct'
     user_fetch_sports: 'UserFetchSportsResponse'
     user_following: 'UserFetchAthletesResponse'
     user_unread_notifications: 'UserUnreadNotificationsResponse'
@@ -937,10 +1000,34 @@ export interface NexusGenFieldTypeNames {
     message: 'String'
     status: 'Int'
   }
+  UsersAthleteStoreData: { // field return type name
+    athlete_name: 'String'
+    image_url: 'String'
+    number_of_visits: 'Int'
+    products: 'ProductsTmpl'
+  }
+  UsersFetchAthleteStore: { // field return type name
+    data: 'UsersAthleteStoreData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
+  UsersFetchProduct: { // field return type name
+    data: 'UsersProductData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
+  UsersProductData: { // field return type name
+    product: 'ProductsTmpl'
+  }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
+    athlete_delete_products: { // args
+      product_ids: Array<number | null>; // [Int]!
+    }
     athlete_signin: { // args
       email: string; // String!
       password: string; // String!
@@ -966,7 +1053,7 @@ export interface NexusGenArgTypes {
       currency?: string | null; // String
       description: string; // String!
       end_time?: string | null; // String
-      media_url?: string | null; // String
+      media_urls: Array<string | null>; // [String]!
       name: string; // String!
       price: number; // Float!
       quantity: number; // Int!
@@ -1016,6 +1103,12 @@ export interface NexusGenArgTypes {
     user_activity: { // args
       limit: number; // Int!
       next_min_id?: number | null; // Int
+    }
+    user_fetch_athlete_store: { // args
+      athlete_id: number; // Int!
+    }
+    user_fetch_product: { // args
+      product_id: number; // Int!
     }
     user_following: { // args
       limit: number; // Int!
