@@ -251,10 +251,11 @@ export const ProductsTmpl = objectType({
         t.int('id')
         t.string('name'),
             t.list.string('media_urls'),
+            t.string('media_url'),
             t.float('price'),
             t.string('currency')
         t.string('end_time')
-        t.string('exclusive')
+        t.boolean('exclusive')
         t.int('quantity')
         t.string('description')
         t.int('total_views')
@@ -273,9 +274,14 @@ export const UsersFetchAthleteStore = objectType({
                 name: 'UsersAthleteStoreData',
                 definition(t) {
                     t.nonNull.string('athlete_name')
-                    t.int('number_of_visits')
                     t.string('image_url')
                     t.list.field('products', {
+                        type: ProductsTmpl,
+                    })
+                    t.list.field('expired_drops', {
+                        type: ProductsTmpl,
+                    })
+                    t.field('featured', {
                         type: ProductsTmpl,
                     })
                 },

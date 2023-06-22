@@ -190,8 +190,9 @@ type ProductsTmpl {
   currency: String
   description: String
   end_time: String
-  exclusive: String
+  exclusive: Boolean
   id: Int
+  media_url: String
   media_urls: [String]
   name: String
   price: Float
@@ -386,8 +387,9 @@ type UserUnreadNotificationsResponse {
 
 type UsersAthleteStoreData {
   athlete_name: String!
+  expired_drops: [ProductsTmpl]
+  featured: ProductsTmpl
   image_url: String
-  number_of_visits: Int
   products: [ProductsTmpl]
 }
 

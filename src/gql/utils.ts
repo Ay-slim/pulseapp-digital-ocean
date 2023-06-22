@@ -54,7 +54,8 @@ export type UserAthleteStoreType = {
     athlete_name: string
     image_url: string
     products: string
-    number_of_visits: number
+    expired_drops: string
+    featured: string
 }
 export type AthleteDataType = SuggestionsDataType & {
     metadata: string

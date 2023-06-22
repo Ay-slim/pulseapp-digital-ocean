@@ -165,8 +165,9 @@ export interface NexusGenObjects {
     currency?: string | null; // String
     description?: string | null; // String
     end_time?: string | null; // String
-    exclusive?: string | null; // String
+    exclusive?: boolean | null; // Boolean
     id?: number | null; // Int
+    media_url?: string | null; // String
     media_urls?: Array<string | null> | null; // [String]
     name?: string | null; // String
     price?: number | null; // Float
@@ -314,8 +315,9 @@ export interface NexusGenObjects {
   }
   UsersAthleteStoreData: { // root type
     athlete_name: string; // String!
+    expired_drops?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+    featured?: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
     image_url?: string | null; // String
-    number_of_visits?: number | null; // Int
     products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   UsersFetchAthleteStore: { // root type
@@ -497,8 +499,9 @@ export interface NexusGenFieldTypes {
     currency: string | null; // String
     description: string | null; // String
     end_time: string | null; // String
-    exclusive: string | null; // String
+    exclusive: boolean | null; // Boolean
     id: number | null; // Int
+    media_url: string | null; // String
     media_urls: Array<string | null> | null; // [String]
     name: string | null; // String
     price: number | null; // Float
@@ -663,8 +666,9 @@ export interface NexusGenFieldTypes {
   }
   UsersAthleteStoreData: { // field return type
     athlete_name: string; // String!
+    expired_drops: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+    featured: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
     image_url: string | null; // String
-    number_of_visits: number | null; // Int
     products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   UsersFetchAthleteStore: { // field return type
@@ -836,8 +840,9 @@ export interface NexusGenFieldTypeNames {
     currency: 'String'
     description: 'String'
     end_time: 'String'
-    exclusive: 'String'
+    exclusive: 'Boolean'
     id: 'Int'
+    media_url: 'String'
     media_urls: 'String'
     name: 'String'
     price: 'Float'
@@ -1002,8 +1007,9 @@ export interface NexusGenFieldTypeNames {
   }
   UsersAthleteStoreData: { // field return type name
     athlete_name: 'String'
+    expired_drops: 'ProductsTmpl'
+    featured: 'ProductsTmpl'
     image_url: 'String'
-    number_of_visits: 'Int'
     products: 'ProductsTmpl'
   }
   UsersFetchAthleteStore: { // field return type name
