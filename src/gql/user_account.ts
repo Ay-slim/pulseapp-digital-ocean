@@ -1111,6 +1111,7 @@ export const UserFetchAthleteStore = extendType({
                               'description', products.description,
                               'exclusive', products.exclusive,
                               'end_time', products.end_time,
+                              'metadata', products.metadata,
                               'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                             )
                           )
@@ -1132,6 +1133,7 @@ export const UserFetchAthleteStore = extendType({
                         media_urls: string[]
                         description: string
                         number_of_views: number
+                        metadata?: { category: string }
                     }
                     const products_list: ProductsRespType[] =
                         JSON.parse(products_resp.products ?? null) ?? []
@@ -1142,18 +1144,34 @@ export const UserFetchAthleteStore = extendType({
                     const media_url_extractor_and_exclusive_bool_converter = (
                         product: ProductsRespType
                     ) => {
-                        return product
-                            ? {
-                                  id: product.id,
-                                  name: product.name,
-                                  price: product.price,
-                                  end_time: product.end_time,
-                                  exclusive: product.exclusive === 'true',
-                                  media_url: (product.media_urls ?? [])[0],
-                                  description: product.description,
-                                  number_of_views: product.number_of_views,
-                              }
-                            : null
+                        if (product) {
+                            const norm_product: {
+                                id: number
+                                name: string
+                                price: number
+                                end_time: string | null
+                                exclusive: boolean
+                                media_url: string
+                                description: string
+                                number_of_views: number
+                                category?: string
+                            } = {
+                                id: product.id,
+                                name: product.name,
+                                price: product.price,
+                                end_time: product.end_time,
+                                exclusive: product.exclusive === 'true',
+                                media_url: (product.media_urls ?? [])[0],
+                                description: product.description,
+                                number_of_views: product.number_of_views,
+                            }
+                            if (product?.metadata) {
+                                norm_product.category =
+                                    product.metadata.category
+                            }
+                            return norm_product
+                        }
+                        return null
                     }
                     await knex_client('store_visits').insert({
                         user_id,

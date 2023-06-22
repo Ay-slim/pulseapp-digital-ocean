@@ -187,6 +187,7 @@ type Products {
 }
 
 type ProductsTmpl {
+  category: String
   currency: String
   description: String
   end_time: String

@@ -254,6 +254,7 @@ export const ProductsTmpl = objectType({
             t.string('media_url'),
             t.float('price'),
             t.string('currency')
+        t.string('category')
         t.string('end_time')
         t.boolean('exclusive')
         t.int('quantity')

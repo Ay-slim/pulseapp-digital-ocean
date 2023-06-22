@@ -162,6 +162,7 @@ export interface NexusGenObjects {
     quantity?: number | null; // Int
   }
   ProductsTmpl: { // root type
+    category?: string | null; // String
     currency?: string | null; // String
     description?: string | null; // String
     end_time?: string | null; // String
@@ -497,6 +498,7 @@ export interface NexusGenFieldTypes {
     quantity: number | null; // Int
   }
   ProductsTmpl: { // field return type
+    category: string | null; // String
     currency: string | null; // String
     description: string | null; // String
     end_time: string | null; // String
@@ -839,6 +841,7 @@ export interface NexusGenFieldTypeNames {
     quantity: 'Int'
   }
   ProductsTmpl: { // field return type name
+    category: 'String'
     currency: 'String'
     description: 'String'
     end_time: 'String'
