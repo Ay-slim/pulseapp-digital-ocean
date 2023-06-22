@@ -1219,6 +1219,14 @@ export const UserFetchProduct = extendType({
                     const { auth_token, knex_client } = context
                     const { product_id } = args
                     const { user_id } = await login_auth(auth_token, 'user_id')
+                    const extract_distance = (end_time: string | null) => {
+                        if (!end_time) {
+                            return null
+                        }
+                        return formatDistance(new Date(end_time), new Date(), {
+                            addSuffix: true,
+                        })
+                    }
                     const product: {
                         name: string
                         price: number
@@ -1261,6 +1269,7 @@ export const UserFetchProduct = extendType({
                                 price: product.price,
                                 currency: product.currency,
                                 end_time: product.end_time,
+                                distance: extract_distance(product.end_time),
                                 exclusive: product.exclusive === 'true',
                                 quantity: product.quantity,
                                 media_urls: JSON.parse(product.media_urls),

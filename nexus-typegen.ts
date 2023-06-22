@@ -165,6 +165,7 @@ export interface NexusGenObjects {
     category?: string | null; // String
     currency?: string | null; // String
     description?: string | null; // String
+    distance?: string | null; // String
     end_time?: string | null; // String
     exclusive?: boolean | null; // Boolean
     id?: number | null; // Int
@@ -501,6 +502,7 @@ export interface NexusGenFieldTypes {
     category: string | null; // String
     currency: string | null; // String
     description: string | null; // String
+    distance: string | null; // String
     end_time: string | null; // String
     exclusive: boolean | null; // Boolean
     id: number | null; // Int
@@ -844,6 +846,7 @@ export interface NexusGenFieldTypeNames {
     category: 'String'
     currency: 'String'
     description: 'String'
+    distance: 'String'
     end_time: 'String'
     exclusive: 'Boolean'
     id: 'Int'

@@ -262,6 +262,7 @@ export const ProductsTmpl = objectType({
         t.int('number_of_views')
         t.int('total_views')
         t.int('unique_views')
+        t.string('distance')
     },
 })
 

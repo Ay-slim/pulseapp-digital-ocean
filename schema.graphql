@@ -190,6 +190,7 @@ type ProductsTmpl {
   category: String
   currency: String
   description: String
+  distance: String
   end_time: String
   exclusive: Boolean
   id: Int
