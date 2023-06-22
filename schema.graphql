@@ -195,6 +195,7 @@ type ProductsTmpl {
   media_url: String
   media_urls: [String]
   name: String
+  number_of_views: Int
   price: Float
   quantity: Int
   total_views: Int

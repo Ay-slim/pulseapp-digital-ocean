@@ -1079,7 +1079,8 @@ export const UserFetchAthleteStore = extendType({
                                 'athletes.name as athlete_name',
                                 'athletes.image_url',
                                 knex_client.raw(
-                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time) FROM products WHERE products.athlete_id = ${athlete_id} AND end_time IS NOT NULL AND end_time > CURRENT_TIMESTAMP() ORDER BY created_at DESC LIMIT 1) AS featured`
+                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time,
+                                    'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)) FROM products WHERE products.athlete_id = ${athlete_id} AND end_time IS NOT NULL AND end_time > CURRENT_TIMESTAMP() ORDER BY created_at DESC LIMIT 1) AS featured`
                                 ),
                                 knex_client.raw(
                                     `(
@@ -1091,7 +1092,8 @@ export const UserFetchAthleteStore = extendType({
                                         'price', products.price,
                                         'description', products.description,
                                         'exclusive', products.exclusive,
-                                        'end_time', products.end_time
+                                        'end_time', products.end_time,
+                                        'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                                       )
                                     )
                                     FROM products
@@ -1108,7 +1110,8 @@ export const UserFetchAthleteStore = extendType({
                               'price', products.price,
                               'description', products.description,
                               'exclusive', products.exclusive,
-                              'end_time', products.end_time
+                              'end_time', products.end_time,
+                              'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                             )
                           )
                           FROM products
@@ -1128,6 +1131,7 @@ export const UserFetchAthleteStore = extendType({
                         exclusive: string
                         media_urls: string[]
                         description: string
+                        number_of_views: number
                     }
                     const products_list: ProductsRespType[] =
                         JSON.parse(products_resp.products ?? null) ?? []
@@ -1147,6 +1151,7 @@ export const UserFetchAthleteStore = extendType({
                                   exclusive: product.exclusive === 'true',
                                   media_url: (product.media_urls ?? [])[0],
                                   description: product.description,
+                                  number_of_views: product.number_of_views,
                               }
                             : null
                     }

@@ -170,6 +170,7 @@ export interface NexusGenObjects {
     media_url?: string | null; // String
     media_urls?: Array<string | null> | null; // [String]
     name?: string | null; // String
+    number_of_views?: number | null; // Int
     price?: number | null; // Float
     quantity?: number | null; // Int
     total_views?: number | null; // Int
@@ -504,6 +505,7 @@ export interface NexusGenFieldTypes {
     media_url: string | null; // String
     media_urls: Array<string | null> | null; // [String]
     name: string | null; // String
+    number_of_views: number | null; // Int
     price: number | null; // Float
     quantity: number | null; // Int
     total_views: number | null; // Int
@@ -845,6 +847,7 @@ export interface NexusGenFieldTypeNames {
     media_url: 'String'
     media_urls: 'String'
     name: 'String'
+    number_of_views: 'Int'
     price: 'Float'
     quantity: 'Int'
     total_views: 'Int'
