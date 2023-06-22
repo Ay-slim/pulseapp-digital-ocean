@@ -516,7 +516,7 @@ export const AthleteFetchProducts = extendType({
                                     price: product.price,
                                     currency: product.currency,
                                     end_time: product.end_time,
-                                    exclusive: product.exclusive,
+                                    exclusive: product.exclusive === 'true',
                                     quantity: product.quantity,
                                     media_urls: JSON.parse(product.media_urls),
                                     description: product.description,
