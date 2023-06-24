@@ -862,6 +862,7 @@ export const UserCreateSale = extendType({
                         )
                     const item_len = remaining_qtys.length
                     for (let i = 0; i < item_len; i++) {
+                        //Check that all items are still in stock
                         if (items[i]?.quantity > remaining_qtys[i].quantity) {
                             throw {
                                 status: 400,
