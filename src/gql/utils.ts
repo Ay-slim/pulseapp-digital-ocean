@@ -292,11 +292,14 @@ export const login_auth = async (
     }
 }
 
-export const err_return = (status = 400): ServerReturnType => {
+export const err_return = (
+    status = 400,
+    message = 'Something went wrong'
+): ServerReturnType => {
     return {
         status,
         error: true,
-        message: 'Something went wrong',
+        message,
     }
 }
 export type ProductNotifArgs = {

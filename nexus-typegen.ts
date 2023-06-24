@@ -14,6 +14,20 @@ declare global {
 }
 
 export interface NexusGenInputs {
+  DeliveryDetailsTmpl: { // input type
+    address?: string | null; // String
+    card_email?: string | null; // String
+    card_expiry?: string | null; // String
+    card_name?: string | null; // String
+    card_number?: string | null; // String
+    city?: string | null; // String
+    zipcode?: string | null; // String
+  }
+  SaleProductTmpl: { // input type
+    price: number; // Int!
+    product_id: number; // Int!
+    quantity: number; // Int!
+  }
 }
 
 export interface NexusGenEnums {
@@ -135,6 +149,21 @@ export interface NexusGenObjects {
     top_followers?: Array<NexusGenRootTypes['TopFollowers'] | null> | null; // [TopFollowers]
   }
   BaseResponse: { // root type
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
+  DeliveryDetailsData: { // root type
+    address: string; // String!
+    card_email: string; // String!
+    card_expiry: string; // String!
+    card_name: string; // String!
+    card_number: string; // String!
+    city: string; // String!
+    zipcode: string; // String!
+  }
+  DeliveryDetailsResponse: { // root type
+    data?: NexusGenRootTypes['DeliveryDetailsData'] | null; // DeliveryDetailsData
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
@@ -460,6 +489,21 @@ export interface NexusGenFieldTypes {
     message: string; // String!
     status: number; // Int!
   }
+  DeliveryDetailsData: { // field return type
+    address: string; // String!
+    card_email: string; // String!
+    card_expiry: string; // String!
+    card_name: string; // String!
+    card_number: string; // String!
+    city: string; // String!
+    zipcode: string; // String!
+  }
+  DeliveryDetailsResponse: { // field return type
+    data: NexusGenRootTypes['DeliveryDetailsData'] | null; // DeliveryDetailsData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
   Mutation: { // field return type
     athlete_delete_products: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     athlete_signin: NexusGenRootTypes['TokenResponse']; // TokenResponse!
@@ -525,6 +569,7 @@ export interface NexusGenFieldTypes {
     fetch_user_suggestions: NexusGenRootTypes['UserFetchSuggestionsResponse']; // UserFetchSuggestionsResponse!
     user_activity: NexusGenRootTypes['UserFetchActivityResponse']; // UserFetchActivityResponse!
     user_fetch_athlete_store: NexusGenRootTypes['UsersFetchAthleteStore']; // UsersFetchAthleteStore!
+    user_fetch_delivery_details: NexusGenRootTypes['DeliveryDetailsResponse']; // DeliveryDetailsResponse!
     user_fetch_incentives: NexusGenRootTypes['UserFetchIncentivesResponse']; // UserFetchIncentivesResponse!
     user_fetch_notif_settings: NexusGenRootTypes['UserFetchNotifSettingsResponse']; // UserFetchNotifSettingsResponse!
     user_fetch_notifications: NexusGenRootTypes['UserFetchNotificationsResponse']; // UserFetchNotificationsResponse!
@@ -804,6 +849,21 @@ export interface NexusGenFieldTypeNames {
     message: 'String'
     status: 'Int'
   }
+  DeliveryDetailsData: { // field return type name
+    address: 'String'
+    card_email: 'String'
+    card_expiry: 'String'
+    card_name: 'String'
+    card_number: 'String'
+    city: 'String'
+    zipcode: 'String'
+  }
+  DeliveryDetailsResponse: { // field return type name
+    data: 'DeliveryDetailsData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
   Mutation: { // field return type name
     athlete_delete_products: 'BaseResponse'
     athlete_signin: 'TokenResponse'
@@ -869,6 +929,7 @@ export interface NexusGenFieldTypeNames {
     fetch_user_suggestions: 'UserFetchSuggestionsResponse'
     user_activity: 'UserFetchActivityResponse'
     user_fetch_athlete_store: 'UsersFetchAthleteStore'
+    user_fetch_delivery_details: 'DeliveryDetailsResponse'
     user_fetch_incentives: 'UserFetchIncentivesResponse'
     user_fetch_notif_settings: 'UserFetchNotifSettingsResponse'
     user_fetch_notifications: 'UserFetchNotificationsResponse'
@@ -1095,9 +1156,8 @@ export interface NexusGenArgTypes {
       phone: string; // String!
     }
     user_create_sale: { // args
-      product_id: number; // Int!
-      quantity?: number | null; // Int
-      total_value: number; // Float!
+      delivery_details: NexusGenInputs['DeliveryDetailsTmpl']; // DeliveryDetailsTmpl!
+      items: Array<NexusGenInputs['SaleProductTmpl'] | null>; // [SaleProductTmpl]!
     }
     user_follow_athlete: { // args
       athlete_id: number; // Int!
@@ -1140,7 +1200,7 @@ export interface NexusGenTypeInterfaces {
 
 export type NexusGenObjectNames = keyof NexusGenObjects;
 
-export type NexusGenInputNames = never;
+export type NexusGenInputNames = keyof NexusGenInputs;
 
 export type NexusGenEnumNames = keyof NexusGenEnums;
 

@@ -454,3 +454,26 @@ export const UserUnreadNotificationsResponse = objectType({
         })
     },
 })
+
+export const DeliveryDetailsResponse = objectType({
+    name: 'DeliveryDetailsResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'DeliveryDetailsData',
+                definition(t) {
+                    t.nonNull.string('address')
+                    t.nonNull.string('city')
+                    t.nonNull.string('zipcode')
+                    t.nonNull.string('card_email')
+                    t.nonNull.string('card_name')
+                    t.nonNull.string('card_number')
+                    t.nonNull.string('card_expiry')
+                },
+            }),
+        })
+    },
+})

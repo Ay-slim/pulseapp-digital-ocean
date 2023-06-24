@@ -7,6 +7,7 @@ import {
     intArg,
     queryType,
     floatArg,
+    inputObjectType,
 } from 'nexus'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
@@ -36,6 +37,7 @@ import {
     UserUnreadNotificationsResponse,
     UsersFetchAthleteStore,
     UsersFetchProduct,
+    DeliveryDetailsResponse,
 } from './response_types'
 
 dotenv.config()
@@ -722,10 +724,16 @@ export const UserFetchActivity = extendType({
                 const { knex_client } = context
                 try {
                     const { next_min_id, limit } = args
-                    const activity_query = knex_client('sales')
+                    const activity_query = knex_client('sales_products')
+                        .leftJoin(
+                            'sales',
+                            'sales.id',
+                            '=',
+                            'sales_products.sale_id'
+                        )
                         .leftJoin(
                             'products',
-                            'sales.product_id',
+                            'sales_products.product_id',
                             '=',
                             'products.id'
                         )
@@ -736,18 +744,22 @@ export const UserFetchActivity = extendType({
                             'athletes.id'
                         )
                         .select(
-                            'sales.id',
+                            'sales_products.id',
                             'products.name',
                             'athletes.name as athlete',
-                            'sales.created_at',
+                            'sales_products.created_at',
                             'sales.status',
                             'products.media_urls'
                         )
-                        .whereRaw(`sales.user_id = ${user_id}`)
-                        .orderBy('sales.id', 'asc')
+                        .whereRaw(`sales_products.user_id = ${user_id}`)
+                        .orderBy('sales_products.id', 'asc')
                         .limit(limit)
                     if (next_min_id) {
-                        activity_query.where('sales.id', '>', next_min_id)
+                        activity_query.where(
+                            'sales_products.id',
+                            '>',
+                            next_min_id
+                        )
                     }
                     const points_query = knex_client('points')
                         .select('total')
@@ -800,15 +812,36 @@ export const UserFetchActivity = extendType({
     },
 })
 
+const SaleProductTmpl = inputObjectType({
+    name: 'SaleProductTmpl',
+    definition(t) {
+        t.nonNull.int('quantity')
+        t.nonNull.int('product_id')
+        t.nonNull.int('price')
+    },
+})
+
+const DeliveryDetailsTmpl = inputObjectType({
+    name: 'DeliveryDetailsTmpl',
+    definition(t) {
+        t.string('address')
+        t.string('city')
+        t.string('zipcode')
+        t.string('card_email')
+        t.string('card_name')
+        t.string('card_number')
+        t.string('card_expiry')
+    },
+})
+
 export const UserCreateSale = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('user_create_sale', {
             type: BaseResponse,
             args: {
-                product_id: nonNull(intArg()),
-                quantity: intArg(),
-                total_value: nonNull(floatArg()),
+                items: nonNull(list(SaleProductTmpl.asArg())),
+                delivery_details: nonNull(DeliveryDetailsTmpl.asArg()),
             },
             async resolve(_, args, context) {
                 try {
@@ -816,22 +849,52 @@ export const UserCreateSale = extendType({
                         context?.auth_token,
                         'user_id'
                     )
-                    const { product_id, quantity, total_value } = args
+                    const { items, delivery_details } = args
                     const { knex_client } = context
-                    const sales_packet: {
-                        user_id: number
-                        product_id: number
-                        quantity?: number
-                        total_value: number
-                    } = {
-                        user_id: user_id!,
-                        product_id,
-                        total_value,
+                    const remaining_qtys: { quantity: number; name: string }[] =
+                        await Promise.all(
+                            items.map((item) => {
+                                return knex_client('products')
+                                    .select('quantity', 'name')
+                                    .where('id', item?.product_id)
+                                    .first()
+                            })
+                        )
+                    const item_len = remaining_qtys.length
+                    for (let i = 0; i < item_len; i++) {
+                        if (items[i]?.quantity > remaining_qtys[i].quantity) {
+                            throw {
+                                status: 400,
+                                error: true,
+                                message:
+                                    remaining_qtys[i].quantity > 0
+                                        ? `Only ${remaining_qtys[i].quantity} pcs of product '${remaining_qtys[i].name}' remaining in stock.`
+                                        : `We're sorry, product '${remaining_qtys[i].name}' is out of stock.`,
+                            }
+                        }
                     }
-                    if (quantity) {
-                        sales_packet['quantity'] = quantity
-                    }
-                    await knex_client('sales').insert(sales_packet)
+                    const total_value = items.reduce(
+                        (sum, item) => sum + item!.price * item!.quantity,
+                        0
+                    )
+                    const [sale_id] = await knex_client('sales').insert(
+                        { user_id, total_value },
+                        ['id']
+                    )
+                    await Promise.all([
+                        ...items.map((item) => {
+                            return knex_client('sales_products').insert({
+                                user_id,
+                                sale_id,
+                                product_id: item!.product_id,
+                                quantity: item!.quantity,
+                            })
+                        }),
+                        knex_client('delivery_info').insert({
+                            ...delivery_details,
+                            user_id,
+                        }),
+                    ])
                     return {
                         status: 201,
                         error: false,
@@ -840,7 +903,7 @@ export const UserCreateSale = extendType({
                 } catch (err) {
                     const Error = err as ServerReturnType
                     console.error(err)
-                    return err_return(Error?.status)
+                    return err_return(Error?.status, Error?.message)
                 }
             },
         })
@@ -1277,6 +1340,62 @@ export const UserFetchProduct = extendType({
                                 total_views: product.total_views,
                             },
                         },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const UserFetchDeliveryDetails = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('user_fetch_delivery_details', {
+            type: DeliveryDetailsResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const { auth_token, knex_client } = context
+                    const { user_id } = await login_auth(auth_token, 'user_id')
+                    const delivery_details: {
+                        address: string
+                        city: string
+                        zipcode: string
+                        card_email: string
+                        card_name: string
+                        card_number: string
+                        card_expiry: string
+                    } = await knex_client('delivery_info')
+                        .select(
+                            'address',
+                            'city',
+                            'zipcode',
+                            'card_email',
+                            'card_name',
+                            'card_number',
+                            'card_expiry'
+                        )
+                        .where({ user_id })
+                        .first()
+                    if (
+                        !delivery_details ||
+                        !Object.keys(delivery_details).length
+                    ) {
+                        return {
+                            status: 205,
+                            error: false,
+                            message: 'Success',
+                        }
+                    }
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: delivery_details,
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType

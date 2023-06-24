@@ -137,6 +137,33 @@ type BaseResponse {
   status: Int!
 }
 
+type DeliveryDetailsData {
+  address: String!
+  card_email: String!
+  card_expiry: String!
+  card_name: String!
+  card_number: String!
+  city: String!
+  zipcode: String!
+}
+
+type DeliveryDetailsResponse {
+  data: DeliveryDetailsData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+input DeliveryDetailsTmpl {
+  address: String
+  card_email: String
+  card_expiry: String
+  card_name: String
+  card_number: String
+  city: String
+  zipcode: String
+}
+
 enum GenderEnum {
   female
   male
@@ -155,7 +182,7 @@ type Mutation {
   s3_upload(file_name: String!): MutationResponse!
   signin(email: String!, password: String!): UserSigninResponse!
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
-  user_create_sale(product_id: Int!, quantity: Int, total_value: Float!): BaseResponse!
+  user_create_sale(delivery_details: DeliveryDetailsTmpl!, items: [SaleProductTmpl]!): BaseResponse!
   user_follow_athlete(athlete_id: Int!): BaseResponse!
   user_mark_read_notifications: BaseResponse!
   user_update_notif_settings(notifications_preference: [String]!): BaseResponse!
@@ -214,6 +241,7 @@ type Query {
   fetch_user_suggestions: UserFetchSuggestionsResponse!
   user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
   user_fetch_athlete_store(athlete_id: Int!): UsersFetchAthleteStore!
+  user_fetch_delivery_details: DeliveryDetailsResponse!
   user_fetch_incentives: UserFetchIncentivesResponse!
   user_fetch_notif_settings: UserFetchNotifSettingsResponse!
   user_fetch_notifications: UserFetchNotificationsResponse!
@@ -221,6 +249,12 @@ type Query {
   user_fetch_sports: UserFetchSportsResponse!
   user_following(limit: Int!, next_min_id: Int): UserFetchAthletesResponse!
   user_unread_notifications: UserUnreadNotificationsResponse!
+}
+
+input SaleProductTmpl {
+  price: Int!
+  product_id: Int!
+  quantity: Int!
 }
 
 type Sales {
