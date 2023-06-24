@@ -861,7 +861,20 @@ export const UserCreateSale = extendType({
                             })
                         )
                     const item_len = remaining_qtys.length
+                    const items_clone: {
+                        price: number
+                        product_id: number
+                        quantity: number
+                        new_qty?: number
+                    }[] = items.map((item) => ({
+                        price: item!.price,
+                        product_id: item!.product_id,
+                        quantity: item!.quantity,
+                    }))
                     for (let i = 0; i < item_len; i++) {
+                        //Calculate the new quantity for each product after current sale
+                        items_clone[i]!.new_qty =
+                            remaining_qtys[i].quantity - items[i]!.quantity
                         //Check that all items are still in stock
                         if (items[i]!.quantity > remaining_qtys[i].quantity) {
                             throw {
@@ -890,6 +903,13 @@ export const UserCreateSale = extendType({
                                 product_id: item!.product_id,
                                 quantity: item!.quantity,
                             })
+                        }),
+                        ...items_clone.map((item) => {
+                            return knex_client('products')
+                                .update({
+                                    quantity: item.new_qty,
+                                })
+                                .where('id', item.product_id)
                         }),
                         knex_client('delivery_info').insert({
                             ...delivery_details,
