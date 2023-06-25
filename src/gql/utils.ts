@@ -394,22 +394,31 @@ export const create_product_notifications = async (args: ProductNotifArgs) => {
     }
 }
 
-// export type SaleNotifArgs = {
-//     knex_client: Knex
-//     sale_id: number
-//     user_id: number
-//     product_id: number
-//     headline: string
-//     message: string
-// }
+export type SaleNotifArgs = {
+    knex_client: Knex
+    sale_id: number
+    user_id: number
+    headline: string
+    message: string
+    email: string
+}
 
-// export const create_sale_notifications = async (args: SaleNotifArgs) => {
-//     const { knex_client, sale_id, product_id, headline, message, user_id } = args
-//     const db_resp = await knex_client.raw(`SELECT `)
-//     await knex_client('notifications').insert({
-//         user_id,
-//         sale_id,
-//         message: "Thank you for initiating this purchase! Please proceed to check out and make a payment to complete it.",
-//         headline: ""
-//     })
-// }
+export const create_sale_notification = async (args: SaleNotifArgs) => {
+    const { knex_client, sale_id, headline, message, user_id, email } = args
+    const { notifications_preference }: { notifications_preference: string } =
+        await knex_client('interests')
+            .select('notifications_preference')
+            .where({ user_id })
+            .first()
+    await knex_client('notifications').insert({
+        user_id,
+        sale_id,
+        message,
+        headline,
+    })
+    const notif_prefs: string[] =
+        JSON.parse(notifications_preference ?? null) ?? []
+    if (notif_prefs.includes('email')) {
+        await send_email_notifications([email], headline, message)
+    }
+}

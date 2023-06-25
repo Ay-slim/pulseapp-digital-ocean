@@ -6,7 +6,6 @@ import {
     list,
     intArg,
     queryType,
-    floatArg,
     inputObjectType,
 } from 'nexus'
 import bcrypt from 'bcryptjs'
@@ -22,6 +21,7 @@ import {
     UserActivityType,
     UserAthleteStoreType,
     send_email_notifications,
+    create_sale_notification,
 } from './utils'
 import {
     TokenResponse,
@@ -845,7 +845,7 @@ export const UserCreateSale = extendType({
             },
             async resolve(_, args, context) {
                 try {
-                    const { user_id } = await login_auth(
+                    const { user_id, email } = await login_auth(
                         context?.auth_token,
                         'user_id'
                     )
@@ -882,7 +882,7 @@ export const UserCreateSale = extendType({
                                 error: true,
                                 message:
                                     remaining_qtys[i].quantity > 0
-                                        ? `Only ${remaining_qtys[i].quantity} pcs of product '${remaining_qtys[i].name}' remaining in stock.`
+                                        ? `Only ${remaining_qtys[i].quantity} units of product '${remaining_qtys[i].name}' remaining in stock.`
                                         : `We're sorry, product '${remaining_qtys[i].name}' is out of stock.`,
                             }
                         }
@@ -891,10 +891,9 @@ export const UserCreateSale = extendType({
                         (sum, item) => sum + item!.price * item!.quantity,
                         0
                     )
-                    const [sale_id] = await knex_client('sales').insert(
-                        { user_id, total_value },
-                        ['id']
-                    )
+                    const [sale_id]: [number] = await knex_client(
+                        'sales'
+                    ).insert({ user_id, total_value }, ['id'])
                     await Promise.all([
                         ...items.map((item) => {
                             return knex_client('sales_products').insert({
@@ -911,11 +910,25 @@ export const UserCreateSale = extendType({
                                 })
                                 .where('id', item.product_id)
                         }),
-                        knex_client('delivery_info').insert({
-                            ...delivery_details,
-                            user_id,
-                        }),
+                        knex_client('delivery_info')
+                            .insert({
+                                ...delivery_details,
+                                user_id,
+                            })
+                            .onConflict('user_id')
+                            .merge(),
                     ])
+                    const message =
+                        'Thank you for initiating this purchase! Hang on a second while we confirm your payment.'
+                    const headline = 'Payment initiated.'
+                    create_sale_notification({
+                        knex_client,
+                        sale_id,
+                        user_id: user_id!,
+                        headline,
+                        message,
+                        email: email!,
+                    })
                     return {
                         status: 201,
                         error: false,
