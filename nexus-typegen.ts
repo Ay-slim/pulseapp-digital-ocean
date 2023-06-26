@@ -153,6 +153,9 @@ export interface NexusGenObjects {
     message: string; // String!
     status: number; // Int!
   }
+  CreateSalesData: { // root type
+    sale_ref: string; // String!
+  }
   DeliveryDetailsData: { // root type
     address: string; // String!
     card_email: string; // String!
@@ -262,6 +265,12 @@ export interface NexusGenObjects {
     content_caption?: string | null; // String
     content_media_url?: string | null; // String
     distance?: string | null; // String
+  }
+  UserCreateSaleResponse: { // root type
+    data?: NexusGenRootTypes['CreateSalesData'] | null; // CreateSalesData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
   }
   UserFetchActivityResponse: { // root type
     data?: NexusGenRootTypes['UserFetchFollowingData'] | null; // UserFetchFollowingData
@@ -489,6 +498,9 @@ export interface NexusGenFieldTypes {
     message: string; // String!
     status: number; // Int!
   }
+  CreateSalesData: { // field return type
+    sale_ref: string; // String!
+  }
   DeliveryDetailsData: { // field return type
     address: string; // String!
     card_email: string; // String!
@@ -515,7 +527,7 @@ export interface NexusGenFieldTypes {
     s3_upload: NexusGenRootTypes['MutationResponse']; // MutationResponse!
     signin: NexusGenRootTypes['UserSigninResponse']; // UserSigninResponse!
     signup: NexusGenRootTypes['TokenResponse']; // TokenResponse!
-    user_create_sale: NexusGenRootTypes['BaseResponse']; // BaseResponse!
+    user_create_sale: NexusGenRootTypes['UserCreateSaleResponse']; // UserCreateSaleResponse!
     user_follow_athlete: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     user_mark_read_notifications: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     user_update_notif_settings: NexusGenRootTypes['BaseResponse']; // BaseResponse!
@@ -632,6 +644,12 @@ export interface NexusGenFieldTypes {
     content_caption: string | null; // String
     content_media_url: string | null; // String
     distance: string | null; // String
+  }
+  UserCreateSaleResponse: { // field return type
+    data: NexusGenRootTypes['CreateSalesData'] | null; // CreateSalesData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
   }
   UserFetchActivityResponse: { // field return type
     data: NexusGenRootTypes['UserFetchFollowingData'] | null; // UserFetchFollowingData
@@ -849,6 +867,9 @@ export interface NexusGenFieldTypeNames {
     message: 'String'
     status: 'Int'
   }
+  CreateSalesData: { // field return type name
+    sale_ref: 'String'
+  }
   DeliveryDetailsData: { // field return type name
     address: 'String'
     card_email: 'String'
@@ -875,7 +896,7 @@ export interface NexusGenFieldTypeNames {
     s3_upload: 'MutationResponse'
     signin: 'UserSigninResponse'
     signup: 'TokenResponse'
-    user_create_sale: 'BaseResponse'
+    user_create_sale: 'UserCreateSaleResponse'
     user_follow_athlete: 'BaseResponse'
     user_mark_read_notifications: 'BaseResponse'
     user_update_notif_settings: 'BaseResponse'
@@ -992,6 +1013,12 @@ export interface NexusGenFieldTypeNames {
     content_caption: 'String'
     content_media_url: 'String'
     distance: 'String'
+  }
+  UserCreateSaleResponse: { // field return type name
+    data: 'CreateSalesData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
   }
   UserFetchActivityResponse: { // field return type name
     data: 'UserFetchFollowingData'

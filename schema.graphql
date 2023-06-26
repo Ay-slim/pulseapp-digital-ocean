@@ -137,6 +137,10 @@ type BaseResponse {
   status: Int!
 }
 
+type CreateSalesData {
+  sale_ref: String!
+}
+
 type DeliveryDetailsData {
   address: String!
   card_email: String!
@@ -182,7 +186,7 @@ type Mutation {
   s3_upload(file_name: String!): MutationResponse!
   signin(email: String!, password: String!): UserSigninResponse!
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
-  user_create_sale(delivery_details: DeliveryDetailsTmpl!, items: [SaleProductTmpl]!): BaseResponse!
+  user_create_sale(delivery_details: DeliveryDetailsTmpl!, items: [SaleProductTmpl]!): UserCreateSaleResponse!
   user_follow_athlete(athlete_id: Int!): BaseResponse!
   user_mark_read_notifications: BaseResponse!
   user_update_notif_settings(notifications_preference: [String]!): BaseResponse!
@@ -321,6 +325,13 @@ type UserContent {
   content_caption: String
   content_media_url: String
   distance: String
+}
+
+type UserCreateSaleResponse {
+  data: CreateSalesData
+  error: Boolean!
+  message: String!
+  status: Int!
 }
 
 type UserFetchActivityResponse {

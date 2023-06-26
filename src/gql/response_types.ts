@@ -477,3 +477,20 @@ export const DeliveryDetailsResponse = objectType({
         })
     },
 })
+
+export const UserCreateSaleResponse = objectType({
+    name: 'UserCreateSaleResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'CreateSalesData',
+                definition(t) {
+                    t.nonNull.string('sale_ref')
+                },
+            }),
+        })
+    },
+})

@@ -38,6 +38,7 @@ import {
     UsersFetchAthleteStore,
     UsersFetchProduct,
     DeliveryDetailsResponse,
+    UserCreateSaleResponse,
 } from './response_types'
 
 dotenv.config()
@@ -838,7 +839,7 @@ export const UserCreateSale = extendType({
     type: 'Mutation',
     definition(t) {
         t.nonNull.field('user_create_sale', {
-            type: BaseResponse,
+            type: UserCreateSaleResponse,
             args: {
                 items: nonNull(list(SaleProductTmpl.asArg())),
                 delivery_details: nonNull(DeliveryDetailsTmpl.asArg()),
@@ -891,9 +892,10 @@ export const UserCreateSale = extendType({
                         (sum, item) => sum + item!.price * item!.quantity,
                         0
                     )
+                    const sale_ref = email![1] + String(Date.now()) + email![0]
                     const [sale_id]: [number] = await knex_client(
                         'sales'
-                    ).insert({ user_id, total_value }, ['id'])
+                    ).insert({ user_id, total_value, sale_ref }, ['id'])
                     await Promise.all([
                         ...items.map((item) => {
                             return knex_client('sales_products').insert({
@@ -933,6 +935,9 @@ export const UserCreateSale = extendType({
                         status: 201,
                         error: false,
                         message: 'Success',
+                        data: {
+                            sale_ref,
+                        },
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType
