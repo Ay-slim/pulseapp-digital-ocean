@@ -7,6 +7,7 @@ import {
     intArg,
     queryType,
     inputObjectType,
+    floatArg,
 } from 'nexus'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
@@ -753,7 +754,7 @@ export const UserFetchActivity = extendType({
                             'products.media_urls'
                         )
                         .whereRaw(`sales_products.user_id = ${user_id}`)
-                        .orderBy('sales_products.id', 'asc')
+                        .orderBy('sales_products.id', 'desc')
                         .limit(limit)
                     if (next_min_id) {
                         activity_query.where(
@@ -842,15 +843,16 @@ export const UserCreateSale = extendType({
             type: UserCreateSaleResponse,
             args: {
                 items: nonNull(list(SaleProductTmpl.asArg())),
+                total_value: nonNull(floatArg()),
                 delivery_details: nonNull(DeliveryDetailsTmpl.asArg()),
             },
             async resolve(_, args, context) {
                 try {
-                    const { user_id, email } = await login_auth(
+                    const { user_id, email, name } = await login_auth(
                         context?.auth_token,
                         'user_id'
                     )
-                    const { items, delivery_details } = args
+                    const { items, delivery_details, total_value } = args
                     const { knex_client } = context
                     const remaining_qtys: { quantity: number; name: string }[] =
                         await Promise.all(
@@ -862,12 +864,14 @@ export const UserCreateSale = extendType({
                             })
                         )
                     const item_len = remaining_qtys.length
-                    const items_clone: {
+                    type ItemsCloneType = {
                         price: number
                         product_id: number
                         quantity: number
                         new_qty?: number
-                    }[] = items.map((item) => ({
+                        name?: string
+                    }
+                    const items_clone: ItemsCloneType[] = items.map((item) => ({
                         price: item!.price,
                         product_id: item!.product_id,
                         quantity: item!.quantity,
@@ -876,6 +880,7 @@ export const UserCreateSale = extendType({
                         //Calculate the new quantity for each product after current sale
                         items_clone[i]!.new_qty =
                             remaining_qtys[i].quantity - items[i]!.quantity
+                        items_clone[i]!.name = remaining_qtys[i].name
                         //Check that all items are still in stock
                         if (items[i]!.quantity > remaining_qtys[i].quantity) {
                             throw {
@@ -888,10 +893,6 @@ export const UserCreateSale = extendType({
                             }
                         }
                     }
-                    const total_value = items.reduce(
-                        (sum, item) => sum + item!.price * item!.quantity,
-                        0
-                    )
                     const sale_ref = email![1] + String(Date.now()) + email![0]
                     const [sale_id]: [number] = await knex_client(
                         'sales'
@@ -920,9 +921,19 @@ export const UserCreateSale = extendType({
                             .onConflict('user_id')
                             .merge(),
                     ])
-                    const message =
-                        'Thank you for initiating this purchase! Hang on a second while we confirm your payment.'
-                    const headline = 'Payment initiated.'
+                    const email_notif_message = (
+                        items: ItemsCloneType[]
+                    ): string => {
+                        let order_list = ''
+                        items.forEach((item) => {
+                            order_list += `<li>Name: ${item.name}, Price: ${item.price}, Quantity: ${item.quantity}</li>`
+                        })
+                        return order_list
+                    }
+                    const message = `<html><body><p>Dear ${name}, your order has been confirmed and is being processed. Here are the details: \n<ul>${email_notif_message(
+                        items_clone
+                    )}</ul><br/>Total purchase value: <strong>$${total_value}</strong><br/>Your purchase ID is: <strong>${sale_ref}</strong></p></body></html>`
+                    const headline = 'Successful Purchase'
                     create_sale_notification({
                         knex_client,
                         sale_id,

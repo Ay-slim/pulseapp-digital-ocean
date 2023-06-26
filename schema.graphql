@@ -186,7 +186,7 @@ type Mutation {
   s3_upload(file_name: String!): MutationResponse!
   signin(email: String!, password: String!): UserSigninResponse!
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
-  user_create_sale(delivery_details: DeliveryDetailsTmpl!, items: [SaleProductTmpl]!): UserCreateSaleResponse!
+  user_create_sale(delivery_details: DeliveryDetailsTmpl!, items: [SaleProductTmpl]!, total_value: Float!): UserCreateSaleResponse!
   user_follow_athlete(athlete_id: Int!): BaseResponse!
   user_mark_read_notifications: BaseResponse!
   user_update_notif_settings(notifications_preference: [String]!): BaseResponse!

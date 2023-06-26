@@ -1185,6 +1185,7 @@ export interface NexusGenArgTypes {
     user_create_sale: { // args
       delivery_details: NexusGenInputs['DeliveryDetailsTmpl']; // DeliveryDetailsTmpl!
       items: Array<NexusGenInputs['SaleProductTmpl'] | null>; // [SaleProductTmpl]!
+      total_value: number; // Float!
     }
     user_follow_athlete: { // args
       athlete_id: number; // Int!

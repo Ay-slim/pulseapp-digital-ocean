@@ -345,10 +345,10 @@ export const send_email_notifications = async (
         await Promise.all(
             emails.map((email) => {
                 transporter.sendMail({
-                    from: '"Zara from Scientia" <no_reply@scientia.com>',
+                    from: '"Letty from Scientia" <no_reply@scientia.com>',
                     to: email,
                     subject: subject,
-                    text: body,
+                    html: body,
                 })
                 console.log(`${subject} email notification sent to: ${email}`)
             })
