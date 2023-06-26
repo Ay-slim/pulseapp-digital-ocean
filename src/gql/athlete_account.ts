@@ -6,7 +6,6 @@ import {
     TopFollowersType,
     SalesType,
     SalesRetType,
-    ProductsDataType,
     month_map,
     create_product_notifications,
     ProductNotifArgs,
@@ -20,8 +19,8 @@ import {
     AthleteFetchBasicsResponse,
     AthleteTopFollowersResponse,
     AthleteSalesResponse,
-    AthleteProductsFetchResponse,
     AthleteSettingsFetchResponse,
+    AthleteProductsFetchResponse,
 } from './response_types'
 
 dotenv.config()
@@ -61,7 +60,12 @@ export const AthleteSigninMutation = extendType({
                             message: 'Invalid password!',
                         }
                     }
-                    const token = create_jwt_token(id, 'athlete_id', name)
+                    const token = create_jwt_token(
+                        id,
+                        'athlete_id',
+                        name,
+                        email
+                    )
                     return {
                         status: 200,
                         error: false,
@@ -130,7 +134,8 @@ export const AthleteSignupMutation = extendType({
                     const token = create_jwt_token(
                         insert_ret?.[0],
                         'athlete_id',
-                        name
+                        name,
+                        email
                     )
                     return {
                         status: 201,
@@ -357,7 +362,7 @@ export const AthleteCreateProduct = extendType({
         t.nonNull.field('create_product', {
             type: BaseResponse,
             args: {
-                media_url: stringArg(),
+                media_urls: nonNull(list(stringArg())),
                 name: nonNull(stringArg()),
                 price: nonNull(floatArg()),
                 quantity: nonNull(intArg()),
@@ -373,7 +378,7 @@ export const AthleteCreateProduct = extendType({
                         'athlete_id'
                     )
                     const {
-                        media_url,
+                        media_urls,
                         name,
                         price,
                         quantity,
@@ -382,11 +387,17 @@ export const AthleteCreateProduct = extendType({
                         category,
                         end_time,
                     } = args
+                    const media_len = media_urls?.length
+                    if (media_len! < 2 || media_len! > 6) {
+                        throw new Error(
+                            'Ensure there are between 2 and 6 media files uploaded for this product'
+                        )
+                    }
                     const { knex_client } = context
                     const metadata = JSON.stringify({ category })
                     const insert_object: {
                         athlete_id?: number
-                        media_url?: string | null
+                        media_urls: string | null
                         name: string
                         price: number
                         quantity: number
@@ -398,7 +409,7 @@ export const AthleteCreateProduct = extendType({
                         start_time: Date
                     } = {
                         athlete_id,
-                        media_url,
+                        media_urls: JSON.stringify(media_urls),
                         name,
                         price,
                         quantity,
@@ -444,7 +455,7 @@ export const AthleteCreateProduct = extendType({
 export const AthleteFetchProducts = extendType({
     type: 'Query',
     definition(t) {
-        t.nonNull.field('fetch_products', {
+        t.nonNull.field('athlete_fetch_products', {
             type: AthleteProductsFetchResponse,
             args: {},
             async resolve(_, __, context) {
@@ -454,25 +465,97 @@ export const AthleteFetchProducts = extendType({
                         'athlete_id'
                     )
                     const { knex_client } = context
-                    const products: ProductsDataType[] = await knex_client(
-                        'products'
-                    )
+                    const products: {
+                        id: number
+                        name: string
+                        price: number
+                        currency: string
+                        end_time: string | null
+                        exclusive: string
+                        quantity: number
+                        media_urls: string
+                        description: string
+                        total_views: number
+                        unique_views: number
+                    }[] = await knex_client
                         .select(
                             'id',
                             'name',
-                            'media_url',
+                            'media_urls',
                             'price',
                             'currency',
-                            'quantity'
+                            'quantity',
+                            'exclusive',
+                            'end_time',
+                            'description',
+                            knex_client.raw(
+                                `(SELECT COUNT(*) FROM product_views WHERE product_id = products.id) AS total_views`
+                            ),
+                            knex_client.raw(
+                                `(SELECT COUNT(DISTINCT user_id) FROM product_views WHERE product_id = products.id) AS unique_views`
+                            )
                         )
-                        .where({ athlete_id })
+                        .from('products')
+                        .where('athlete_id', athlete_id)
+                        .whereRaw('deleted_at IS NULL')
+                    //console.log(products)
+                    // console.log({
+                    //     athlete_name: products[0]?.athlete_name,
+                    //     image_url: products[0]?.image_url,
+                    //     products: JSON.parse(products[0].products)
+                    // })
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
-                            products,
+                            products: products.map((product) => {
+                                return {
+                                    id: product.id,
+                                    name: product.name,
+                                    price: product.price,
+                                    currency: product.currency,
+                                    end_time: product.end_time,
+                                    exclusive: product.exclusive === 'true',
+                                    quantity: product.quantity,
+                                    media_urls: JSON.parse(product.media_urls),
+                                    description: product.description,
+                                    total_views: product.total_views,
+                                    unique_views: product.unique_views,
+                                }
+                            }),
                         },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteDeleteProducts = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('athlete_delete_products', {
+            type: BaseResponse,
+            args: {
+                product_ids: nonNull(list(intArg())),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const { knex_client, auth_token } = context
+                    await login_auth(auth_token, 'athlete_id')
+                    const { product_ids } = args
+                    await knex_client('products')
+                        .update({ deleted_at: new Date() })
+                        .whereIn('id', product_ids)
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType

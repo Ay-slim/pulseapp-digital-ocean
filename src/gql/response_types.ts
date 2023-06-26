@@ -245,15 +245,70 @@ export const AthleteSalesResponse = objectType({
     },
 })
 
-const ProductsTmpl = objectType({
+export const ProductsTmpl = objectType({
     name: 'ProductsTmpl',
     definition(t) {
+        t.int('id')
         t.string('name'),
+            t.list.string('media_urls'),
             t.string('media_url'),
             t.float('price'),
             t.string('currency')
+        t.string('category')
+        t.string('end_time')
+        t.boolean('exclusive')
         t.int('quantity')
-        t.int('id')
+        t.string('description')
+        t.int('number_of_views')
+        t.int('total_views')
+        t.int('unique_views')
+        t.string('distance')
+    },
+})
+
+export const UsersFetchAthleteStore = objectType({
+    name: 'UsersFetchAthleteStore',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UsersAthleteStoreData',
+                definition(t) {
+                    t.nonNull.string('athlete_name')
+                    t.string('image_url')
+                    t.list.field('products', {
+                        type: ProductsTmpl,
+                    })
+                    t.list.field('expired_drops', {
+                        type: ProductsTmpl,
+                    })
+                    t.field('featured', {
+                        type: ProductsTmpl,
+                    })
+                },
+            }),
+        })
+    },
+})
+
+export const UsersFetchProduct = objectType({
+    name: 'UsersFetchProduct',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UsersProductData',
+                definition(t) {
+                    t.field('product', {
+                        type: ProductsTmpl,
+                    })
+                },
+            }),
+        })
     },
 })
 
@@ -265,7 +320,7 @@ export const AthleteProductsFetchResponse = objectType({
         t.nonNull.string('message')
         t.field('data', {
             type: objectType({
-                name: 'AthleteProductsFetchData',
+                name: 'AthletesProductData',
                 definition(t) {
                     t.list.field('products', {
                         type: ProductsTmpl,
@@ -394,6 +449,46 @@ export const UserUnreadNotificationsResponse = objectType({
                 name: 'UnreadNotifsData',
                 definition(t) {
                     t.int('unread_count')
+                },
+            }),
+        })
+    },
+})
+
+export const DeliveryDetailsResponse = objectType({
+    name: 'DeliveryDetailsResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'DeliveryDetailsData',
+                definition(t) {
+                    t.nonNull.string('address')
+                    t.nonNull.string('city')
+                    t.nonNull.string('zipcode')
+                    t.nonNull.string('card_email')
+                    t.nonNull.string('card_name')
+                    t.nonNull.string('card_number')
+                    t.nonNull.string('card_expiry')
+                },
+            }),
+        })
+    },
+})
+
+export const UserCreateSaleResponse = objectType({
+    name: 'UserCreateSaleResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'CreateSalesData',
+                definition(t) {
+                    t.nonNull.string('sale_ref')
                 },
             }),
         })

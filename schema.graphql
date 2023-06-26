@@ -55,12 +55,8 @@ type AthleteFetchBasicsResponseData {
   athlete_bio: AthleteBasicStats
 }
 
-type AthleteProductsFetchData {
-  products: [ProductsTmpl]
-}
-
 type AthleteProductsFetchResponse {
-  data: AthleteProductsFetchData
+  data: AthletesProductData
   error: Boolean!
   message: String!
   status: Int!
@@ -112,6 +108,10 @@ type AthleteTopFollowersResponse {
   status: Int!
 }
 
+type AthletesProductData {
+  products: [ProductsTmpl]
+}
+
 type AuthData {
   athlete_bio: AthleteBio
   athlete_data: [AthleteData]
@@ -137,6 +137,37 @@ type BaseResponse {
   status: Int!
 }
 
+type CreateSalesData {
+  sale_ref: String!
+}
+
+type DeliveryDetailsData {
+  address: String!
+  card_email: String!
+  card_expiry: String!
+  card_name: String!
+  card_number: String!
+  city: String!
+  zipcode: String!
+}
+
+type DeliveryDetailsResponse {
+  data: DeliveryDetailsData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+input DeliveryDetailsTmpl {
+  address: String
+  card_email: String
+  card_expiry: String
+  card_name: String
+  card_number: String
+  city: String
+  zipcode: String
+}
+
 enum GenderEnum {
   female
   male
@@ -145,16 +176,17 @@ enum GenderEnum {
 }
 
 type Mutation {
+  athlete_delete_products(product_ids: [Int]!): BaseResponse!
   athlete_signin(email: String!, password: String!): TokenResponse!
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): TokenResponse!
   athlete_update_info(description: String!, image_url: String!): BaseResponse!
   athlete_update_settings(description: String, notifications_preference: [String]): BaseResponse!
-  create_product(category: String, currency: String, description: String!, end_time: String, media_url: String, name: String!, price: Float!, quantity: Int!): BaseResponse!
+  create_product(category: String, currency: String, description: String!, end_time: String, media_urls: [String]!, name: String!, price: Float!, quantity: Int!): BaseResponse!
   interests(athletes: [Int]!, incentives: [String]!, notifications_preference: [String]!, sports: [String]!): BaseResponse!
   s3_upload(file_name: String!): MutationResponse!
   signin(email: String!, password: String!): UserSigninResponse!
   signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
-  user_create_sale(product_id: Int!, quantity: Int, total_value: Float!): BaseResponse!
+  user_create_sale(delivery_details: DeliveryDetailsTmpl!, items: [SaleProductTmpl]!, total_value: Float!): UserCreateSaleResponse!
   user_follow_athlete(athlete_id: Int!): BaseResponse!
   user_mark_read_notifications: BaseResponse!
   user_update_notif_settings(notifications_preference: [String]!): BaseResponse!
@@ -186,29 +218,47 @@ type Products {
 }
 
 type ProductsTmpl {
+  category: String
   currency: String
+  description: String
+  distance: String
+  end_time: String
+  exclusive: Boolean
   id: Int
   media_url: String
+  media_urls: [String]
   name: String
+  number_of_views: Int
   price: Float
   quantity: Int
+  total_views: Int
+  unique_views: Int
 }
 
 type Query {
+  athlete_fetch_products: AthleteProductsFetchResponse!
   athlete_fetch_settings: AthleteSettingsFetchResponse!
   athletes(limit: Int!, next_min_id: Int, sports: [String]!): UserFetchAthletesResponse!
   fetch_athlete_basics: AthleteFetchBasicsResponse!
   fetch_athlete_sales: AthleteSalesResponse!
   fetch_athlete_top_followers: AthleteTopFollowersResponse!
-  fetch_products: AthleteProductsFetchResponse!
   fetch_user_suggestions: UserFetchSuggestionsResponse!
   user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
+  user_fetch_athlete_store(athlete_id: Int!): UsersFetchAthleteStore!
+  user_fetch_delivery_details: DeliveryDetailsResponse!
   user_fetch_incentives: UserFetchIncentivesResponse!
   user_fetch_notif_settings: UserFetchNotifSettingsResponse!
   user_fetch_notifications: UserFetchNotificationsResponse!
+  user_fetch_product(product_id: Int!): UsersFetchProduct!
   user_fetch_sports: UserFetchSportsResponse!
   user_following(limit: Int!, next_min_id: Int): UserFetchAthletesResponse!
   user_unread_notifications: UserUnreadNotificationsResponse!
+}
+
+input SaleProductTmpl {
+  price: Int!
+  product_id: Int!
+  quantity: Int!
 }
 
 type Sales {
@@ -275,6 +325,13 @@ type UserContent {
   content_caption: String
   content_media_url: String
   distance: String
+}
+
+type UserCreateSaleResponse {
+  data: CreateSalesData
+  error: Boolean!
+  message: String!
+  status: Int!
 }
 
 type UserFetchActivityResponse {
@@ -374,4 +431,30 @@ type UserUnreadNotificationsResponse {
   error: Boolean!
   message: String!
   status: Int!
+}
+
+type UsersAthleteStoreData {
+  athlete_name: String!
+  expired_drops: [ProductsTmpl]
+  featured: ProductsTmpl
+  image_url: String
+  products: [ProductsTmpl]
+}
+
+type UsersFetchAthleteStore {
+  data: UsersAthleteStoreData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UsersFetchProduct {
+  data: UsersProductData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type UsersProductData {
+  product: ProductsTmpl
 }
