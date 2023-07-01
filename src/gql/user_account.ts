@@ -640,7 +640,7 @@ export const UserFetchFollowing = queryType({
             type: UserFetchAthletesResponse,
             args: {
                 next_min_id: intArg(),
-                limit: nonNull(intArg()),
+                limit: intArg(),
             },
             async resolve(_, args, context) {
                 const { user_id } = await login_auth(
@@ -666,9 +666,11 @@ export const UserFetchFollowing = queryType({
                         )
                         .whereRaw(`users_athletes.user_id = ${user_id}`)
                         .orderBy('athletes.id', 'asc')
-                        .limit(limit)
                     if (next_min_id) {
                         athlete_query.where('athletes.id', '>', next_min_id)
+                    }
+                    if (limit) {
+                        athlete_query.limit(limit)
                     }
                     const db_resp: AthleteDataType[] = await athlete_query
                     const ret_value = db_resp.map((resp) => {

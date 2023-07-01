@@ -1214,7 +1214,7 @@ export interface NexusGenArgTypes {
       product_id: number; // Int!
     }
     user_following: { // args
-      limit: number; // Int!
+      limit?: number | null; // Int
       next_min_id?: number | null; // Int
     }
   }
