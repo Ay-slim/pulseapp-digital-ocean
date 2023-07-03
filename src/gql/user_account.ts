@@ -288,7 +288,10 @@ export const UserAddInterests = extendType({
                         }),
                     ]
                     await Promise.all(db_updates_array)
-                    if (notifications_preference.includes('email')) {
+                    if (
+                        notifications_preference.includes('email') &&
+                        !process.env.NO_EMAILS
+                    ) {
                         const body =
                             "We're glad you completed your signup! Login to your profile to get the latest exclusive stuff from your favorite athletes! We can't wait to show you around."
                         send_email_notifications(
@@ -996,16 +999,18 @@ export const UserCreateSale = extendType({
                         })
                         return order_list
                     }
-                    const message = `<html><body><p>Dear ${name}, your order has been confirmed and is being processed. Here are the details: \n<ul>${email_notif_message(
+                    const html_message = `<html><body><p>Dear ${name}, your order has been confirmed and is being processed. Here are the details: \n<ul>${email_notif_message(
                         items_clone
                     )}</ul><br/>Total purchase value: <strong>$${total_value}</strong><br/>Your purchase ID is: <strong>${sale_ref}</strong></p></body></html>`
+                    const plain_text_message = `Dear ${name}, your order with purchase id: ${sale_ref} has been confirmed and is being processed`
                     const headline = 'Successful Purchase'
                     create_sale_notification({
                         knex_client,
                         sale_id,
                         user_id: user_id!,
                         headline,
-                        message,
+                        html_message,
+                        plain_text_message,
                         email: email!,
                     })
                     return {
