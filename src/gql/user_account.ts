@@ -8,7 +8,9 @@ import {
     queryType,
     inputObjectType,
     floatArg,
+    booleanArg,
 } from 'nexus'
+import { Knex } from 'knex'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
 import { formatDistance } from 'date-fns'
@@ -641,6 +643,7 @@ export const UserFetchFollowing = queryType({
             args: {
                 next_min_id: intArg(),
                 limit: intArg(),
+                order_by_store_visits: booleanArg(),
             },
             async resolve(_, args, context) {
                 const { user_id } = await login_auth(
@@ -649,7 +652,7 @@ export const UserFetchFollowing = queryType({
                 )
                 const { knex_client } = context
                 try {
-                    const { next_min_id, limit } = args
+                    const { next_min_id, limit, order_by_store_visits } = args
                     const athlete_query = knex_client('athletes')
                         .join(
                             'users_athletes',
@@ -665,12 +668,44 @@ export const UserFetchFollowing = queryType({
                             'athletes.metadata'
                         )
                         .whereRaw(`users_athletes.user_id = ${user_id}`)
-                        .orderBy('athletes.id', 'asc')
                     if (next_min_id) {
                         athlete_query.where('athletes.id', '>', next_min_id)
                     }
                     if (limit) {
                         athlete_query.limit(limit)
+                    }
+                    if (order_by_store_visits) {
+                        const latest_unique_visits_subquery = knex_client(
+                            'store_visits'
+                        )
+                            .select('user_id', 'athlete_id')
+                            .max('created_at as latest_created_at')
+                            .groupBy('athlete_id', 'user_id')
+
+                        const subquery_alias = knex_client.raw('(?) as ??', [
+                            latest_unique_visits_subquery,
+                            'latest_store_visits',
+                        ])
+
+                        athlete_query
+                            .leftJoin(
+                                subquery_alias,
+                                (que: Knex.JoinClause) => {
+                                    que.on(
+                                        'athletes.id',
+                                        '=',
+                                        'latest_store_visits.athlete_id'
+                                    ).andOn(
+                                        'users_athletes.user_id',
+                                        '=',
+                                        'latest_store_visits.user_id'
+                                    )
+                                }
+                            )
+                            .orderBy(
+                                'latest_store_visits.latest_created_at',
+                                'desc'
+                            )
                     }
                     const db_resp: AthleteDataType[] = await athlete_query
                     const ret_value = db_resp.map((resp) => {

@@ -1216,6 +1216,7 @@ export interface NexusGenArgTypes {
     user_following: { // args
       limit?: number | null; // Int
       next_min_id?: number | null; // Int
+      order_by_store_visits?: boolean | null; // Boolean
     }
   }
 }
