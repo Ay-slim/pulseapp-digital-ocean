@@ -59,6 +59,7 @@ export type UserAthleteStoreType = {
 }
 export type AthleteDataType = SuggestionsDataType & {
     metadata: string
+    new_product_count: number
 }
 
 export type AthleteBioType = {

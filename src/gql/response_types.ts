@@ -104,6 +104,7 @@ const AthleteResData = list(
             t.string('image_url')
             t.string('sport')
             t.string('description')
+            t.int('new_product_count')
         },
     })
 )

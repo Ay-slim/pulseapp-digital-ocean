@@ -653,6 +653,28 @@ export const UserFetchFollowing = queryType({
                 const { knex_client } = context
                 try {
                     const { next_min_id, limit, order_by_store_visits } = args
+                    // Subquery to count all the products that have not been viewed by this user
+                    const products_subquery = knex_client('products as p')
+                        .select(
+                            knex_client.raw(
+                                'COUNT(DISTINCT p.id) AS new_product_count'
+                            )
+                        )
+                        .where(
+                            'p.athlete_id',
+                            '=',
+                            knex_client.raw('athletes.id')
+                        )
+                        .whereNotIn(
+                            'p.id',
+                            (query_builder: Knex.QueryBuilder) => {
+                                query_builder
+                                    .select('pv.product_id')
+                                    .from('product_views as pv')
+                                    .whereRaw(`pv.user_id = ${user_id}`)
+                            }
+                        )
+
                     const athlete_query = knex_client('athletes')
                         .join(
                             'users_athletes',
@@ -660,14 +682,18 @@ export const UserFetchFollowing = queryType({
                             '=',
                             'users_athletes.athlete_id'
                         )
-                        .select(
+                        .select([
                             'athletes.id',
                             'athletes.name',
                             'athletes.image_url',
                             'athletes.sport',
-                            'athletes.metadata'
-                        )
-                        .whereRaw(`users_athletes.user_id = ${user_id}`)
+                            'athletes.metadata',
+                            knex_client.raw(
+                                `(${products_subquery}) as new_product_count`
+                            ),
+                        ])
+                        .where('users_athletes.user_id', user_id)
+
                     if (next_min_id) {
                         athlete_query.where('athletes.id', '>', next_min_id)
                     }
@@ -690,16 +716,18 @@ export const UserFetchFollowing = queryType({
                         athlete_query
                             .leftJoin(
                                 subquery_alias,
-                                (que: Knex.JoinClause) => {
-                                    que.on(
-                                        'athletes.id',
-                                        '=',
-                                        'latest_store_visits.athlete_id'
-                                    ).andOn(
-                                        'users_athletes.user_id',
-                                        '=',
-                                        'latest_store_visits.user_id'
-                                    )
+                                (join_arg: Knex.JoinClause) => {
+                                    join_arg
+                                        .on(
+                                            'athletes.id',
+                                            '=',
+                                            'latest_store_visits.athlete_id'
+                                        )
+                                        .andOn(
+                                            'users_athletes.user_id',
+                                            '=',
+                                            'latest_store_visits.user_id'
+                                        )
                                 }
                             )
                             .orderBy(
@@ -717,6 +745,7 @@ export const UserFetchFollowing = queryType({
                                 image_url: resp?.image_url,
                                 sport: resp?.sport,
                                 description: parsed_mdata?.description,
+                                new_product_count: resp?.new_product_count,
                             }
                         } catch (err) {
                             throw {

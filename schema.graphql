@@ -67,6 +67,7 @@ type AthleteResData {
   id: Int
   image_url: String
   name: String
+  new_product_count: Int
   sport: String
 }
 
