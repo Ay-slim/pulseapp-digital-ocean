@@ -473,6 +473,9 @@ export const DeliveryDetailsResponse = objectType({
                     t.nonNull.string('card_name')
                     t.nonNull.string('card_number')
                     t.nonNull.string('card_expiry')
+                    t.nonNull.string('name')
+                    t.nonNull.string('email')
+                    t.nonNull.string('phone')
                 },
             }),
         })

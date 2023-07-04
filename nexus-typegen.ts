@@ -164,6 +164,9 @@ export interface NexusGenObjects {
     card_name: string; // String!
     card_number: string; // String!
     city: string; // String!
+    email: string; // String!
+    name: string; // String!
+    phone: string; // String!
     zipcode: string; // String!
   }
   DeliveryDetailsResponse: { // root type
@@ -510,6 +513,9 @@ export interface NexusGenFieldTypes {
     card_name: string; // String!
     card_number: string; // String!
     city: string; // String!
+    email: string; // String!
+    name: string; // String!
+    phone: string; // String!
     zipcode: string; // String!
   }
   DeliveryDetailsResponse: { // field return type
@@ -880,6 +886,9 @@ export interface NexusGenFieldTypeNames {
     card_name: 'String'
     card_number: 'String'
     city: 'String'
+    email: 'String'
+    name: 'String'
+    phone: 'String'
     zipcode: 'String'
   }
   DeliveryDetailsResponse: { // field return type name

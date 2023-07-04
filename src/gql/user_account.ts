@@ -1487,7 +1487,7 @@ export const UserFetchDeliveryDetails = extendType({
                 try {
                     const { auth_token, knex_client } = context
                     const { user_id } = await login_auth(auth_token, 'user_id')
-                    const delivery_details: {
+                    type DeliveryType = {
                         address: string
                         city: string
                         zipcode: string
@@ -1495,33 +1495,52 @@ export const UserFetchDeliveryDetails = extendType({
                         card_name: string
                         card_number: string
                         card_expiry: string
-                    } = await knex_client('delivery_info')
+                        name: string
+                        email: string
+                        phone: string
+                    }
+                    const delivery_details: DeliveryType = await knex_client(
+                        'users as u'
+                    )
                         .select(
-                            'address',
-                            'city',
-                            'zipcode',
-                            'card_email',
-                            'card_name',
-                            'card_number',
-                            'card_expiry'
+                            'd.address',
+                            'd.city',
+                            'd.zipcode',
+                            'd.card_email',
+                            'd.card_name',
+                            'd.card_number',
+                            'd.card_expiry',
+                            'u.name',
+                            'u.email',
+                            'u.phone'
                         )
-                        .where({ user_id })
+                        .leftJoin(
+                            'delivery_info as d',
+                            'u.id',
+                            '=',
+                            'd.user_id'
+                        )
+                        .whereRaw(`u.id = ${user_id}`)
                         .first()
-                    if (
-                        !delivery_details ||
-                        !Object.keys(delivery_details).length
-                    ) {
+                    const delivery_normalizer = (del_details: DeliveryType) => {
                         return {
-                            status: 205,
-                            error: false,
-                            message: 'Success',
+                            name: del_details.name,
+                            email: del_details.email,
+                            phone: del_details.phone,
+                            card_expiry: del_details.card_expiry ?? '',
+                            card_number: del_details.card_number ?? '',
+                            card_name: del_details.card_name ?? '',
+                            card_email: del_details.card_email ?? '',
+                            zipcode: del_details.zipcode ?? '',
+                            city: del_details.city ?? '',
+                            address: del_details.address ?? '',
                         }
                     }
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
-                        data: delivery_details,
+                        data: delivery_normalizer(delivery_details),
                     }
                 } catch (err) {
                     const Error = err as ServerReturnType
