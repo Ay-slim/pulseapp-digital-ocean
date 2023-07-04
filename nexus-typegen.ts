@@ -1172,6 +1172,7 @@ export interface NexusGenArgTypes {
       name: string; // String!
       price: number; // Float!
       quantity: number; // Int!
+      start_time?: string | null; // String
     }
     interests: { // args
       athletes: Array<number | null>; // [Int]!

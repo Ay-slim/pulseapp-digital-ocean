@@ -370,6 +370,7 @@ export const AthleteCreateProduct = extendType({
                 currency: stringArg(),
                 category: stringArg(),
                 end_time: stringArg(),
+                start_time: stringArg(),
             },
             async resolve(_, args, context) {
                 try {
@@ -386,11 +387,12 @@ export const AthleteCreateProduct = extendType({
                         description,
                         category,
                         end_time,
+                        start_time,
                     } = args
                     const media_len = media_urls?.length
-                    if (media_len! < 2 || media_len! > 6) {
+                    if (media_len! < 2 || media_len! > 5) {
                         throw new Error(
-                            'Ensure there are between 2 and 6 media files uploaded for this product'
+                            'Ensure there are between 2 and 5 media files uploaded for this product'
                         )
                     }
                     const { knex_client } = context
@@ -416,7 +418,9 @@ export const AthleteCreateProduct = extendType({
                         description,
                         exclusive: end_time ? 'true' : 'false',
                         metadata,
-                        start_time: new Date(),
+                        start_time: start_time
+                            ? new Date(start_time)
+                            : new Date(),
                         end_time,
                     }
                     if (currency) {
