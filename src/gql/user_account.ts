@@ -8,7 +8,9 @@ import {
     queryType,
     inputObjectType,
     floatArg,
+    booleanArg,
 } from 'nexus'
+import { Knex } from 'knex'
 import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
 import { formatDistance } from 'date-fns'
@@ -286,7 +288,10 @@ export const UserAddInterests = extendType({
                         }),
                     ]
                     await Promise.all(db_updates_array)
-                    if (notifications_preference.includes('email')) {
+                    if (
+                        notifications_preference.includes('email') &&
+                        !process.env.NO_EMAILS
+                    ) {
                         const body =
                             "We're glad you completed your signup! Login to your profile to get the latest exclusive stuff from your favorite athletes! We can't wait to show you around."
                         send_email_notifications(
@@ -640,7 +645,8 @@ export const UserFetchFollowing = queryType({
             type: UserFetchAthletesResponse,
             args: {
                 next_min_id: intArg(),
-                limit: nonNull(intArg()),
+                limit: intArg(),
+                order_by_store_visits: booleanArg(),
             },
             async resolve(_, args, context) {
                 const { user_id } = await login_auth(
@@ -649,7 +655,29 @@ export const UserFetchFollowing = queryType({
                 )
                 const { knex_client } = context
                 try {
-                    const { next_min_id, limit } = args
+                    const { next_min_id, limit, order_by_store_visits } = args
+                    // Subquery to count all the products that have not been viewed by this user
+                    const products_subquery = knex_client('products as p')
+                        .select(
+                            knex_client.raw(
+                                'COUNT(DISTINCT p.id) AS new_product_count'
+                            )
+                        )
+                        .where(
+                            'p.athlete_id',
+                            '=',
+                            knex_client.raw('athletes.id')
+                        )
+                        .whereNotIn(
+                            'p.id',
+                            (query_builder: Knex.QueryBuilder) => {
+                                query_builder
+                                    .select('pv.product_id')
+                                    .from('product_views as pv')
+                                    .whereRaw(`pv.user_id = ${user_id}`)
+                            }
+                        )
+
                     const athlete_query = knex_client('athletes')
                         .join(
                             'users_athletes',
@@ -657,18 +685,58 @@ export const UserFetchFollowing = queryType({
                             '=',
                             'users_athletes.athlete_id'
                         )
-                        .select(
+                        .select([
                             'athletes.id',
                             'athletes.name',
                             'athletes.image_url',
                             'athletes.sport',
-                            'athletes.metadata'
-                        )
-                        .whereRaw(`users_athletes.user_id = ${user_id}`)
-                        .orderBy('athletes.id', 'asc')
-                        .limit(limit)
+                            'athletes.metadata',
+                            knex_client.raw(
+                                `(${products_subquery}) as new_product_count`
+                            ),
+                        ])
+                        .where('users_athletes.user_id', user_id)
+
                     if (next_min_id) {
                         athlete_query.where('athletes.id', '>', next_min_id)
+                    }
+                    if (limit) {
+                        athlete_query.limit(limit)
+                    }
+                    if (order_by_store_visits) {
+                        const latest_unique_visits_subquery = knex_client(
+                            'store_visits'
+                        )
+                            .select('user_id', 'athlete_id')
+                            .max('created_at as latest_created_at')
+                            .groupBy('athlete_id', 'user_id')
+
+                        const subquery_alias = knex_client.raw('(?) as ??', [
+                            latest_unique_visits_subquery,
+                            'latest_store_visits',
+                        ])
+
+                        athlete_query
+                            .leftJoin(
+                                subquery_alias,
+                                (join_arg: Knex.JoinClause) => {
+                                    join_arg
+                                        .on(
+                                            'athletes.id',
+                                            '=',
+                                            'latest_store_visits.athlete_id'
+                                        )
+                                        .andOn(
+                                            'users_athletes.user_id',
+                                            '=',
+                                            'latest_store_visits.user_id'
+                                        )
+                                }
+                            )
+                            .orderBy(
+                                'latest_store_visits.latest_created_at',
+                                'desc'
+                            )
                     }
                     const db_resp: AthleteDataType[] = await athlete_query
                     const ret_value = db_resp.map((resp) => {
@@ -680,6 +748,7 @@ export const UserFetchFollowing = queryType({
                                 image_url: resp?.image_url,
                                 sport: resp?.sport,
                                 description: parsed_mdata?.description,
+                                new_product_count: resp?.new_product_count,
                             }
                         } catch (err) {
                             throw {
@@ -930,16 +999,18 @@ export const UserCreateSale = extendType({
                         })
                         return order_list
                     }
-                    const message = `<html><body><p>Dear ${name}, your order has been confirmed and is being processed. Here are the details: \n<ul>${email_notif_message(
+                    const html_message = `<html><body><p>Dear ${name}, your order has been confirmed and is being processed. Here are the details: \n<ul>${email_notif_message(
                         items_clone
                     )}</ul><br/>Total purchase value: <strong>$${total_value}</strong><br/>Your purchase ID is: <strong>${sale_ref}</strong></p></body></html>`
+                    const plain_text_message = `Dear ${name}, your order with purchase id: ${sale_ref} has been confirmed and is being processed`
                     const headline = 'Successful Purchase'
                     create_sale_notification({
                         knex_client,
                         sale_id,
                         user_id: user_id!,
                         headline,
-                        message,
+                        html_message,
+                        plain_text_message,
                         email: email!,
                     })
                     return {
@@ -1192,7 +1263,7 @@ export const UserFetchAthleteStore = extendType({
                                 'athletes.name as athlete_name',
                                 'athletes.image_url',
                                 knex_client.raw(
-                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time,
+                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time, 'quantity', quantity,
                                     'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)) FROM products WHERE products.athlete_id = ${athlete_id} AND end_time IS NOT NULL AND end_time > CURRENT_TIMESTAMP() ORDER BY created_at DESC LIMIT 1) AS featured`
                                 ),
                                 knex_client.raw(
@@ -1206,6 +1277,7 @@ export const UserFetchAthleteStore = extendType({
                                         'description', products.description,
                                         'exclusive', products.exclusive,
                                         'end_time', products.end_time,
+                                        'quantity', products.quantity,
                                         'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                                       )
                                     )
@@ -1225,6 +1297,7 @@ export const UserFetchAthleteStore = extendType({
                               'exclusive', products.exclusive,
                               'end_time', products.end_time,
                               'metadata', products.metadata,
+                              'quantity', products.quantity,
                               'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                             )
                           )
@@ -1241,6 +1314,7 @@ export const UserFetchAthleteStore = extendType({
                         id: number
                         name: string
                         price: number
+                        quantity: number
                         end_time: string | null
                         exclusive: string
                         media_urls: string[]
@@ -1267,6 +1341,7 @@ export const UserFetchAthleteStore = extendType({
                                 media_url: string
                                 description: string
                                 number_of_views: number
+                                quantity: number
                                 category?: string
                             } = {
                                 id: product.id,
@@ -1277,6 +1352,7 @@ export const UserFetchAthleteStore = extendType({
                                 media_url: (product.media_urls ?? [])[0],
                                 description: product.description,
                                 number_of_views: product.number_of_views,
+                                quantity: product.quantity,
                             }
                             if (product?.metadata) {
                                 norm_product.category =

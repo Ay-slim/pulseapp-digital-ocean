@@ -67,6 +67,7 @@ type AthleteResData {
   id: Int
   image_url: String
   name: String
+  new_product_count: Int
   sport: String
 }
 
@@ -251,7 +252,7 @@ type Query {
   user_fetch_notifications: UserFetchNotificationsResponse!
   user_fetch_product(product_id: Int!): UsersFetchProduct!
   user_fetch_sports: UserFetchSportsResponse!
-  user_following(limit: Int!, next_min_id: Int): UserFetchAthletesResponse!
+  user_following(limit: Int, next_min_id: Int, order_by_store_visits: Boolean): UserFetchAthletesResponse!
   user_unread_notifications: UserUnreadNotificationsResponse!
 }
 

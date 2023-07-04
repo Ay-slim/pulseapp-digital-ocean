@@ -94,6 +94,7 @@ export interface NexusGenObjects {
     id?: number | null; // Int
     image_url?: string | null; // String
     name?: string | null; // String
+    new_product_count?: number | null; // Int
     sport?: string | null; // String
   }
   AthleteSalesData: { // root type
@@ -439,6 +440,7 @@ export interface NexusGenFieldTypes {
     id: number | null; // Int
     image_url: string | null; // String
     name: string | null; // String
+    new_product_count: number | null; // Int
     sport: string | null; // String
   }
   AthleteSalesData: { // field return type
@@ -808,6 +810,7 @@ export interface NexusGenFieldTypeNames {
     id: 'Int'
     image_url: 'String'
     name: 'String'
+    new_product_count: 'Int'
     sport: 'String'
   }
   AthleteSalesData: { // field return type name
@@ -1214,8 +1217,9 @@ export interface NexusGenArgTypes {
       product_id: number; // Int!
     }
     user_following: { // args
-      limit: number; // Int!
+      limit?: number | null; // Int
       next_min_id?: number | null; // Int
+      order_by_store_visits?: boolean | null; // Boolean
     }
   }
 }

@@ -59,6 +59,7 @@ export type UserAthleteStoreType = {
 }
 export type AthleteDataType = SuggestionsDataType & {
     metadata: string
+    new_product_count: number
 }
 
 export type AthleteBioType = {
@@ -379,16 +380,20 @@ export const create_product_notifications = async (args: ProductNotifArgs) => {
                 })
             })
         )
-        const follower_emails = db_resp_dest
-            .filter((resp_val) => {
-                const notif_prefs =
-                    JSON.parse(resp_val.notifications_preference! ?? null) ?? []
-                return notif_prefs.includes('email')
-            })
-            .map((resp_val) => {
-                return resp_val.email
-            })
-        await send_email_notifications(follower_emails, headline, message)
+        if (!process.env.NO_EMAILS) {
+            const follower_emails = db_resp_dest
+                .filter((resp_val) => {
+                    const notif_prefs =
+                        JSON.parse(
+                            resp_val.notifications_preference! ?? null
+                        ) ?? []
+                    return notif_prefs.includes('email')
+                })
+                .map((resp_val) => {
+                    return resp_val.email
+                })
+            await send_email_notifications(follower_emails, headline, message)
+        }
     } catch (err) {
         console.error(err)
     }
@@ -399,12 +404,21 @@ export type SaleNotifArgs = {
     sale_id: number
     user_id: number
     headline: string
-    message: string
+    html_message: string
+    plain_text_message: string
     email: string
 }
 
 export const create_sale_notification = async (args: SaleNotifArgs) => {
-    const { knex_client, sale_id, headline, message, user_id, email } = args
+    const {
+        knex_client,
+        sale_id,
+        headline,
+        html_message,
+        plain_text_message,
+        user_id,
+        email,
+    } = args
     const { notifications_preference }: { notifications_preference: string } =
         await knex_client('interests')
             .select('notifications_preference')
@@ -413,12 +427,12 @@ export const create_sale_notification = async (args: SaleNotifArgs) => {
     await knex_client('notifications').insert({
         user_id,
         sale_id,
-        message,
+        message: plain_text_message,
         headline,
     })
     const notif_prefs: string[] =
         JSON.parse(notifications_preference ?? null) ?? []
-    if (notif_prefs.includes('email')) {
-        await send_email_notifications([email], headline, message)
+    if (notif_prefs.includes('email') && !process.env.NO_EMAILS) {
+        await send_email_notifications([email], headline, html_message)
     }
 }
