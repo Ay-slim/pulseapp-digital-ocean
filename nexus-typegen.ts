@@ -202,6 +202,7 @@ export interface NexusGenObjects {
     currency?: string | null; // String
     description?: string | null; // String
     distance?: string | null; // String
+    end_distance?: string | null; // String
     end_time?: string | null; // String
     exclusive?: boolean | null; // Boolean
     id?: number | null; // Int
@@ -211,6 +212,8 @@ export interface NexusGenObjects {
     number_of_views?: number | null; // Int
     price?: number | null; // Float
     quantity?: number | null; // Int
+    start_distance?: string | null; // String
+    start_time?: string | null; // String
     total_views?: number | null; // Int
     unique_views?: number | null; // Int
   }
@@ -362,6 +365,7 @@ export interface NexusGenObjects {
     athlete_name: string; // String!
     expired_drops?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     featured?: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
+    future_products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     image_url?: string | null; // String
     products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
@@ -567,6 +571,7 @@ export interface NexusGenFieldTypes {
     currency: string | null; // String
     description: string | null; // String
     distance: string | null; // String
+    end_distance: string | null; // String
     end_time: string | null; // String
     exclusive: boolean | null; // Boolean
     id: number | null; // Int
@@ -576,6 +581,8 @@ export interface NexusGenFieldTypes {
     number_of_views: number | null; // Int
     price: number | null; // Float
     quantity: number | null; // Int
+    start_distance: string | null; // String
+    start_time: string | null; // String
     total_views: number | null; // Int
     unique_views: number | null; // Int
   }
@@ -745,6 +752,7 @@ export interface NexusGenFieldTypes {
     athlete_name: string; // String!
     expired_drops: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     featured: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
+    future_products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     image_url: string | null; // String
     products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
@@ -940,6 +948,7 @@ export interface NexusGenFieldTypeNames {
     currency: 'String'
     description: 'String'
     distance: 'String'
+    end_distance: 'String'
     end_time: 'String'
     exclusive: 'Boolean'
     id: 'Int'
@@ -949,6 +958,8 @@ export interface NexusGenFieldTypeNames {
     number_of_views: 'Int'
     price: 'Float'
     quantity: 'Int'
+    start_distance: 'String'
+    start_time: 'String'
     total_views: 'Int'
     unique_views: 'Int'
   }
@@ -1118,6 +1129,7 @@ export interface NexusGenFieldTypeNames {
     athlete_name: 'String'
     expired_drops: 'ProductsTmpl'
     featured: 'ProductsTmpl'
+    future_products: 'ProductsTmpl'
     image_url: 'String'
     products: 'ProductsTmpl'
   }

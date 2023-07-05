@@ -1302,9 +1302,30 @@ export const UserFetchAthleteStore = extendType({
                             )
                           )
                           FROM products
-                          WHERE products.athlete_id = athletes.id AND products.deleted_at IS NULL AND (products.end_time IS NULL OR products.end_time > CURRENT_TIMESTAMP())
+                          WHERE products.athlete_id = athletes.id AND products.deleted_at IS NULL AND (products.end_time IS NULL OR products.end_time > CURRENT_TIMESTAMP()) AND products.start_time < CURRENT_TIMESTAMP()
                         ) AS products
-                      `)
+                      `),
+                                knex_client.raw(`
+                      (
+                        SELECT JSON_ARRAYAGG(
+                          JSON_OBJECT(
+                            'id', products.id,
+                            'name', products.name,
+                            'media_urls', products.media_urls,
+                            'price', products.price,
+                            'description', products.description,
+                            'exclusive', products.exclusive,
+                            'end_time', products.end_time,
+                            'metadata', products.metadata,
+                            'quantity', products.quantity,
+                            'start_time', products.start_time,
+                            'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
+                          )
+                        )
+                        FROM products
+                        WHERE products.athlete_id = athletes.id AND products.deleted_at IS NULL AND (products.end_time IS NULL OR products.end_time > CURRENT_TIMESTAMP()) AND products.start_time > CURRENT_TIMESTAMP()
+                      ) AS future_products
+                    `)
                             )
                             .from('athletes')
                             .where('athletes.id', athlete_id)
@@ -1316,6 +1337,7 @@ export const UserFetchAthleteStore = extendType({
                         price: number
                         quantity: number
                         end_time: string | null
+                        start_time?: string | null
                         exclusive: string
                         media_urls: string[]
                         description: string
@@ -1326,8 +1348,11 @@ export const UserFetchAthleteStore = extendType({
                         JSON.parse(products_resp.products ?? null) ?? []
                     const expired_drops: ProductsRespType[] =
                         JSON.parse(products_resp.expired_drops ?? null) ?? []
+                    const future_products: ProductsRespType[] =
+                        JSON.parse(products_resp.future_products ?? null) ?? []
                     const featured: ProductsRespType =
                         JSON.parse(products_resp.featured ?? null) ?? null
+
                     const media_url_extractor_and_exclusive_bool_converter = (
                         product: ProductsRespType
                     ) => {
@@ -1337,6 +1362,7 @@ export const UserFetchAthleteStore = extendType({
                                 name: string
                                 price: number
                                 end_time: string | null
+                                start_time?: string | null
                                 exclusive: boolean
                                 media_url: string
                                 description: string
@@ -1348,6 +1374,7 @@ export const UserFetchAthleteStore = extendType({
                                 name: product.name,
                                 price: product.price,
                                 end_time: product.end_time,
+                                start_time: product?.start_time,
                                 exclusive: product.exclusive === 'true',
                                 media_url: (product.media_urls ?? [])[0],
                                 description: product.description,
@@ -1362,6 +1389,7 @@ export const UserFetchAthleteStore = extendType({
                         }
                         return null
                     }
+
                     await knex_client('store_visits').insert({
                         user_id,
                         athlete_id,
@@ -1383,6 +1411,9 @@ export const UserFetchAthleteStore = extendType({
                                 media_url_extractor_and_exclusive_bool_converter(
                                     featured
                                 ),
+                            future_products: future_products.map(
+                                media_url_extractor_and_exclusive_bool_converter
+                            ),
                         },
                     }
                 } catch (err) {
@@ -1408,19 +1439,22 @@ export const UserFetchProduct = extendType({
                     const { auth_token, knex_client } = context
                     const { product_id } = args
                     const { user_id } = await login_auth(auth_token, 'user_id')
-                    const extract_distance = (end_time: string | null) => {
-                        if (!end_time) {
+
+                    const extract_distance = (time_val: string | null) => {
+                        if (!time_val) {
                             return null
                         }
-                        return formatDistance(new Date(end_time), new Date(), {
+                        return formatDistance(new Date(time_val), new Date(), {
                             addSuffix: true,
                         })
                     }
+
                     const product: {
                         name: string
                         price: number
                         currency: string
                         end_time: string | null
+                        start_time: string | null
                         exclusive: string
                         quantity: number
                         media_urls: string
@@ -1435,6 +1469,7 @@ export const UserFetchProduct = extendType({
                             'quantity',
                             'exclusive',
                             'end_time',
+                            'start_time',
                             'description',
                             knex_client.raw(
                                 `(SELECT COUNT(*) FROM product_views WHERE product_id = ${product_id}) AS total_views`
@@ -1458,7 +1493,13 @@ export const UserFetchProduct = extendType({
                                 price: product.price,
                                 currency: product.currency,
                                 end_time: product.end_time,
-                                distance: extract_distance(product.end_time),
+                                start_time: product.start_time,
+                                end_distance: extract_distance(
+                                    product.end_time
+                                ),
+                                start_distance: extract_distance(
+                                    product.start_time
+                                ),
                                 exclusive: product.exclusive === 'true',
                                 quantity: product.quantity,
                                 media_urls: JSON.parse(product.media_urls),
