@@ -443,7 +443,7 @@ type UserUnreadNotificationsResponse {
 type UsersAthleteStoreData {
   athlete_name: String!
   expired_drops: [ProductsTmpl]
-  featured: ProductsTmpl
+  featured: [ProductsTmpl]
   future_products: [ProductsTmpl]
   image_url: String
   products: [ProductsTmpl]

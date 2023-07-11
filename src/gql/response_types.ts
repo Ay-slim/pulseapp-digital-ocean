@@ -288,7 +288,7 @@ export const UsersFetchAthleteStore = objectType({
                     t.list.field('expired_drops', {
                         type: ProductsTmpl,
                     })
-                    t.field('featured', {
+                    t.list.field('featured', {
                         type: ProductsTmpl,
                     })
                     t.list.field('future_products', {

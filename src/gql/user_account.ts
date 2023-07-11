@@ -1350,9 +1350,16 @@ export const UserFetchAthleteStore = extendType({
                         JSON.parse(products_resp.expired_drops ?? null) ?? []
                     const future_products: ProductsRespType[] =
                         JSON.parse(products_resp.future_products ?? null) ?? []
-                    const featured: ProductsRespType =
+                    const featured_product: ProductsRespType =
                         JSON.parse(products_resp.featured ?? null) ?? null
 
+                    if (
+                        featured_product &&
+                        Object.keys(featured_product).length > 0
+                    ) {
+                        featured_product['start_time'] = null
+                    }
+                    const featured = future_products.concat([featured_product])
                     const media_url_extractor_and_exclusive_bool_converter = (
                         product: ProductsRespType
                     ) => {
@@ -1407,11 +1414,7 @@ export const UserFetchAthleteStore = extendType({
                             expired_drops: expired_drops.map(
                                 media_url_extractor_and_exclusive_bool_converter
                             ),
-                            featured:
-                                media_url_extractor_and_exclusive_bool_converter(
-                                    featured
-                                ),
-                            future_products: future_products.map(
+                            featured: featured.map(
                                 media_url_extractor_and_exclusive_bool_converter
                             ),
                         },

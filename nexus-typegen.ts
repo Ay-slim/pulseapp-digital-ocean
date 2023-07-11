@@ -364,7 +364,7 @@ export interface NexusGenObjects {
   UsersAthleteStoreData: { // root type
     athlete_name: string; // String!
     expired_drops?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
-    featured?: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
+    featured?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     future_products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     image_url?: string | null; // String
     products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
@@ -751,7 +751,7 @@ export interface NexusGenFieldTypes {
   UsersAthleteStoreData: { // field return type
     athlete_name: string; // String!
     expired_drops: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
-    featured: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
+    featured: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     future_products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     image_url: string | null; // String
     products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
