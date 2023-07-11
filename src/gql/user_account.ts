@@ -1302,7 +1302,7 @@ export const UserFetchAthleteStore = extendType({
                             )
                           )
                           FROM products
-                          WHERE products.athlete_id = athletes.id AND products.deleted_at IS NULL AND (products.end_time IS NULL OR products.end_time > CURRENT_TIMESTAMP()) AND products.start_time < CURRENT_TIMESTAMP()
+                          WHERE products.athlete_id = athletes.id AND products.deleted_at IS NULL AND (products.end_time IS NULL OR products.end_time > CURRENT_TIMESTAMP()) AND (products.start_time IS NULL OR products.start_time < CURRENT_TIMESTAMP())
                         ) AS products
                       `),
                                 knex_client.raw(`
