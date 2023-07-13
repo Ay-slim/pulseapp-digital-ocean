@@ -226,6 +226,7 @@ type ProductsTmpl {
   currency: String
   description: String
   distance: String
+  end_distance: String
   end_time: String
   exclusive: Boolean
   id: Int
@@ -235,6 +236,8 @@ type ProductsTmpl {
   number_of_views: Int
   price: Float
   quantity: Int
+  start_distance: String
+  start_time: String
   total_views: Int
   unique_views: Int
 }
@@ -440,7 +443,8 @@ type UserUnreadNotificationsResponse {
 type UsersAthleteStoreData {
   athlete_name: String!
   expired_drops: [ProductsTmpl]
-  featured: ProductsTmpl
+  featured: [ProductsTmpl]
+  future_products: [ProductsTmpl]
   image_url: String
   products: [ProductsTmpl]
 }

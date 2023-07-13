@@ -56,6 +56,7 @@ export type UserAthleteStoreType = {
     products: string
     expired_drops: string
     featured: string
+    future_products: string
 }
 export type AthleteDataType = SuggestionsDataType & {
     metadata: string

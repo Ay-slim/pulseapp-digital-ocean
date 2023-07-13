@@ -257,6 +257,7 @@ export const ProductsTmpl = objectType({
             t.string('currency')
         t.string('category')
         t.string('end_time')
+        t.string('start_time')
         t.boolean('exclusive')
         t.int('quantity')
         t.string('description')
@@ -264,6 +265,8 @@ export const ProductsTmpl = objectType({
         t.int('total_views')
         t.int('unique_views')
         t.string('distance')
+        t.string('start_distance')
+        t.string('end_distance')
     },
 })
 
@@ -285,7 +288,10 @@ export const UsersFetchAthleteStore = objectType({
                     t.list.field('expired_drops', {
                         type: ProductsTmpl,
                     })
-                    t.field('featured', {
+                    t.list.field('featured', {
+                        type: ProductsTmpl,
+                    })
+                    t.list.field('future_products', {
                         type: ProductsTmpl,
                     })
                 },
