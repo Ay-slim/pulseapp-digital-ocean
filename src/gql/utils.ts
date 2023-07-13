@@ -408,6 +408,8 @@ export type SaleNotifArgs = {
     html_message: string
     plain_text_message: string
     email: string
+    sale_ref: string
+    total_value: number
 }
 
 export const create_sale_notification = async (args: SaleNotifArgs) => {
@@ -419,6 +421,8 @@ export const create_sale_notification = async (args: SaleNotifArgs) => {
         plain_text_message,
         user_id,
         email,
+        sale_ref,
+        total_value,
     } = args
     const { notifications_preference }: { notifications_preference: string } =
         await knex_client('interests')
@@ -435,5 +439,35 @@ export const create_sale_notification = async (args: SaleNotifArgs) => {
         JSON.parse(notifications_preference ?? null) ?? []
     if (notif_prefs.includes('email') && !process.env.NO_EMAILS) {
         await send_email_notifications([email], headline, html_message)
+    }
+    if (['development', 'staging'].includes(process.env.NODE_ENV!)) {
+        await setTimeout(async () => {
+            const sale_html_message = `<html><body><p>Your payment of $${total_value} was successful for your purchase with ref: ${sale_ref}. You have now received 5 extra points!</p></body></html>`
+            send_email_notifications(
+                [email],
+                'Payment Successful',
+                sale_html_message
+            )
+            const { total: current_total_points } = await knex_client('points')
+                .select('total')
+                .where({ user_id })
+                .orderBy('id', 'desc')
+                .limit(1)
+                .first()
+            await Promise.all([
+                knex_client('points').insert({
+                    user_id,
+                    units: 5,
+                    total: current_total_points + 5,
+                    event: 'sale',
+                }),
+                knex_client('notifications').insert({
+                    user_id,
+                    headline: '5 purchase points!',
+                    message: `You have just gained 5 extra points for your purchase with ref: ${sale_ref}`,
+                    event: 'point',
+                }),
+            ])
+        }, 300000)
     }
 }
