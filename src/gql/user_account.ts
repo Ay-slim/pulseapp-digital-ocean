@@ -834,6 +834,7 @@ export const UserFetchActivity = extendType({
                     }
                     const points_query = knex_client('points')
                         .select('total')
+                        .where({ user_id })
                         .orderBy('id', 'desc')
                         .limit(1)
                         .first()
@@ -1012,6 +1013,8 @@ export const UserCreateSale = extendType({
                         html_message,
                         plain_text_message,
                         email: email!,
+                        sale_ref,
+                        total_value,
                     })
                     return {
                         status: 201,
