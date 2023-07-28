@@ -534,3 +534,39 @@ export const UserCreateSaleResponse = objectType({
         })
     },
 })
+
+//Scraping response types
+
+const ProfileTmpl = objectType({
+    name: 'ProfileTmpl',
+    definition(t) {
+        t.string('bio')
+        t.string('full_name')
+        t.string('username')
+        t.int('no_of_posts')
+        t.int('following')
+        t.int('followers')
+        t.string('profile_pic_url')
+        t.boolean('is_private')
+        t.boolean('can_crawl_all_followers')
+    },
+})
+
+export const ProfileDetailsQuery = objectType({
+    name: 'ProfileDetailsQuery',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'ProfileDetailsData',
+                definition(t) {
+                    t.field('profile_details', {
+                        type: ProfileTmpl,
+                    })
+                },
+            }),
+        })
+    },
+})

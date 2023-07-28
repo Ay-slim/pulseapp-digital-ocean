@@ -254,6 +254,29 @@ type ProductsTmpl {
   unique_views: Int
 }
 
+type ProfileDetailsData {
+  profile_details: ProfileTmpl
+}
+
+type ProfileDetailsQuery {
+  data: ProfileDetailsData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type ProfileTmpl {
+  bio: String
+  can_crawl_all_followers: Boolean
+  followers: Int
+  following: Int
+  full_name: String
+  is_private: Boolean
+  no_of_posts: Int
+  profile_pic_url: String
+  username: String
+}
+
 type Query {
   athlete_fetch_products: AthleteProductsFetchResponse!
   athlete_fetch_rankings: AthleteFetchRankingsResponse!
@@ -263,6 +286,7 @@ type Query {
   fetch_athlete_sales: AthleteSalesResponse!
   fetch_athlete_top_followers: AthleteTopFollowersResponse!
   fetch_user_suggestions: UserFetchSuggestionsResponse!
+  profile_details(username: String!): ProfileDetailsQuery!
   user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
   user_fetch_athlete_store(athlete_id: Int!): UsersFetchAthleteStore!
   user_fetch_delivery_details: DeliveryDetailsResponse!
