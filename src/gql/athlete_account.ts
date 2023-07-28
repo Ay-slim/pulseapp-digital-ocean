@@ -21,6 +21,7 @@ import {
     AthleteSalesResponse,
     AthleteSettingsFetchResponse,
     AthleteProductsFetchResponse,
+    AthleteFetchRankingsResponse,
 } from './response_types'
 
 dotenv.config()
@@ -657,6 +658,57 @@ export const AthleteFetchSettingsQuery = extendType({
                                 notifications_preference:
                                     metadata.notifications_preference,
                             },
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteFetchFollowersRanking = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('athlete_fetch_rankings', {
+            type: AthleteFetchRankingsResponse,
+            args: {},
+            async resolve(_, __, context) {
+                try {
+                    const { athlete_id } = await login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )
+                    const { knex_client } = context
+                    const fan_rankings_raw: { fan_rankings: string }[][] =
+                        await knex_client.raw(`
+                        SELECT fan_rankings
+                        FROM ig_fb_followers
+                        WHERE athlete_id = ${athlete_id}
+                        AND batch_id = (
+                            SELECT MAX(batch_id)
+                            FROM ig_fb_followers
+                            WHERE athlete_id = ${athlete_id}
+                        );`)
+                    //console.log(fan_rankings_raw[0])
+                    const fan_rankings: {
+                        username: string
+                        is_follower: boolean
+                        average_sentiment: number
+                        interaction_score: number
+                    }[] = fan_rankings_raw[0].length
+                        ? JSON.parse(fan_rankings_raw[0][0]?.fan_rankings)
+                        : []
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            platform: 'Instagram',
+                            fan_rankings,
                         },
                     }
                 } catch (err) {

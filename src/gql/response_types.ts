@@ -338,6 +338,36 @@ export const AthleteProductsFetchResponse = objectType({
     },
 })
 
+export const RankingsTmpl = objectType({
+    name: 'RankingsTmpl',
+    definition(t) {
+        t.string('username')
+        t.boolean('is_follower')
+        t.float('average_sentiment')
+        t.float('interaction_score')
+    },
+})
+
+export const AthleteFetchRankingsResponse = objectType({
+    name: 'AthleteFetchRankingsResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'AthletesRankingsFetchData',
+                definition(t) {
+                    t.list.field('fan_rankings', {
+                        type: RankingsTmpl,
+                    })
+                    t.string('platform')
+                },
+            }),
+        })
+    },
+})
+
 const SettingsTmpl = objectType({
     name: 'SettingsTmpl',
     definition(t) {
@@ -499,6 +529,42 @@ export const UserCreateSaleResponse = objectType({
                 name: 'CreateSalesData',
                 definition(t) {
                     t.nonNull.string('sale_ref')
+                },
+            }),
+        })
+    },
+})
+
+//Scraping response types
+
+const ProfileTmpl = objectType({
+    name: 'ProfileTmpl',
+    definition(t) {
+        t.string('bio')
+        t.string('full_name')
+        t.string('username')
+        t.int('no_of_posts')
+        t.int('following')
+        t.int('followers')
+        t.string('profile_pic_url')
+        t.boolean('is_private')
+        t.boolean('can_crawl_all_followers')
+    },
+})
+
+export const ProfileDetailsQuery = objectType({
+    name: 'ProfileDetailsQuery',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'ProfileDetailsData',
+                definition(t) {
+                    t.field('profile_details', {
+                        type: ProfileTmpl,
+                    })
                 },
             }),
         })

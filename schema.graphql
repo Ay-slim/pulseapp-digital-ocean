@@ -55,6 +55,13 @@ type AthleteFetchBasicsResponseData {
   athlete_bio: AthleteBasicStats
 }
 
+type AthleteFetchRankingsResponse {
+  data: AthletesRankingsFetchData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
 type AthleteProductsFetchResponse {
   data: AthletesProductData
   error: Boolean!
@@ -111,6 +118,11 @@ type AthleteTopFollowersResponse {
 
 type AthletesProductData {
   products: [ProductsTmpl]
+}
+
+type AthletesRankingsFetchData {
+  fan_rankings: [RankingsTmpl]
+  platform: String
 }
 
 type AuthData {
@@ -242,14 +254,39 @@ type ProductsTmpl {
   unique_views: Int
 }
 
+type ProfileDetailsData {
+  profile_details: ProfileTmpl
+}
+
+type ProfileDetailsQuery {
+  data: ProfileDetailsData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
+type ProfileTmpl {
+  bio: String
+  can_crawl_all_followers: Boolean
+  followers: Int
+  following: Int
+  full_name: String
+  is_private: Boolean
+  no_of_posts: Int
+  profile_pic_url: String
+  username: String
+}
+
 type Query {
   athlete_fetch_products: AthleteProductsFetchResponse!
+  athlete_fetch_rankings: AthleteFetchRankingsResponse!
   athlete_fetch_settings: AthleteSettingsFetchResponse!
   athletes(limit: Int!, next_min_id: Int, sports: [String]!): UserFetchAthletesResponse!
   fetch_athlete_basics: AthleteFetchBasicsResponse!
   fetch_athlete_sales: AthleteSalesResponse!
   fetch_athlete_top_followers: AthleteTopFollowersResponse!
   fetch_user_suggestions: UserFetchSuggestionsResponse!
+  profile_details(username: String!): ProfileDetailsQuery!
   user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
   user_fetch_athlete_store(athlete_id: Int!): UsersFetchAthleteStore!
   user_fetch_delivery_details: DeliveryDetailsResponse!
@@ -260,6 +297,13 @@ type Query {
   user_fetch_sports: UserFetchSportsResponse!
   user_following(limit: Int, next_min_id: Int, order_by_store_visits: Boolean): UserFetchAthletesResponse!
   user_unread_notifications: UserUnreadNotificationsResponse!
+}
+
+type RankingsTmpl {
+  average_sentiment: Float
+  interaction_score: Float
+  is_follower: Boolean
+  username: String
 }
 
 input SaleProductTmpl {
