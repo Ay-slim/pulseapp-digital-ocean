@@ -6,7 +6,10 @@
       "strict": true,
       "esModuleInterop": true,
       "outDir": "dist",
-      "lib": ["es2018", "esnext.asynciterable"]
+      "lib": ["es2018", "esnext.asynciterable", "dom"],
+      "types": [
+        "node"
+      ]
   },
   "exclude": ["node_modules"]
 }
