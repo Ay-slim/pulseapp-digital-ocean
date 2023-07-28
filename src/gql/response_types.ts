@@ -338,6 +338,36 @@ export const AthleteProductsFetchResponse = objectType({
     },
 })
 
+export const RankingsTmpl = objectType({
+    name: 'RankingsTmpl',
+    definition(t) {
+        t.string('username')
+        t.boolean('is_follower')
+        t.float('average_sentiment')
+        t.float('interaction_score')
+    },
+})
+
+export const AthleteFetchRankingsResponse = objectType({
+    name: 'AthleteFetchRankingsResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'AthletesRankingsFetchData',
+                definition(t) {
+                    t.list.field('fan_rankings', {
+                        type: RankingsTmpl,
+                    })
+                    t.string('platform')
+                },
+            }),
+        })
+    },
+})
+
 const SettingsTmpl = objectType({
     name: 'SettingsTmpl',
     definition(t) {

@@ -83,6 +83,12 @@ export interface NexusGenObjects {
   AthleteFetchBasicsResponseData: { // root type
     athlete_bio?: NexusGenRootTypes['AthleteBasicStats'] | null; // AthleteBasicStats
   }
+  AthleteFetchRankingsResponse: { // root type
+    data?: NexusGenRootTypes['AthletesRankingsFetchData'] | null; // AthletesRankingsFetchData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
   AthleteProductsFetchResponse: { // root type
     data?: NexusGenRootTypes['AthletesProductData'] | null; // AthletesProductData
     error: boolean; // Boolean!
@@ -130,6 +136,10 @@ export interface NexusGenObjects {
   }
   AthletesProductData: { // root type
     products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+  }
+  AthletesRankingsFetchData: { // root type
+    fan_rankings?: Array<NexusGenRootTypes['RankingsTmpl'] | null> | null; // [RankingsTmpl]
+    platform?: string | null; // String
   }
   AuthData: { // root type
     athlete_bio?: NexusGenRootTypes['AthleteBio'] | null; // AthleteBio
@@ -218,6 +228,12 @@ export interface NexusGenObjects {
     unique_views?: number | null; // Int
   }
   Query: {};
+  RankingsTmpl: { // root type
+    average_sentiment?: number | null; // Float
+    interaction_score?: number | null; // Float
+    is_follower?: boolean | null; // Boolean
+    username?: string | null; // String
+  }
   Sales: { // root type
     month?: string | null; // String
     total_sales?: number | null; // Float
@@ -436,6 +452,12 @@ export interface NexusGenFieldTypes {
   AthleteFetchBasicsResponseData: { // field return type
     athlete_bio: NexusGenRootTypes['AthleteBasicStats'] | null; // AthleteBasicStats
   }
+  AthleteFetchRankingsResponse: { // field return type
+    data: NexusGenRootTypes['AthletesRankingsFetchData'] | null; // AthletesRankingsFetchData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
   AthleteProductsFetchResponse: { // field return type
     data: NexusGenRootTypes['AthletesProductData'] | null; // AthletesProductData
     error: boolean; // Boolean!
@@ -483,6 +505,10 @@ export interface NexusGenFieldTypes {
   }
   AthletesProductData: { // field return type
     products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+  }
+  AthletesRankingsFetchData: { // field return type
+    fan_rankings: Array<NexusGenRootTypes['RankingsTmpl'] | null> | null; // [RankingsTmpl]
+    platform: string | null; // String
   }
   AuthData: { // field return type
     athlete_bio: NexusGenRootTypes['AthleteBio'] | null; // AthleteBio
@@ -588,6 +614,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     athlete_fetch_products: NexusGenRootTypes['AthleteProductsFetchResponse']; // AthleteProductsFetchResponse!
+    athlete_fetch_rankings: NexusGenRootTypes['AthleteFetchRankingsResponse']; // AthleteFetchRankingsResponse!
     athlete_fetch_settings: NexusGenRootTypes['AthleteSettingsFetchResponse']; // AthleteSettingsFetchResponse!
     athletes: NexusGenRootTypes['UserFetchAthletesResponse']; // UserFetchAthletesResponse!
     fetch_athlete_basics: NexusGenRootTypes['AthleteFetchBasicsResponse']; // AthleteFetchBasicsResponse!
@@ -604,6 +631,12 @@ export interface NexusGenFieldTypes {
     user_fetch_sports: NexusGenRootTypes['UserFetchSportsResponse']; // UserFetchSportsResponse!
     user_following: NexusGenRootTypes['UserFetchAthletesResponse']; // UserFetchAthletesResponse!
     user_unread_notifications: NexusGenRootTypes['UserUnreadNotificationsResponse']; // UserUnreadNotificationsResponse!
+  }
+  RankingsTmpl: { // field return type
+    average_sentiment: number | null; // Float
+    interaction_score: number | null; // Float
+    is_follower: boolean | null; // Boolean
+    username: string | null; // String
   }
   Sales: { // field return type
     month: string | null; // String
@@ -813,6 +846,12 @@ export interface NexusGenFieldTypeNames {
   AthleteFetchBasicsResponseData: { // field return type name
     athlete_bio: 'AthleteBasicStats'
   }
+  AthleteFetchRankingsResponse: { // field return type name
+    data: 'AthletesRankingsFetchData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
   AthleteProductsFetchResponse: { // field return type name
     data: 'AthletesProductData'
     error: 'Boolean'
@@ -860,6 +899,10 @@ export interface NexusGenFieldTypeNames {
   }
   AthletesProductData: { // field return type name
     products: 'ProductsTmpl'
+  }
+  AthletesRankingsFetchData: { // field return type name
+    fan_rankings: 'RankingsTmpl'
+    platform: 'String'
   }
   AuthData: { // field return type name
     athlete_bio: 'AthleteBio'
@@ -965,6 +1008,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     athlete_fetch_products: 'AthleteProductsFetchResponse'
+    athlete_fetch_rankings: 'AthleteFetchRankingsResponse'
     athlete_fetch_settings: 'AthleteSettingsFetchResponse'
     athletes: 'UserFetchAthletesResponse'
     fetch_athlete_basics: 'AthleteFetchBasicsResponse'
@@ -981,6 +1025,12 @@ export interface NexusGenFieldTypeNames {
     user_fetch_sports: 'UserFetchSportsResponse'
     user_following: 'UserFetchAthletesResponse'
     user_unread_notifications: 'UserUnreadNotificationsResponse'
+  }
+  RankingsTmpl: { // field return type name
+    average_sentiment: 'Float'
+    interaction_score: 'Float'
+    is_follower: 'Boolean'
+    username: 'String'
   }
   Sales: { // field return type name
     month: 'String'

@@ -55,6 +55,13 @@ type AthleteFetchBasicsResponseData {
   athlete_bio: AthleteBasicStats
 }
 
+type AthleteFetchRankingsResponse {
+  data: AthletesRankingsFetchData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
 type AthleteProductsFetchResponse {
   data: AthletesProductData
   error: Boolean!
@@ -111,6 +118,11 @@ type AthleteTopFollowersResponse {
 
 type AthletesProductData {
   products: [ProductsTmpl]
+}
+
+type AthletesRankingsFetchData {
+  fan_rankings: [RankingsTmpl]
+  platform: String
 }
 
 type AuthData {
@@ -244,6 +256,7 @@ type ProductsTmpl {
 
 type Query {
   athlete_fetch_products: AthleteProductsFetchResponse!
+  athlete_fetch_rankings: AthleteFetchRankingsResponse!
   athlete_fetch_settings: AthleteSettingsFetchResponse!
   athletes(limit: Int!, next_min_id: Int, sports: [String]!): UserFetchAthletesResponse!
   fetch_athlete_basics: AthleteFetchBasicsResponse!
@@ -260,6 +273,13 @@ type Query {
   user_fetch_sports: UserFetchSportsResponse!
   user_following(limit: Int, next_min_id: Int, order_by_store_visits: Boolean): UserFetchAthletesResponse!
   user_unread_notifications: UserUnreadNotificationsResponse!
+}
+
+type RankingsTmpl {
+  average_sentiment: Float
+  interaction_score: Float
+  is_follower: Boolean
+  username: String
 }
 
 input SaleProductTmpl {
