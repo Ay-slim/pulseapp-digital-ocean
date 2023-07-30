@@ -9,6 +9,7 @@ import {
     month_map,
     create_product_notifications,
     ProductNotifArgs,
+    rank_kizuna_followers,
 } from './utils'
 import { err_return, create_jwt_token } from './utils'
 import bcrypt from 'bcryptjs'
@@ -683,7 +684,7 @@ export const AthleteFetchFollowersRanking = extendType({
                         'athlete_id'
                     )
                     const { knex_client } = context
-                    const fan_rankings_raw: { fan_rankings: string }[][] =
+                    const insta_fan_rankings_raw: { fan_rankings: string }[][] =
                         await knex_client.raw(`
                         SELECT fan_rankings
                         FROM ig_fb_followers
@@ -694,21 +695,24 @@ export const AthleteFetchFollowersRanking = extendType({
                             WHERE athlete_id = ${athlete_id}
                         );`)
                     //console.log(fan_rankings_raw[0])
-                    const fan_rankings: {
+                    const insta_fan_rankings: {
                         username: string
                         is_follower: boolean
                         average_sentiment: number
                         interaction_score: number
-                    }[] = fan_rankings_raw[0].length
-                        ? JSON.parse(fan_rankings_raw[0][0]?.fan_rankings)
+                    }[] = insta_fan_rankings_raw[0].length
+                        ? JSON.parse(insta_fan_rankings_raw[0][0]?.fan_rankings)
                         : []
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
-                            platform: 'Instagram',
-                            fan_rankings,
+                            instagram: insta_fan_rankings,
+                            kizuna: await rank_kizuna_followers(
+                                athlete_id!,
+                                knex_client
+                            ),
                         },
                     }
                 } catch (err) {

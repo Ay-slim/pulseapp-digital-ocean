@@ -3,9 +3,11 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import { Knex } from 'knex'
 import nodemailer, { TransportOptions } from 'nodemailer'
+//import knex_config from '../db/knexfile'
 
 dotenv.config()
-
+//const env = process.env.NODE_ENV
+//const knex_client = knex(knex_config[env!])
 type JwtPayloadWithId = JwtPayload & {
     user_id?: number
     athlete_id?: number
@@ -475,3 +477,112 @@ export const create_sale_notification = async (args: SaleNotifArgs) => {
         ])
     }, 120000)
 }
+
+type KizunaMetrics = {
+    user_id: number
+    name: string
+    email: string
+    sales_count: number
+    views_count: number
+    visits_count: number
+    interaction_score: number
+}
+
+export const rank_kizuna_followers = async (
+    athlete_id: number,
+    knex_client: Knex
+) => {
+    const sales_count: {
+        user_id: number
+        name: string
+        email: string
+        sales_count: number
+    }[][] =
+        (await knex_client.raw(
+            `SELECT sp.user_id, u.name, u.email, COUNT(*) AS sales_count FROM sales_products sp LEFT JOIN products p ON sp.product_id=p.id LEFT JOIN users u ON sp.user_id=u.id WHERE p.athlete_id=${athlete_id} GROUP BY sp.user_id;`
+        )) ?? []
+    const product_views: {
+        user_id: number
+        name: string
+        email: string
+        views_count: number
+    }[][] =
+        (await knex_client.raw(
+            `SELECT pv.user_id, u.name, u.email, COUNT(*) AS views_count FROM product_views pv LEFT JOIN products p ON pv.product_id=p.id LEFT JOIN users u ON pv.user_id=u.id WHERE p.athlete_id=${athlete_id} GROUP BY pv.user_id;`
+        )) ?? []
+    const store_visits: {
+        user_id: number
+        name: string
+        email: string
+        visits_count: number
+    }[][] =
+        (await knex_client.raw(
+            `SELECT sv.user_id, u.name, u.email, COUNT(*) AS visits_count FROM store_visits sv LEFT JOIN users u ON sv.user_id=u.id WHERE sv.athlete_id=${athlete_id} GROUP BY sv.user_id;`
+        )) ?? []
+    //console.log(sales_count, 'Count', product_views, 'vies', store_visits, 'visits')
+    /**
+     * Merges all three metrics into an object with the user_id as key
+     */
+    if (!sales_count.length && !product_views.length && !store_visits.length) {
+        return []
+    }
+    const aggregated_metrics: { [key: string]: KizunaMetrics } = {}
+    for (const i of sales_count[0]) {
+        aggregated_metrics[i.user_id] = {
+            user_id: i.user_id,
+            name: i.name,
+            email: i.email,
+            sales_count: i.sales_count,
+            views_count: 0,
+            visits_count: 0,
+            interaction_score: 0,
+        }
+    }
+    for (const j of product_views[0]) {
+        if (!aggregated_metrics[j.user_id]) {
+            aggregated_metrics[j.user_id] = {
+                user_id: j.user_id,
+                name: j.name,
+                email: j.email,
+                sales_count: 0,
+                views_count: j.views_count,
+                visits_count: 0,
+                interaction_score: 0,
+            }
+        } else {
+            aggregated_metrics[j.user_id].views_count += j.views_count
+        }
+    }
+    for (const k of store_visits[0]) {
+        if (!aggregated_metrics[k.user_id]) {
+            aggregated_metrics[k.user_id] = {
+                user_id: k.user_id,
+                name: k.name,
+                email: k.email,
+                sales_count: 0,
+                views_count: 0,
+                visits_count: k.visits_count,
+                interaction_score: 0,
+            }
+        } else {
+            aggregated_metrics[k.user_id].visits_count += k.visits_count
+        }
+    }
+
+    /**
+     * Create an array of all metrics, calculate interaction score and sort
+     */
+    const metrics_list: KizunaMetrics[] = []
+    for (const l in aggregated_metrics) {
+        aggregated_metrics[l].interaction_score =
+            2 * aggregated_metrics[l].sales_count +
+            1.5 * aggregated_metrics[l].views_count +
+            1.2 * aggregated_metrics[l].visits_count
+        metrics_list.push(aggregated_metrics[l])
+    }
+    metrics_list.sort((a, b) => b.interaction_score - a.interaction_score)
+    //console.log(metrics_list)
+    return metrics_list
+}
+
+//rank_kizuna_followers(1, knex_client)
