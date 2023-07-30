@@ -280,7 +280,7 @@ export const UserAddInterests = extendType({
                         knex_client('users').where('id', user_id).update({
                             info_completion: 'complete',
                         }),
-                        ...athletes.map((athlete_id) => {
+                        ...athletes.map((athlete_id: number | null) => {
                             return knex_client('users_athletes').insert({
                                 athlete_id,
                                 user_id,
@@ -926,12 +926,20 @@ export const UserCreateSale = extendType({
                     const { knex_client } = context
                     const remaining_qtys: { quantity: number; name: string }[] =
                         await Promise.all(
-                            items.map((item) => {
-                                return knex_client('products')
-                                    .select('quantity', 'name')
-                                    .where('id', item?.product_id)
-                                    .first()
-                            })
+                            items.map(
+                                (
+                                    item: {
+                                        price: number
+                                        product_id: number
+                                        quantity: number
+                                    } | null
+                                ) => {
+                                    return knex_client('products')
+                                        .select('quantity', 'name')
+                                        .where('id', item?.product_id)
+                                        .first()
+                                }
+                            )
                         )
                     const item_len = remaining_qtys.length
                     type ItemsCloneType = {
@@ -941,11 +949,13 @@ export const UserCreateSale = extendType({
                         new_qty?: number
                         name?: string
                     }
-                    const items_clone: ItemsCloneType[] = items.map((item) => ({
-                        price: item!.price,
-                        product_id: item!.product_id,
-                        quantity: item!.quantity,
-                    }))
+                    const items_clone: ItemsCloneType[] = items.map(
+                        (item: ItemsCloneType | null) => ({
+                            price: item!.price,
+                            product_id: item!.product_id,
+                            quantity: item!.quantity,
+                        })
+                    )
                     for (let i = 0; i < item_len; i++) {
                         //Calculate the new quantity for each product after current sale
                         items_clone[i]!.new_qty =
@@ -968,14 +978,22 @@ export const UserCreateSale = extendType({
                         'sales'
                     ).insert({ user_id, total_value, sale_ref }, ['id'])
                     await Promise.all([
-                        ...items.map((item) => {
-                            return knex_client('sales_products').insert({
-                                user_id,
-                                sale_id,
-                                product_id: item!.product_id,
-                                quantity: item!.quantity,
-                            })
-                        }),
+                        ...items.map(
+                            (
+                                item: {
+                                    price: number
+                                    product_id: number
+                                    quantity: number
+                                } | null
+                            ) => {
+                                return knex_client('sales_products').insert({
+                                    user_id,
+                                    sale_id,
+                                    product_id: item!.product_id,
+                                    quantity: item!.quantity,
+                                })
+                            }
+                        ),
                         ...items_clone.map((item) => {
                             return knex_client('products')
                                 .update({

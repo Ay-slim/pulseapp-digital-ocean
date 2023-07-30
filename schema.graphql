@@ -121,8 +121,8 @@ type AthletesProductData {
 }
 
 type AthletesRankingsFetchData {
-  fan_rankings: [RankingsTmpl]
-  platform: String
+  instagram: [InstRankingsTmpl]
+  kizuna: [KizunaRankingsTmpl]
 }
 
 type AuthData {
@@ -189,6 +189,23 @@ enum GenderEnum {
   male
   nonbinary
   other
+}
+
+type InstRankingsTmpl {
+  average_sentiment: Float
+  interaction_score: Float
+  is_follower: Boolean
+  username: String
+}
+
+type KizunaRankingsTmpl {
+  email: String
+  interaction_score: Float
+  name: String
+  sales_count: Int
+  user_id: Int
+  views_count: Int
+  visits_count: Int
 }
 
 type Mutation {
@@ -297,13 +314,6 @@ type Query {
   user_fetch_sports: UserFetchSportsResponse!
   user_following(limit: Int, next_min_id: Int, order_by_store_visits: Boolean): UserFetchAthletesResponse!
   user_unread_notifications: UserUnreadNotificationsResponse!
-}
-
-type RankingsTmpl {
-  average_sentiment: Float
-  interaction_score: Float
-  is_follower: Boolean
-  username: String
 }
 
 input SaleProductTmpl {

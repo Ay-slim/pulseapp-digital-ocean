@@ -338,12 +338,25 @@ export const AthleteProductsFetchResponse = objectType({
     },
 })
 
-export const RankingsTmpl = objectType({
-    name: 'RankingsTmpl',
+const InstaRankingsTmpl = objectType({
+    name: 'InstRankingsTmpl',
     definition(t) {
         t.string('username')
         t.boolean('is_follower')
         t.float('average_sentiment')
+        t.float('interaction_score')
+    },
+})
+
+const KizunaRankingsTmpl = objectType({
+    name: 'KizunaRankingsTmpl',
+    definition(t) {
+        t.int('user_id')
+        t.string('name')
+        t.string('email')
+        t.int('sales_count')
+        t.int('views_count')
+        t.int('visits_count')
         t.float('interaction_score')
     },
 })
@@ -358,10 +371,12 @@ export const AthleteFetchRankingsResponse = objectType({
             type: objectType({
                 name: 'AthletesRankingsFetchData',
                 definition(t) {
-                    t.list.field('fan_rankings', {
-                        type: RankingsTmpl,
+                    t.list.field('instagram', {
+                        type: InstaRankingsTmpl,
                     })
-                    t.string('platform')
+                    t.list.field('kizuna', {
+                        type: KizunaRankingsTmpl,
+                    })
                 },
             }),
         })
