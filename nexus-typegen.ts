@@ -103,15 +103,6 @@ export interface NexusGenObjects {
     new_product_count?: number | null; // Int
     sport?: string | null; // String
   }
-  AthleteSalesData: { // root type
-    sales?: Array<NexusGenRootTypes['SalesTmpl'] | null> | null; // [SalesTmpl]
-  }
-  AthleteSalesResponse: { // root type
-    data?: NexusGenRootTypes['AthleteSalesData'] | null; // AthleteSalesData
-    error: boolean; // Boolean!
-    message: string; // String!
-    status: number; // Int!
-  }
   AthleteSettings: { // root type
     description?: string | null; // String
     notifications_preference?: Array<string | null> | null; // [String]
@@ -138,7 +129,7 @@ export interface NexusGenObjects {
     products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   AthletesRankingsFetchData: { // root type
-    instagram?: Array<NexusGenRootTypes['InstRankingsTmpl'] | null> | null; // [InstRankingsTmpl]
+    instagram?: NexusGenRootTypes['InstagramData'] | null; // InstagramData
     kizuna?: Array<NexusGenRootTypes['KizunaRankingsTmpl'] | null> | null; // [KizunaRankingsTmpl]
   }
   AuthData: { // root type
@@ -185,11 +176,22 @@ export interface NexusGenObjects {
     message: string; // String!
     status: number; // Int!
   }
+  InstPostsSentTmpl: { // root type
+    average_sentiment?: number | null; // Float
+    caption?: string | null; // String
+    media_url?: string | null; // String
+    post_id?: string | null; // String
+  }
   InstRankingsTmpl: { // root type
     average_sentiment?: number | null; // Float
     interaction_score?: number | null; // Float
     is_follower?: boolean | null; // Boolean
     username?: string | null; // String
+  }
+  InstagramData: { // root type
+    fans_ranking?: Array<NexusGenRootTypes['InstRankingsTmpl'] | null> | null; // [InstRankingsTmpl]
+    posts_analysis?: Array<NexusGenRootTypes['InstPostsSentTmpl'] | null> | null; // [InstPostsSentTmpl]
+    profile_details?: NexusGenRootTypes['ProfileTmpl'] | null; // ProfileTmpl
   }
   KizunaRankingsTmpl: { // root type
     email?: string | null; // String
@@ -276,6 +278,17 @@ export interface NexusGenObjects {
   SettingsTmpl: { // root type
     description?: string | null; // String
     notifications_preference?: Array<string | null> | null; // [String]
+  }
+  StoreAnalyticsData: { // root type
+    sales?: Array<NexusGenRootTypes['SalesTmpl'] | null> | null; // [SalesTmpl]
+    todays_visits?: number | null; // Int
+    week_visits?: Array<NexusGenRootTypes['WeeksVisits'] | null> | null; // [WeeksVisits]
+  }
+  StoreAnalyticsresponse: { // root type
+    data?: NexusGenRootTypes['StoreAnalyticsData'] | null; // StoreAnalyticsData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
   }
   SuggestionsData: { // root type
     id?: number | null; // Int
@@ -429,6 +442,11 @@ export interface NexusGenObjects {
   UsersProductData: { // root type
     product?: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
   }
+  WeeksVisits: { // root type
+    count?: number | null; // Int
+    date?: string | null; // String
+    day_of_week?: string | null; // String
+  }
 }
 
 export interface NexusGenInterfaces {
@@ -501,15 +519,6 @@ export interface NexusGenFieldTypes {
     new_product_count: number | null; // Int
     sport: string | null; // String
   }
-  AthleteSalesData: { // field return type
-    sales: Array<NexusGenRootTypes['SalesTmpl'] | null> | null; // [SalesTmpl]
-  }
-  AthleteSalesResponse: { // field return type
-    data: NexusGenRootTypes['AthleteSalesData'] | null; // AthleteSalesData
-    error: boolean; // Boolean!
-    message: string; // String!
-    status: number; // Int!
-  }
   AthleteSettings: { // field return type
     description: string | null; // String
     notifications_preference: Array<string | null> | null; // [String]
@@ -536,7 +545,7 @@ export interface NexusGenFieldTypes {
     products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   AthletesRankingsFetchData: { // field return type
-    instagram: Array<NexusGenRootTypes['InstRankingsTmpl'] | null> | null; // [InstRankingsTmpl]
+    instagram: NexusGenRootTypes['InstagramData'] | null; // InstagramData
     kizuna: Array<NexusGenRootTypes['KizunaRankingsTmpl'] | null> | null; // [KizunaRankingsTmpl]
   }
   AuthData: { // field return type
@@ -583,11 +592,22 @@ export interface NexusGenFieldTypes {
     message: string; // String!
     status: number; // Int!
   }
+  InstPostsSentTmpl: { // field return type
+    average_sentiment: number | null; // Float
+    caption: string | null; // String
+    media_url: string | null; // String
+    post_id: string | null; // String
+  }
   InstRankingsTmpl: { // field return type
     average_sentiment: number | null; // Float
     interaction_score: number | null; // Float
     is_follower: boolean | null; // Boolean
     username: string | null; // String
+  }
+  InstagramData: { // field return type
+    fans_ranking: Array<NexusGenRootTypes['InstRankingsTmpl'] | null> | null; // [InstRankingsTmpl]
+    posts_analysis: Array<NexusGenRootTypes['InstPostsSentTmpl'] | null> | null; // [InstPostsSentTmpl]
+    profile_details: NexusGenRootTypes['ProfileTmpl'] | null; // ProfileTmpl
   }
   KizunaRankingsTmpl: { // field return type
     email: string | null; // String
@@ -599,6 +619,7 @@ export interface NexusGenFieldTypes {
     visits_count: number | null; // Int
   }
   Mutation: { // field return type
+    athlete_alert_top_fans: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     athlete_delete_products: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     athlete_signin: NexusGenRootTypes['TokenResponse']; // TokenResponse!
     athlete_signup: NexusGenRootTypes['TokenResponse']; // TokenResponse!
@@ -682,8 +703,8 @@ export interface NexusGenFieldTypes {
     athlete_fetch_settings: NexusGenRootTypes['AthleteSettingsFetchResponse']; // AthleteSettingsFetchResponse!
     athletes: NexusGenRootTypes['UserFetchAthletesResponse']; // UserFetchAthletesResponse!
     fetch_athlete_basics: NexusGenRootTypes['AthleteFetchBasicsResponse']; // AthleteFetchBasicsResponse!
-    fetch_athlete_sales: NexusGenRootTypes['AthleteSalesResponse']; // AthleteSalesResponse!
     fetch_athlete_top_followers: NexusGenRootTypes['AthleteTopFollowersResponse']; // AthleteTopFollowersResponse!
+    fetch_store_analytics: NexusGenRootTypes['StoreAnalyticsresponse']; // StoreAnalyticsresponse!
     fetch_user_suggestions: NexusGenRootTypes['UserFetchSuggestionsResponse']; // UserFetchSuggestionsResponse!
     profile_details: NexusGenRootTypes['ProfileDetailsQuery']; // ProfileDetailsQuery!
     user_activity: NexusGenRootTypes['UserFetchActivityResponse']; // UserFetchActivityResponse!
@@ -710,6 +731,17 @@ export interface NexusGenFieldTypes {
   SettingsTmpl: { // field return type
     description: string | null; // String
     notifications_preference: Array<string | null> | null; // [String]
+  }
+  StoreAnalyticsData: { // field return type
+    sales: Array<NexusGenRootTypes['SalesTmpl'] | null> | null; // [SalesTmpl]
+    todays_visits: number | null; // Int
+    week_visits: Array<NexusGenRootTypes['WeeksVisits'] | null> | null; // [WeeksVisits]
+  }
+  StoreAnalyticsresponse: { // field return type
+    data: NexusGenRootTypes['StoreAnalyticsData'] | null; // StoreAnalyticsData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
   }
   SuggestionsData: { // field return type
     id: number | null; // Int
@@ -863,6 +895,11 @@ export interface NexusGenFieldTypes {
   UsersProductData: { // field return type
     product: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
   }
+  WeeksVisits: { // field return type
+    count: number | null; // Int
+    date: string | null; // String
+    day_of_week: string | null; // String
+  }
 }
 
 export interface NexusGenFieldTypeNames {
@@ -925,15 +962,6 @@ export interface NexusGenFieldTypeNames {
     new_product_count: 'Int'
     sport: 'String'
   }
-  AthleteSalesData: { // field return type name
-    sales: 'SalesTmpl'
-  }
-  AthleteSalesResponse: { // field return type name
-    data: 'AthleteSalesData'
-    error: 'Boolean'
-    message: 'String'
-    status: 'Int'
-  }
   AthleteSettings: { // field return type name
     description: 'String'
     notifications_preference: 'String'
@@ -960,7 +988,7 @@ export interface NexusGenFieldTypeNames {
     products: 'ProductsTmpl'
   }
   AthletesRankingsFetchData: { // field return type name
-    instagram: 'InstRankingsTmpl'
+    instagram: 'InstagramData'
     kizuna: 'KizunaRankingsTmpl'
   }
   AuthData: { // field return type name
@@ -1007,11 +1035,22 @@ export interface NexusGenFieldTypeNames {
     message: 'String'
     status: 'Int'
   }
+  InstPostsSentTmpl: { // field return type name
+    average_sentiment: 'Float'
+    caption: 'String'
+    media_url: 'String'
+    post_id: 'String'
+  }
   InstRankingsTmpl: { // field return type name
     average_sentiment: 'Float'
     interaction_score: 'Float'
     is_follower: 'Boolean'
     username: 'String'
+  }
+  InstagramData: { // field return type name
+    fans_ranking: 'InstRankingsTmpl'
+    posts_analysis: 'InstPostsSentTmpl'
+    profile_details: 'ProfileTmpl'
   }
   KizunaRankingsTmpl: { // field return type name
     email: 'String'
@@ -1023,6 +1062,7 @@ export interface NexusGenFieldTypeNames {
     visits_count: 'Int'
   }
   Mutation: { // field return type name
+    athlete_alert_top_fans: 'BaseResponse'
     athlete_delete_products: 'BaseResponse'
     athlete_signin: 'TokenResponse'
     athlete_signup: 'TokenResponse'
@@ -1106,8 +1146,8 @@ export interface NexusGenFieldTypeNames {
     athlete_fetch_settings: 'AthleteSettingsFetchResponse'
     athletes: 'UserFetchAthletesResponse'
     fetch_athlete_basics: 'AthleteFetchBasicsResponse'
-    fetch_athlete_sales: 'AthleteSalesResponse'
     fetch_athlete_top_followers: 'AthleteTopFollowersResponse'
+    fetch_store_analytics: 'StoreAnalyticsresponse'
     fetch_user_suggestions: 'UserFetchSuggestionsResponse'
     profile_details: 'ProfileDetailsQuery'
     user_activity: 'UserFetchActivityResponse'
@@ -1134,6 +1174,17 @@ export interface NexusGenFieldTypeNames {
   SettingsTmpl: { // field return type name
     description: 'String'
     notifications_preference: 'String'
+  }
+  StoreAnalyticsData: { // field return type name
+    sales: 'SalesTmpl'
+    todays_visits: 'Int'
+    week_visits: 'WeeksVisits'
+  }
+  StoreAnalyticsresponse: { // field return type name
+    data: 'StoreAnalyticsData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
   }
   SuggestionsData: { // field return type name
     id: 'Int'
@@ -1287,10 +1338,18 @@ export interface NexusGenFieldTypeNames {
   UsersProductData: { // field return type name
     product: 'ProductsTmpl'
   }
+  WeeksVisits: { // field return type name
+    count: 'Int'
+    date: 'String'
+    day_of_week: 'String'
+  }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
+    athlete_alert_top_fans: { // args
+      product_ids: Array<number | null>; // [Int]!
+    }
     athlete_delete_products: { // args
       product_ids: Array<number | null>; // [Int]!
     }

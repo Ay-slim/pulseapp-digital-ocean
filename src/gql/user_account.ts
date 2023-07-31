@@ -294,11 +294,13 @@ export const UserAddInterests = extendType({
                     ) {
                         const body =
                             "We're glad you completed your signup! Login to your profile to get the latest exclusive stuff from your favorite athletes! We can't wait to show you around."
-                        send_email_notifications(
-                            [email!],
-                            'Welcome to Scientia!',
-                            body
-                        )
+                        send_email_notifications([
+                            {
+                                email: email!,
+                                body,
+                                subject: 'Welcome to Scientia',
+                            },
+                        ])
                     }
 
                     return {
@@ -1275,9 +1277,31 @@ export const UserFetchAthleteStore = extendType({
             },
             async resolve(_, args, context) {
                 try {
-                    const { athlete_id } = args
+                    let { athlete_id } = args
+                    let user_id = 0
+                    /**
+                     * May be bad practice, but we're reusing this user endpoint for athletes as well when we
+                     * need to display a store view of their store to them, it returns the same data so we didn't
+                     * see the need to reinvent the wheel.
+                     * How do we differentiate? When the user visits, we expect to have a valid athlete id in the args
+                     * but when it's being used by an athlete, we set the athlete_id arg to -1 and pick the correct athlete_id from
+                     * the athlete's login token
+                     */
+                    const is_athlete_visit: boolean = athlete_id === -1
                     const { knex_client, auth_token } = context
-                    const { user_id } = await login_auth(auth_token, 'user_id')
+                    if (is_athlete_visit) {
+                        const decoded_token = await login_auth(
+                            auth_token,
+                            'athlete_id'
+                        )
+                        athlete_id = decoded_token.athlete_id!
+                    } else {
+                        const decoded_token = await login_auth(
+                            auth_token,
+                            'user_id'
+                        )
+                        user_id = decoded_token.user_id!
+                    }
                     const products_resp: UserAthleteStoreType =
                         await knex_client
                             .select(
@@ -1417,11 +1441,12 @@ export const UserFetchAthleteStore = extendType({
                         }
                         return null
                     }
-
-                    await knex_client('store_visits').insert({
-                        user_id,
-                        athlete_id,
-                    })
+                    if (!is_athlete_visit) {
+                        await knex_client('store_visits').insert({
+                            user_id,
+                            athlete_id,
+                        })
+                    }
                     return {
                         status: 201,
                         error: false,

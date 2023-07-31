@@ -10,6 +10,7 @@ import {
     create_product_notifications,
     ProductNotifArgs,
     rank_kizuna_followers,
+    exclusive_product_notification,
 } from './utils'
 import { err_return, create_jwt_token } from './utils'
 import bcrypt from 'bcryptjs'
@@ -19,7 +20,7 @@ import {
     BaseResponse,
     AthleteFetchBasicsResponse,
     AthleteTopFollowersResponse,
-    AthleteSalesResponse,
+    StoreAnalyticsResponse,
     AthleteSettingsFetchResponse,
     AthleteProductsFetchResponse,
     AthleteFetchRankingsResponse,
@@ -299,11 +300,11 @@ export const AthleteFetchTopFollowers = extendType({
     },
 })
 
-export const AthleteFetchSales = extendType({
+export const AthleteFetchStoreAnalytics = extendType({
     type: 'Query',
     definition(t) {
-        t.nonNull.field('fetch_athlete_sales', {
-            type: AthleteSalesResponse,
+        t.nonNull.field('fetch_store_analytics', {
+            type: StoreAnalyticsResponse,
             args: {},
             async resolve(_, __, context) {
                 try {
@@ -312,25 +313,32 @@ export const AthleteFetchSales = extendType({
                         'athlete_id'
                     )
                     const { knex_client } = context
-                    const total_sales: SalesType[] = await knex_client('sales')
-                        .join(
-                            'products',
-                            'sales.product_id',
-                            '=',
-                            'products.id'
-                        )
-                        .select(
-                            knex_client.raw(
-                                'YEAR(sales.created_at) AS year, MONTH(sales.created_at) AS month, SUM(sales.total_value) AS total_sales'
+                    const total_sales: SalesType[] =
+                        (await knex_client('sales')
+                            .leftJoin(
+                                'sales_products',
+                                'sales_products.sale_id',
+                                '=',
+                                'sales.id'
                             )
-                        )
-                        .where('products.athlete_id', athlete_id)
-                        .groupByRaw(
-                            'YEAR(sales.created_at), MONTH(sales.created_at)'
-                        )
-                        .orderByRaw(
-                            'YEAR(sales.created_at), MONTH(sales.created_at)'
-                        )
+                            .join(
+                                'products',
+                                'sales_products.product_id',
+                                '=',
+                                'products.id'
+                            )
+                            .select(
+                                knex_client.raw(
+                                    'YEAR(sales.created_at) AS year, MONTH(sales.created_at) AS month, SUM(sales.total_value) AS total_sales'
+                                )
+                            )
+                            .where('products.athlete_id', athlete_id)
+                            .groupByRaw(
+                                'YEAR(sales.created_at), MONTH(sales.created_at)'
+                            )
+                            .orderByRaw(
+                                'YEAR(sales.created_at), MONTH(sales.created_at)'
+                            )) ?? []
                     const normalized_sales: SalesRetType[] = total_sales.map(
                         (sale) => {
                             return {
@@ -340,12 +348,36 @@ export const AthleteFetchSales = extendType({
                             }
                         }
                     )
+                    type VisitsCount = {
+                        date: string
+                        day_of_week: string
+                        count: number
+                    }
+                    const last_weeks_vists: VisitsCount[][] =
+                        (await knex_client.raw(`
+                        SELECT DATE(created_at) AS date,
+                        DAYNAME(created_at) AS day_of_week,
+                        COUNT(*) AS count
+                        FROM store_visits
+                        WHERE created_at >= CURDATE() - INTERVAL 70 DAY AND athlete_id=${athlete_id}
+                        GROUP BY DATE(created_at), DAYNAME(created_at)
+                        ORDER BY DATE(created_at) ASC;
+                    `)) ?? [[]]
+                    const [{ count: todays_visits }]: { count: number }[] =
+                        (await knex_client('store_visits')
+                            .count('* as count')
+                            .whereRaw('DATE(created_at) = CURDATE()')) ?? [
+                            { count: 0 },
+                        ]
+
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
                             sales: normalized_sales,
+                            week_visits: last_weeks_vists[0],
+                            todays_visits,
                         },
                     }
                 } catch (err) {
@@ -573,6 +605,55 @@ export const AthleteDeleteProducts = extendType({
     },
 })
 
+export const AthleteAlertTopFans = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('athlete_alert_top_fans', {
+            type: BaseResponse,
+            args: {
+                product_ids: nonNull(list(intArg())),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const { knex_client, auth_token } = context
+                    const { athlete_id, name: athlete_name } = await login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )
+                    await login_auth(auth_token, 'athlete_id')
+                    const { product_ids } = args
+                    for (const i of product_ids) {
+                        const ranked_followers = await rank_kizuna_followers(
+                            athlete_id!,
+                            knex_client
+                        )
+                        const top_10_followers =
+                            ranked_followers.length > 10
+                                ? ranked_followers.slice(0, 10)
+                                : ranked_followers
+                        await exclusive_product_notification(
+                            top_10_followers,
+                            athlete_id!,
+                            knex_client,
+                            athlete_name!,
+                            i!
+                        )
+                    }
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
 export const AthleteUpdateSettingsMutation = extendType({
     type: 'Mutation',
     definition(t) {
@@ -684,9 +765,12 @@ export const AthleteFetchFollowersRanking = extendType({
                         'athlete_id'
                     )
                     const { knex_client } = context
-                    const insta_fan_rankings_raw: { fan_rankings: string }[][] =
-                        await knex_client.raw(`
-                        SELECT fan_rankings
+                    const insta_fan_rankings_raw: {
+                        fan_rankings: string
+                        posts_sentiments: string
+                        profile_details: string
+                    }[][] = await knex_client.raw(`
+                        SELECT fan_rankings, posts_sentiments, profile_details
                         FROM ig_fb_followers
                         WHERE athlete_id = ${athlete_id}
                         AND batch_id = (
@@ -703,12 +787,41 @@ export const AthleteFetchFollowersRanking = extendType({
                     }[] = insta_fan_rankings_raw[0].length
                         ? JSON.parse(insta_fan_rankings_raw[0][0]?.fan_rankings)
                         : []
+                    const insta_posts_sentiments: {
+                        media_url: string
+                        caption: string
+                        average_sentiment: number
+                        post_id: string
+                    }[] = insta_fan_rankings_raw[0].length
+                        ? JSON.parse(
+                              insta_fan_rankings_raw[0][0]?.posts_sentiments
+                          )
+                        : []
+                    const insta_profile_details: {
+                        bio: string
+                        full_name: string
+                        username: string
+                        no_of_posts: number
+                        following: number
+                        followers: number
+                        profile_pic_url: string
+                        is_private: boolean
+                        can_crawl_all_followers: boolean
+                    } = insta_fan_rankings_raw[0].length
+                        ? JSON.parse(
+                              insta_fan_rankings_raw[0][0]?.profile_details
+                          )
+                        : []
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
-                            instagram: insta_fan_rankings,
+                            instagram: {
+                                fans_ranking: insta_fan_rankings,
+                                posts_analysis: insta_posts_sentiments,
+                                profile_details: insta_profile_details,
+                            },
                             kizuna: await rank_kizuna_followers(
                                 athlete_id!,
                                 knex_client

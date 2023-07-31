@@ -332,9 +332,11 @@ const join_string_list = (string_list: string[]) => {
     return joined_string
 }
 export const send_email_notifications = async (
-    emails: string[],
-    subject: string,
-    body: string
+    email_deets: {
+        email: string
+        body: string
+        subject: string
+    }[]
 ) => {
     try {
         const transporter = nodemailer.createTransport({
@@ -347,19 +349,49 @@ export const send_email_notifications = async (
             },
         } as TransportOptions)
         await Promise.all(
-            emails.map((email) => {
+            email_deets.map((deet) => {
                 transporter.sendMail({
                     from: '"Letty from Scientia" <no_reply@scientia.com>',
-                    to: email,
-                    subject: subject,
-                    html: body,
+                    to: deet.email,
+                    subject: deet.subject,
+                    html: deet.body,
                 })
-                console.log(`${subject} email notification sent to: ${email}`)
+                console.log(
+                    `${deet.subject} email notification sent to: ${deet.email}`
+                )
             })
         )
     } catch (err) {
         console.error(`Email error: ${err}`)
     }
+}
+
+export const exclusive_product_notification = async (
+    top_10_followers: KizunaMetrics[],
+    athlete_id: number,
+    knex_client: Knex,
+    athlete_name: string,
+    product_id: number
+) => {
+    const email_notif_packet = top_10_followers.map((follower) => {
+        return {
+            email: follower.email,
+            subject: 'Exclusive drop!',
+            body: `Great news ${follower.name}! Because you're one of the 10 most active fans of ${athlete_name} for this week, you're getting an exclusive, for your eyes only early access to a new product they just dropped. Login now to shop and grab 'em off the shelves!`,
+        }
+    })
+    await send_email_notifications(email_notif_packet)
+    await Promise.all(
+        top_10_followers.map((follower) => {
+            return knex_client('notifications').insert({
+                product_id,
+                user_id: follower.user_id,
+                message: `Great news ${follower.name}! You're one of the 10 most active followers of ${athlete_name} and this has qualified you for exclusive access to the new product they just launched! Head to their store now to shop`,
+                event: 'drop',
+                headline: 'Top Follower!',
+            })
+        })
+    )
 }
 
 export const create_product_notifications = async (args: ProductNotifArgs) => {
@@ -395,7 +427,15 @@ export const create_product_notifications = async (args: ProductNotifArgs) => {
                 .map((resp_val) => {
                     return resp_val.email
                 })
-            await send_email_notifications(follower_emails, headline, message)
+            const email_packet = follower_emails.map((email) => {
+                return {
+                    email: email,
+                    body: message,
+                    subject: headline,
+                }
+            })
+            await send_email_notifications(email_packet)
+            await knex_client('notifications').insert({})
         }
     } catch (err) {
         console.error(err)
@@ -440,16 +480,20 @@ export const create_sale_notification = async (args: SaleNotifArgs) => {
     const notif_prefs: string[] =
         JSON.parse(notifications_preference ?? null) ?? []
     if (notif_prefs.includes('email') && !process.env.NO_EMAILS) {
-        await send_email_notifications([email], headline, html_message)
+        await send_email_notifications([
+            { email, body: html_message, subject: headline },
+        ])
     }
     ///Remove this in production, it's only a temporary mock of a successful payment
     await setTimeout(async () => {
         const sale_html_message = `<html><body><p>Your payment of $${total_value} was successful for your purchase with ref: ${sale_ref}. You have now received 5 extra points!</p></body></html>`
-        send_email_notifications(
-            [email],
-            'Payment Successful',
-            sale_html_message
-        )
+        send_email_notifications([
+            {
+                email,
+                body: sale_html_message,
+                subject: 'Payment Successful',
+            },
+        ])
         const { total: current_total_points } = await knex_client('points')
             .select('total')
             .where({ user_id })

@@ -78,17 +78,6 @@ type AthleteResData {
   sport: String
 }
 
-type AthleteSalesData {
-  sales: [SalesTmpl]
-}
-
-type AthleteSalesResponse {
-  data: AthleteSalesData
-  error: Boolean!
-  message: String!
-  status: Int!
-}
-
 type AthleteSettings {
   description: String
   notifications_preference: [String]
@@ -121,7 +110,7 @@ type AthletesProductData {
 }
 
 type AthletesRankingsFetchData {
-  instagram: [InstRankingsTmpl]
+  instagram: InstagramData
   kizuna: [KizunaRankingsTmpl]
 }
 
@@ -191,11 +180,24 @@ enum GenderEnum {
   other
 }
 
+type InstPostsSentTmpl {
+  average_sentiment: Float
+  caption: String
+  media_url: String
+  post_id: String
+}
+
 type InstRankingsTmpl {
   average_sentiment: Float
   interaction_score: Float
   is_follower: Boolean
   username: String
+}
+
+type InstagramData {
+  fans_ranking: [InstRankingsTmpl]
+  posts_analysis: [InstPostsSentTmpl]
+  profile_details: ProfileTmpl
 }
 
 type KizunaRankingsTmpl {
@@ -209,6 +211,7 @@ type KizunaRankingsTmpl {
 }
 
 type Mutation {
+  athlete_alert_top_fans(product_ids: [Int]!): BaseResponse!
   athlete_delete_products(product_ids: [Int]!): BaseResponse!
   athlete_signin(email: String!, password: String!): TokenResponse!
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): TokenResponse!
@@ -300,8 +303,8 @@ type Query {
   athlete_fetch_settings: AthleteSettingsFetchResponse!
   athletes(limit: Int!, next_min_id: Int, sports: [String]!): UserFetchAthletesResponse!
   fetch_athlete_basics: AthleteFetchBasicsResponse!
-  fetch_athlete_sales: AthleteSalesResponse!
   fetch_athlete_top_followers: AthleteTopFollowersResponse!
+  fetch_store_analytics: StoreAnalyticsresponse!
   fetch_user_suggestions: UserFetchSuggestionsResponse!
   profile_details(username: String!): ProfileDetailsQuery!
   user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
@@ -337,6 +340,19 @@ type SalesTmpl {
 type SettingsTmpl {
   description: String
   notifications_preference: [String]
+}
+
+type StoreAnalyticsData {
+  sales: [SalesTmpl]
+  todays_visits: Int
+  week_visits: [WeeksVisits]
+}
+
+type StoreAnalyticsresponse {
+  data: StoreAnalyticsData
+  error: Boolean!
+  message: String!
+  status: Int!
 }
 
 type SuggestionsData {
@@ -519,4 +535,10 @@ type UsersFetchProduct {
 
 type UsersProductData {
   product: ProductsTmpl
+}
+
+type WeeksVisits {
+  count: Int
+  date: String
+  day_of_week: String
 }

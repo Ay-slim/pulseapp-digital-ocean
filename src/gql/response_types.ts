@@ -227,19 +227,32 @@ const SalesTmpl = objectType({
     },
 })
 
-export const AthleteSalesResponse = objectType({
-    name: 'AthleteSalesResponse',
+const WeeksVisits = objectType({
+    name: 'WeeksVisits',
+    definition(t) {
+        t.string('date')
+        t.string('day_of_week')
+        t.int('count')
+    },
+})
+
+export const StoreAnalyticsResponse = objectType({
+    name: 'StoreAnalyticsresponse',
     definition(t) {
         t.nonNull.int('status')
         t.nonNull.boolean('error')
         t.nonNull.string('message')
         t.field('data', {
             type: objectType({
-                name: 'AthleteSalesData',
+                name: 'StoreAnalyticsData',
                 definition(t) {
                     t.list.field('sales', {
                         type: SalesTmpl,
                     })
+                    t.list.field('week_visits', {
+                        type: WeeksVisits,
+                    })
+                    t.int('todays_visits')
                 },
             }),
         })
@@ -348,6 +361,16 @@ const InstaRankingsTmpl = objectType({
     },
 })
 
+const InstaPostsSentTmpl = objectType({
+    name: 'InstPostsSentTmpl',
+    definition(t) {
+        t.string('caption')
+        t.string('media_url')
+        t.float('average_sentiment')
+        t.string('post_id')
+    },
+})
+
 const KizunaRankingsTmpl = objectType({
     name: 'KizunaRankingsTmpl',
     definition(t) {
@@ -371,8 +394,21 @@ export const AthleteFetchRankingsResponse = objectType({
             type: objectType({
                 name: 'AthletesRankingsFetchData',
                 definition(t) {
-                    t.list.field('instagram', {
-                        type: InstaRankingsTmpl,
+                    t.field('instagram', {
+                        type: objectType({
+                            name: 'InstagramData',
+                            definition(t) {
+                                t.list.field('fans_ranking', {
+                                    type: InstaRankingsTmpl,
+                                })
+                                t.list.field('posts_analysis', {
+                                    type: InstaPostsSentTmpl,
+                                })
+                                t.field('profile_details', {
+                                    type: ProfileTmpl,
+                                })
+                            },
+                        }),
                     })
                     t.list.field('kizuna', {
                         type: KizunaRankingsTmpl,
