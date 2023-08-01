@@ -618,6 +618,7 @@ export const AthleteAlertTopFans = extendType({
             type: BaseResponse,
             args: {
                 product_ids: nonNull(list(intArg())),
+                percentage: intArg(),
             },
             async resolve(_, args, context) {
                 try {
@@ -628,17 +629,22 @@ export const AthleteAlertTopFans = extendType({
                     )
                     await login_auth(auth_token, 'athlete_id')
                     const { product_ids } = args
+                    const percentage = args?.percentage ?? 10
+                    const ranked_followers = await rank_kizuna_followers(
+                        athlete_id!,
+                        knex_client
+                    )
+                    const length_to_fetch = Math.round(
+                        (percentage * ranked_followers.length) / 100
+                    )
+                    const top_x_followers =
+                        ranked_followers.length > length_to_fetch
+                            ? ranked_followers.slice(0, length_to_fetch)
+                            : ranked_followers
+                    //console.log(top_x_followers)
                     for (const i of product_ids) {
-                        const ranked_followers = await rank_kizuna_followers(
-                            athlete_id!,
-                            knex_client
-                        )
-                        const top_10_followers =
-                            ranked_followers.length > 10
-                                ? ranked_followers.slice(0, 10)
-                                : ranked_followers
                         await exclusive_product_notification(
-                            top_10_followers,
+                            top_x_followers,
                             athlete_id!,
                             knex_client,
                             athlete_name!,
@@ -821,6 +827,7 @@ export const AthleteFetchFollowersRanking = extendType({
                               insta_fan_rankings_raw[0][0]?.posts_sentiments
                           )
                         : []
+                    console.log(insta_fan_rankings_raw, insta_posts_sentiments)
                     const insta_profile_details: {
                         bio: string
                         full_name: string

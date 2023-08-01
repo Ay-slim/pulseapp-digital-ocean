@@ -1354,6 +1354,7 @@ export interface NexusGenFieldTypeNames {
 export interface NexusGenArgTypes {
   Mutation: {
     athlete_alert_top_fans: { // args
+      percentage?: number | null; // Int
       product_ids: Array<number | null>; // [Int]!
     }
     athlete_delete_products: { // args
