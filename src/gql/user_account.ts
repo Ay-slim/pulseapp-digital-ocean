@@ -1309,7 +1309,7 @@ export const UserFetchAthleteStore = extendType({
                                 'athletes.name as athlete_name',
                                 'athletes.image_url',
                                 knex_client.raw(
-                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time, 'quantity', quantity,
+                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time, 'quantity', quantity, 'start_time', start_time,
                                     'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)) FROM products WHERE products.athlete_id = ${athlete_id} AND end_time IS NOT NULL AND end_time > CURRENT_TIMESTAMP() ORDER BY created_at DESC LIMIT 1) AS featured`
                                 ),
                                 knex_client.raw(
@@ -1324,6 +1324,7 @@ export const UserFetchAthleteStore = extendType({
                                         'exclusive', products.exclusive,
                                         'end_time', products.end_time,
                                         'quantity', products.quantity,
+                                        'start_time', products.start_time,
                                         'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                                       )
                                     )
@@ -1344,6 +1345,7 @@ export const UserFetchAthleteStore = extendType({
                               'end_time', products.end_time,
                               'metadata', products.metadata,
                               'quantity', products.quantity,
+                              'start_time', products.start_time,
                               'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                             )
                           )
@@ -1386,12 +1388,12 @@ export const UserFetchAthleteStore = extendType({
                     const featured_product: ProductsRespType =
                         JSON.parse(products_resp.featured ?? null) ?? null
 
-                    if (
-                        featured_product &&
-                        Object.keys(featured_product).length > 0
-                    ) {
-                        featured_product['start_time'] = null
-                    }
+                    // if (
+                    //     featured_product &&
+                    //     Object.keys(featured_product).length > 0
+                    // ) {
+                    //     featured_product['start_time'] = null
+                    // }
                     const featured = future_products.concat([featured_product])
                     const media_url_extractor_and_exclusive_bool_converter = (
                         product: ProductsRespType
