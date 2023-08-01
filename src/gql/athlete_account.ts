@@ -827,7 +827,7 @@ export const AthleteFetchFollowersRanking = extendType({
                               insta_fan_rankings_raw[0][0]?.posts_sentiments
                           )
                         : []
-                    console.log(insta_fan_rankings_raw, insta_posts_sentiments)
+                    //console.log(insta_fan_rankings_raw, insta_posts_sentiments)
                     const insta_profile_details: {
                         bio: string
                         full_name: string

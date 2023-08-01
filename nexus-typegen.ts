@@ -198,6 +198,7 @@ export interface NexusGenObjects {
   KizunaRankingsTmpl: { // root type
     email?: string | null; // String
     interaction_score?: number | null; // Float
+    is_follower?: boolean | null; // Boolean
     name?: string | null; // String
     sales_count?: number | null; // Int
     user_id?: number | null; // Int
@@ -616,6 +617,7 @@ export interface NexusGenFieldTypes {
   KizunaRankingsTmpl: { // field return type
     email: string | null; // String
     interaction_score: number | null; // Float
+    is_follower: boolean | null; // Boolean
     name: string | null; // String
     sales_count: number | null; // Int
     user_id: number | null; // Int
@@ -1061,6 +1063,7 @@ export interface NexusGenFieldTypeNames {
   KizunaRankingsTmpl: { // field return type name
     email: 'String'
     interaction_score: 'Float'
+    is_follower: 'Boolean'
     name: 'String'
     sales_count: 'Int'
     user_id: 'Int'

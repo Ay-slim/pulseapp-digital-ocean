@@ -382,6 +382,7 @@ const KizunaRankingsTmpl = objectType({
         t.int('views_count')
         t.int('visits_count')
         t.float('interaction_score')
+        t.boolean('is_follower')
     },
 })
 

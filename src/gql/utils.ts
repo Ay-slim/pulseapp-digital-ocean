@@ -545,6 +545,7 @@ type KizunaMetrics = {
     views_count: number
     visits_count: number
     interaction_score: number
+    is_follower: boolean
 }
 
 export const rank_kizuna_followers = async (
@@ -578,6 +579,16 @@ export const rank_kizuna_followers = async (
         (await knex_client.raw(
             `SELECT sv.user_id, u.name, u.email, COUNT(*) AS visits_count FROM store_visits sv LEFT JOIN users u ON sv.user_id=u.id WHERE sv.athlete_id=${athlete_id} GROUP BY sv.user_id;`
         )) ?? []
+
+    const raw_kizuna_followers: { user_id: number }[] = await knex_client(
+        'users_athletes'
+    )
+        .select('user_id')
+        .where({ athlete_id })
+    const kizuna_followers = raw_kizuna_followers.map((follower) => {
+        return follower.user_id
+    })
+    //console.log(kizuna_followers)
     //console.log(sales_count, 'Count', product_views, 'vies', store_visits, 'visits')
     /**
      * Merges all three metrics into an object with the user_id as key
@@ -595,6 +606,7 @@ export const rank_kizuna_followers = async (
             views_count: 0,
             visits_count: 0,
             interaction_score: 0,
+            is_follower: true,
         }
     }
     for (const j of product_views[0]) {
@@ -607,6 +619,7 @@ export const rank_kizuna_followers = async (
                 views_count: j.views_count,
                 visits_count: 0,
                 interaction_score: 0,
+                is_follower: true,
             }
         } else {
             aggregated_metrics[j.user_id].views_count += j.views_count
@@ -622,6 +635,7 @@ export const rank_kizuna_followers = async (
                 views_count: 0,
                 visits_count: k.visits_count,
                 interaction_score: 0,
+                is_follower: true,
             }
         } else {
             aggregated_metrics[k.user_id].visits_count += k.visits_count
@@ -629,7 +643,7 @@ export const rank_kizuna_followers = async (
     }
 
     /**
-     * Create an array of all metrics, calculate interaction score and sort
+     * Create an array of all metrics, calculate interaction score, confirm if follower, and sort
      */
     const metrics_list: KizunaMetrics[] = []
     for (const l in aggregated_metrics) {
@@ -637,6 +651,9 @@ export const rank_kizuna_followers = async (
             2 * aggregated_metrics[l].sales_count +
             1.5 * aggregated_metrics[l].views_count +
             1.2 * aggregated_metrics[l].visits_count
+        aggregated_metrics[l].is_follower = kizuna_followers.includes(
+            aggregated_metrics[l].user_id
+        )
         metrics_list.push(aggregated_metrics[l])
     }
     metrics_list.sort((a, b) => b.interaction_score - a.interaction_score)
