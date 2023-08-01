@@ -215,15 +215,15 @@ export const AthleteFetchBasics = extendType({
                             'athletes.name',
                             'athletes.image_url',
                             knex_client.raw(
-                                '(SELECT COUNT(*) FROM users_athletes WHERE athlete_id = ?) AS follower_count',
+                                '(SELECT COUNT(*) FROM users_athletes WHERE athlete_id = ? AND deleted_at IS NULL) AS follower_count',
                                 [athlete_id]
                             ),
                             knex_client.raw(
-                                `(SELECT COUNT(*) FROM products WHERE athlete_id = ? AND exclusive = 'false') AS fixed_items_count`,
+                                `(SELECT COUNT(*) FROM products WHERE athlete_id = ? AND deleted_at IS NULL AND exclusive = 'false') AS fixed_items_count`,
                                 [athlete_id]
                             ),
                             knex_client.raw(
-                                `(SELECT COUNT(*) FROM products WHERE athlete_id = ? AND exclusive = 'true') AS variable_items_count`,
+                                `(SELECT COUNT(*) FROM products WHERE athlete_id = ? AND exclusive = 'true' AND deleted_at IS NULL) AS variable_items_count`,
                                 [athlete_id]
                             ),
                             knex_client.raw(
