@@ -57,6 +57,7 @@ export interface NexusGenObjects {
     follower_count?: number | null; // Int
     image_url?: string | null; // String
     name?: string | null; // String
+    upcoming_drops_count?: number | null; // Int
     variable_items_count?: number | null; // Int
   }
   AthleteBio: { // root type
@@ -82,7 +83,6 @@ export interface NexusGenObjects {
   }
   AthleteFetchBasicsResponseData: { // root type
     athlete_bio?: NexusGenRootTypes['AthleteBasicStats'] | null; // AthleteBasicStats
-    upcoming_drops?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   AthleteFetchRankingsResponse: { // root type
     data?: NexusGenRootTypes['AthletesRankingsFetchData'] | null; // AthletesRankingsFetchData
@@ -474,6 +474,7 @@ export interface NexusGenFieldTypes {
     follower_count: number | null; // Int
     image_url: string | null; // String
     name: string | null; // String
+    upcoming_drops_count: number | null; // Int
     variable_items_count: number | null; // Int
   }
   AthleteBio: { // field return type
@@ -499,7 +500,6 @@ export interface NexusGenFieldTypes {
   }
   AthleteFetchBasicsResponseData: { // field return type
     athlete_bio: NexusGenRootTypes['AthleteBasicStats'] | null; // AthleteBasicStats
-    upcoming_drops: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   AthleteFetchRankingsResponse: { // field return type
     data: NexusGenRootTypes['AthletesRankingsFetchData'] | null; // AthletesRankingsFetchData
@@ -918,6 +918,7 @@ export interface NexusGenFieldTypeNames {
     follower_count: 'Int'
     image_url: 'String'
     name: 'String'
+    upcoming_drops_count: 'Int'
     variable_items_count: 'Int'
   }
   AthleteBio: { // field return type name
@@ -943,7 +944,6 @@ export interface NexusGenFieldTypeNames {
   }
   AthleteFetchBasicsResponseData: { // field return type name
     athlete_bio: 'AthleteBasicStats'
-    upcoming_drops: 'ProductsTmpl'
   }
   AthleteFetchRankingsResponse: { // field return type name
     data: 'AthletesRankingsFetchData'

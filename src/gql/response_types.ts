@@ -192,6 +192,7 @@ const AthleteBasicStats = objectType({
         t.int('follower_count')
         t.int('fixed_items_count')
         t.int('variable_items_count')
+        t.int('upcoming_drops_count')
     },
 })
 
@@ -207,9 +208,6 @@ export const AthleteFetchBasicsResponse = objectType({
                 definition(t) {
                     t.field('athlete_bio', {
                         type: AthleteBasicStats,
-                    })
-                    t.list.field('upcoming_drops', {
-                        type: ProductsTmpl,
                     })
                 },
             }),

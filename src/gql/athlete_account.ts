@@ -226,26 +226,11 @@ export const AthleteFetchBasics = extendType({
                                 `(SELECT COUNT(*) FROM products WHERE athlete_id = ? AND exclusive = 'true') AS variable_items_count`,
                                 [athlete_id]
                             ),
-                            knex_client.raw(`
-                                (
-                                    SELECT JSON_ARRAYAGG(
-                                    JSON_OBJECT(
-                                            'id', products.id,
-                                            'name', products.name,
-                                            'media_urls', products.media_urls,
-                                            'price', products.price,
-                                            'description', products.description,
-                                            'exclusive', products.exclusive,
-                                            'end_time', products.end_time,
-                                            'metadata', products.metadata,
-                                            'quantity', products.quantity,
-                                            'start_time', products.start_time
-                                        )
-                                    )
-                                    FROM products
-                                    WHERE products.athlete_id = athletes.id AND products.deleted_at IS NULL AND (products.end_time IS NULL OR products.end_time > CURRENT_TIMESTAMP()) AND products.start_time > CURRENT_TIMESTAMP()
-                                ) AS future_products
-                                `)
+                            knex_client.raw(
+                                `
+                                (SELECT COUNT(*) FROM products WHERE products.athlete_id = ? AND products.deleted_at IS NULL AND (products.end_time IS NULL OR products.end_time > CURRENT_TIMESTAMP()) AND products.start_time > CURRENT_TIMESTAMP()) AS upcoming_drops_count`,
+                                [athlete_id]
+                            )
                         )
                         .from('athletes')
                         .leftJoin(
@@ -260,31 +245,12 @@ export const AthleteFetchBasics = extendType({
                         )
                         .whereRaw('athletes.id = ?', [athlete_id])
                     //console.log(stats)
-                    const future_products: ProductsRespType[] =
-                        JSON.parse(stats[0].future_products) ?? []
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
                             athlete_bio: stats?.[0],
-                            upcoming_drops: future_products.map(
-                                (future_product) => {
-                                    return {
-                                        id: future_product.id,
-                                        name: future_product.name,
-                                        price: future_product.price,
-                                        end_time: future_product.end_time,
-                                        start_time: future_product.start_time,
-                                        exclusive:
-                                            future_product.exclusive === 'true',
-                                        media_url: (future_product.media_urls ??
-                                            [])[0],
-                                        description: future_product.description,
-                                        quantity: future_product.quantity,
-                                    }
-                                }
-                            ),
                         },
                     }
                 } catch (err) {

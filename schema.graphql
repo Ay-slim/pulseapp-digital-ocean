@@ -24,6 +24,7 @@ type AthleteBasicStats {
   follower_count: Int
   image_url: String
   name: String
+  upcoming_drops_count: Int
   variable_items_count: Int
 }
 
@@ -53,7 +54,6 @@ type AthleteFetchBasicsResponse {
 
 type AthleteFetchBasicsResponseData {
   athlete_bio: AthleteBasicStats
-  upcoming_drops: [ProductsTmpl]
 }
 
 type AthleteFetchRankingsResponse {

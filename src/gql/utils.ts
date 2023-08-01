@@ -71,7 +71,7 @@ export type AthleteBioType = {
     fixed_items_count: number
     variable_items_count: number
     image_url: string
-    future_products: string
+    upcoming_drops_count: number
 }
 
 export type TopFollowersType = {
