@@ -25,6 +25,7 @@ import {
     UserAthleteStoreType,
     send_email_notifications,
     create_sale_notification,
+    ProductsRespType,
 } from './utils'
 import {
     TokenResponse,
@@ -1376,19 +1377,6 @@ export const UserFetchAthleteStore = extendType({
                             .where('athletes.id', athlete_id)
                             .first()
 
-                    type ProductsRespType = {
-                        id: number
-                        name: string
-                        price: number
-                        quantity: number
-                        end_time: string | null
-                        start_time?: string | null
-                        exclusive: string
-                        media_urls: string[]
-                        description: string
-                        number_of_views: number
-                        metadata?: { category: string }
-                    }
                     const products_list: ProductsRespType[] =
                         JSON.parse(products_resp.products ?? null) ?? []
                     const expired_drops: ProductsRespType[] =

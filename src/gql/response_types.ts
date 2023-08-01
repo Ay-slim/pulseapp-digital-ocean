@@ -160,6 +160,30 @@ export const UserFetchSuggestionsResponse = objectType({
     },
 })
 
+export const ProductsTmpl = objectType({
+    name: 'ProductsTmpl',
+    definition(t) {
+        t.int('id')
+        t.string('name'),
+            t.list.string('media_urls'),
+            t.string('media_url'),
+            t.float('price'),
+            t.string('currency')
+        t.string('category')
+        t.string('end_time')
+        t.string('start_time')
+        t.boolean('exclusive')
+        t.int('quantity')
+        t.string('description')
+        t.int('number_of_views')
+        t.int('total_views')
+        t.int('unique_views')
+        t.string('distance')
+        t.string('start_distance')
+        t.string('end_distance')
+    },
+})
+
 const AthleteBasicStats = objectType({
     name: 'AthleteBasicStats',
     definition(t) {
@@ -183,6 +207,9 @@ export const AthleteFetchBasicsResponse = objectType({
                 definition(t) {
                     t.field('athlete_bio', {
                         type: AthleteBasicStats,
+                    })
+                    t.list.field('upcoming_drops', {
+                        type: ProductsTmpl,
                     })
                 },
             }),
@@ -256,30 +283,6 @@ export const StoreAnalyticsResponse = objectType({
                 },
             }),
         })
-    },
-})
-
-export const ProductsTmpl = objectType({
-    name: 'ProductsTmpl',
-    definition(t) {
-        t.int('id')
-        t.string('name'),
-            t.list.string('media_urls'),
-            t.string('media_url'),
-            t.float('price'),
-            t.string('currency')
-        t.string('category')
-        t.string('end_time')
-        t.string('start_time')
-        t.boolean('exclusive')
-        t.int('quantity')
-        t.string('description')
-        t.int('number_of_views')
-        t.int('total_views')
-        t.int('unique_views')
-        t.string('distance')
-        t.string('start_distance')
-        t.string('end_distance')
     },
 })
 

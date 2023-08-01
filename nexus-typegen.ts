@@ -82,6 +82,7 @@ export interface NexusGenObjects {
   }
   AthleteFetchBasicsResponseData: { // root type
     athlete_bio?: NexusGenRootTypes['AthleteBasicStats'] | null; // AthleteBasicStats
+    upcoming_drops?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   AthleteFetchRankingsResponse: { // root type
     data?: NexusGenRootTypes['AthletesRankingsFetchData'] | null; // AthletesRankingsFetchData
@@ -498,6 +499,7 @@ export interface NexusGenFieldTypes {
   }
   AthleteFetchBasicsResponseData: { // field return type
     athlete_bio: NexusGenRootTypes['AthleteBasicStats'] | null; // AthleteBasicStats
+    upcoming_drops: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   AthleteFetchRankingsResponse: { // field return type
     data: NexusGenRootTypes['AthletesRankingsFetchData'] | null; // AthletesRankingsFetchData
@@ -941,6 +943,7 @@ export interface NexusGenFieldTypeNames {
   }
   AthleteFetchBasicsResponseData: { // field return type name
     athlete_bio: 'AthleteBasicStats'
+    upcoming_drops: 'ProductsTmpl'
   }
   AthleteFetchRankingsResponse: { // field return type name
     data: 'AthletesRankingsFetchData'

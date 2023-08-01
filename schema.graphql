@@ -53,6 +53,7 @@ type AthleteFetchBasicsResponse {
 
 type AthleteFetchBasicsResponseData {
   athlete_bio: AthleteBasicStats
+  upcoming_drops: [ProductsTmpl]
 }
 
 type AthleteFetchRankingsResponse {

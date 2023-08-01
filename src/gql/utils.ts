@@ -71,6 +71,7 @@ export type AthleteBioType = {
     fixed_items_count: number
     variable_items_count: number
     image_url: string
+    future_products: string
 }
 
 export type TopFollowersType = {
@@ -98,6 +99,20 @@ export type SalesRetType = {
     year: number
     month: string
     total_sales: number
+}
+
+export type ProductsRespType = {
+    id: number
+    name: string
+    price: number
+    quantity: number
+    end_time: string | null
+    start_time?: string | null
+    exclusive: string
+    media_urls: string[]
+    description: string
+    number_of_views: number
+    metadata?: { category: string }
 }
 
 const AthleteData = list(
