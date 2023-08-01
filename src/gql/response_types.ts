@@ -408,6 +408,7 @@ export const AthleteFetchRankingsResponse = objectType({
                                 t.field('profile_details', {
                                     type: ProfileTmpl,
                                 })
+                                t.string('is_private')
                             },
                         }),
                     })

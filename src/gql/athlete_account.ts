@@ -785,6 +785,24 @@ export const AthleteFetchFollowersRanking = extendType({
                             WHERE athlete_id = ${athlete_id}
                         );`)
                     //console.log(fan_rankings_raw[0])
+                    const [{ metadata: athlete_metadata }]: {
+                        metadata: string
+                    }[] = await knex_client('athletes')
+                        .select('metadata')
+                        .where({ id: athlete_id })
+                    //console.log(JSON.parse(athlete_metadata))
+                    const parsed_metadata: { instagram: string } =
+                        JSON.parse(athlete_metadata)
+                    let is_private_insta = 'no_data'
+                    if (parsed_metadata && parsed_metadata.instagram) {
+                        const insta_info: { is_private: boolean } = JSON.parse(
+                            parsed_metadata.instagram
+                        )
+                        is_private_insta =
+                            insta_info && insta_info.is_private
+                                ? 'true'
+                                : 'false'
+                    }
                     const insta_fan_rankings: {
                         username: string
                         is_follower: boolean
@@ -827,6 +845,7 @@ export const AthleteFetchFollowersRanking = extendType({
                                 fans_ranking: insta_fan_rankings,
                                 posts_analysis: insta_posts_sentiments,
                                 profile_details: insta_profile_details,
+                                is_private: is_private_insta,
                             },
                             kizuna: await rank_kizuna_followers(
                                 athlete_id!,

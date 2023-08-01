@@ -191,6 +191,7 @@ export interface NexusGenObjects {
   }
   InstagramData: { // root type
     fans_ranking?: Array<NexusGenRootTypes['InstRankingsTmpl'] | null> | null; // [InstRankingsTmpl]
+    is_private?: string | null; // String
     posts_analysis?: Array<NexusGenRootTypes['InstPostsSentTmpl'] | null> | null; // [InstPostsSentTmpl]
     profile_details?: NexusGenRootTypes['ProfileTmpl'] | null; // ProfileTmpl
   }
@@ -608,6 +609,7 @@ export interface NexusGenFieldTypes {
   }
   InstagramData: { // field return type
     fans_ranking: Array<NexusGenRootTypes['InstRankingsTmpl'] | null> | null; // [InstRankingsTmpl]
+    is_private: string | null; // String
     posts_analysis: Array<NexusGenRootTypes['InstPostsSentTmpl'] | null> | null; // [InstPostsSentTmpl]
     profile_details: NexusGenRootTypes['ProfileTmpl'] | null; // ProfileTmpl
   }
@@ -1052,6 +1054,7 @@ export interface NexusGenFieldTypeNames {
   }
   InstagramData: { // field return type name
     fans_ranking: 'InstRankingsTmpl'
+    is_private: 'String'
     posts_analysis: 'InstPostsSentTmpl'
     profile_details: 'ProfileTmpl'
   }

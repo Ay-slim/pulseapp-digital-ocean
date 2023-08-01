@@ -197,6 +197,7 @@ type InstRankingsTmpl {
 
 type InstagramData {
   fans_ranking: [InstRankingsTmpl]
+  is_private: String
   posts_analysis: [InstPostsSentTmpl]
   profile_details: ProfileTmpl
 }
