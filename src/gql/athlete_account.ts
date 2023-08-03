@@ -372,10 +372,11 @@ export const AthleteFetchStoreAnalytics = extendType({
                     const [{ count: todays_visits }]: { count: number }[] =
                         (await knex_client('store_visits')
                             .count('* as count')
-                            .whereRaw('DATE(created_at) = CURDATE()')) ?? [
-                            { count: 0 },
-                        ]
-
+                            .whereRaw(
+                                `DATE(created_at) = CURDATE() AND athlete_id=${athlete_id}`
+                            )) ?? [{ count: 0 }]
+                    //console.log(last_weeks_vists[0], 'WEEK VISITSSS')
+                    //console.log(normalized_sales, 'SALESSSS')
                     return {
                         status: 201,
                         error: false,
@@ -637,6 +638,7 @@ export const AthleteAlertTopFans = extendType({
                     const length_to_fetch = Math.round(
                         (percentage * ranked_followers.length) / 100
                     )
+                    //console.log(length_to_fetch)
                     const top_x_followers =
                         ranked_followers.length > length_to_fetch
                             ? ranked_followers.slice(0, length_to_fetch)
@@ -790,7 +792,7 @@ export const AthleteFetchFollowersRanking = extendType({
                             FROM ig_fb_followers
                             WHERE athlete_id = ${athlete_id}
                         );`)
-                    //console.log(fan_rankings_raw[0])
+                    //console.log(insta_fan_rankings_raw[0])
                     const [{ metadata: athlete_metadata }]: {
                         metadata: string
                     }[] = await knex_client('athletes')
@@ -843,6 +845,7 @@ export const AthleteFetchFollowersRanking = extendType({
                               insta_fan_rankings_raw[0][0]?.profile_details
                           )
                         : []
+                    //console.log(insta_posts_sentiments, 'posssttsss')
                     return {
                         status: 201,
                         error: false,
