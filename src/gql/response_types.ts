@@ -160,6 +160,30 @@ export const UserFetchSuggestionsResponse = objectType({
     },
 })
 
+export const ProductsTmpl = objectType({
+    name: 'ProductsTmpl',
+    definition(t) {
+        t.int('id')
+        t.string('name'),
+            t.list.string('media_urls'),
+            t.string('media_url'),
+            t.float('price'),
+            t.string('currency')
+        t.string('category')
+        t.string('end_time')
+        t.string('start_time')
+        t.boolean('exclusive')
+        t.int('quantity')
+        t.string('description')
+        t.int('number_of_views')
+        t.int('total_views')
+        t.int('unique_views')
+        t.string('distance')
+        t.string('start_distance')
+        t.string('end_distance')
+    },
+})
+
 const AthleteBasicStats = objectType({
     name: 'AthleteBasicStats',
     definition(t) {
@@ -168,6 +192,7 @@ const AthleteBasicStats = objectType({
         t.int('follower_count')
         t.int('fixed_items_count')
         t.int('variable_items_count')
+        t.int('upcoming_drops_count')
     },
 })
 
@@ -227,46 +252,35 @@ const SalesTmpl = objectType({
     },
 })
 
-export const AthleteSalesResponse = objectType({
-    name: 'AthleteSalesResponse',
+const WeeksVisits = objectType({
+    name: 'WeeksVisits',
+    definition(t) {
+        t.string('date')
+        t.string('day_of_week')
+        t.int('count')
+    },
+})
+
+export const StoreAnalyticsResponse = objectType({
+    name: 'StoreAnalyticsresponse',
     definition(t) {
         t.nonNull.int('status')
         t.nonNull.boolean('error')
         t.nonNull.string('message')
         t.field('data', {
             type: objectType({
-                name: 'AthleteSalesData',
+                name: 'StoreAnalyticsData',
                 definition(t) {
                     t.list.field('sales', {
                         type: SalesTmpl,
                     })
+                    t.list.field('week_visits', {
+                        type: WeeksVisits,
+                    })
+                    t.int('todays_visits')
                 },
             }),
         })
-    },
-})
-
-export const ProductsTmpl = objectType({
-    name: 'ProductsTmpl',
-    definition(t) {
-        t.int('id')
-        t.string('name'),
-            t.list.string('media_urls'),
-            t.string('media_url'),
-            t.float('price'),
-            t.string('currency')
-        t.string('category')
-        t.string('end_time')
-        t.string('start_time')
-        t.boolean('exclusive')
-        t.int('quantity')
-        t.string('description')
-        t.int('number_of_views')
-        t.int('total_views')
-        t.int('unique_views')
-        t.string('distance')
-        t.string('start_distance')
-        t.string('end_distance')
     },
 })
 
@@ -348,6 +362,16 @@ const InstaRankingsTmpl = objectType({
     },
 })
 
+const InstaPostsSentTmpl = objectType({
+    name: 'InstPostsSentTmpl',
+    definition(t) {
+        t.string('caption')
+        t.string('media_url')
+        t.float('average_sentiment')
+        t.string('post_id')
+    },
+})
+
 const KizunaRankingsTmpl = objectType({
     name: 'KizunaRankingsTmpl',
     definition(t) {
@@ -358,6 +382,7 @@ const KizunaRankingsTmpl = objectType({
         t.int('views_count')
         t.int('visits_count')
         t.float('interaction_score')
+        t.boolean('is_follower')
     },
 })
 
@@ -371,8 +396,22 @@ export const AthleteFetchRankingsResponse = objectType({
             type: objectType({
                 name: 'AthletesRankingsFetchData',
                 definition(t) {
-                    t.list.field('instagram', {
-                        type: InstaRankingsTmpl,
+                    t.field('instagram', {
+                        type: objectType({
+                            name: 'InstagramData',
+                            definition(t) {
+                                t.list.field('fans_ranking', {
+                                    type: InstaRankingsTmpl,
+                                })
+                                t.list.field('posts_analysis', {
+                                    type: InstaPostsSentTmpl,
+                                })
+                                t.field('profile_details', {
+                                    type: ProfileTmpl,
+                                })
+                                t.string('is_private')
+                            },
+                        }),
                     })
                     t.list.field('kizuna', {
                         type: KizunaRankingsTmpl,

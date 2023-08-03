@@ -71,6 +71,7 @@ export type AthleteBioType = {
     fixed_items_count: number
     variable_items_count: number
     image_url: string
+    upcoming_drops_count: number
 }
 
 export type TopFollowersType = {
@@ -98,6 +99,20 @@ export type SalesRetType = {
     year: number
     month: string
     total_sales: number
+}
+
+export type ProductsRespType = {
+    id: number
+    name: string
+    price: number
+    quantity: number
+    end_time: string | null
+    start_time?: string | null
+    exclusive: string
+    media_urls: string[]
+    description: string
+    number_of_views: number
+    metadata?: { category: string }
 }
 
 const AthleteData = list(
@@ -332,9 +347,11 @@ const join_string_list = (string_list: string[]) => {
     return joined_string
 }
 export const send_email_notifications = async (
-    emails: string[],
-    subject: string,
-    body: string
+    email_deets: {
+        email: string
+        body: string
+        subject: string
+    }[]
 ) => {
     try {
         const transporter = nodemailer.createTransport({
@@ -347,19 +364,49 @@ export const send_email_notifications = async (
             },
         } as TransportOptions)
         await Promise.all(
-            emails.map((email) => {
+            email_deets.map((deet) => {
                 transporter.sendMail({
                     from: '"Letty from Scientia" <no_reply@scientia.com>',
-                    to: email,
-                    subject: subject,
-                    html: body,
+                    to: deet.email,
+                    subject: deet.subject,
+                    html: deet.body,
                 })
-                console.log(`${subject} email notification sent to: ${email}`)
+                console.log(
+                    `${deet.subject} email notification sent to: ${deet.email}`
+                )
             })
         )
     } catch (err) {
         console.error(`Email error: ${err}`)
     }
+}
+
+export const exclusive_product_notification = async (
+    top_10_followers: KizunaMetrics[],
+    athlete_id: number,
+    knex_client: Knex,
+    athlete_name: string,
+    product_id: number
+) => {
+    const email_notif_packet = top_10_followers.map((follower) => {
+        return {
+            email: follower.email,
+            subject: 'Exclusive drop!',
+            body: `Great news ${follower.name}! Because you're one of the 10 most active fans of ${athlete_name} for this week, you're getting an exclusive, for your eyes only early access to a new product they just dropped. Login now to shop and grab 'em off the shelves!`,
+        }
+    })
+    await send_email_notifications(email_notif_packet)
+    await Promise.all(
+        top_10_followers.map((follower) => {
+            return knex_client('notifications').insert({
+                product_id,
+                user_id: follower.user_id,
+                message: `Great news ${follower.name}! You're one of the 10 most active followers of ${athlete_name} and this has qualified you for exclusive access to the new product they just launched! Head to their store now to shop`,
+                event: 'drop',
+                headline: 'Top Follower!',
+            })
+        })
+    )
 }
 
 export const create_product_notifications = async (args: ProductNotifArgs) => {
@@ -395,7 +442,15 @@ export const create_product_notifications = async (args: ProductNotifArgs) => {
                 .map((resp_val) => {
                     return resp_val.email
                 })
-            await send_email_notifications(follower_emails, headline, message)
+            const email_packet = follower_emails.map((email) => {
+                return {
+                    email: email,
+                    body: message,
+                    subject: headline,
+                }
+            })
+            await send_email_notifications(email_packet)
+            await knex_client('notifications').insert({})
         }
     } catch (err) {
         console.error(err)
@@ -440,16 +495,20 @@ export const create_sale_notification = async (args: SaleNotifArgs) => {
     const notif_prefs: string[] =
         JSON.parse(notifications_preference ?? null) ?? []
     if (notif_prefs.includes('email') && !process.env.NO_EMAILS) {
-        await send_email_notifications([email], headline, html_message)
+        await send_email_notifications([
+            { email, body: html_message, subject: headline },
+        ])
     }
     ///Remove this in production, it's only a temporary mock of a successful payment
     await setTimeout(async () => {
         const sale_html_message = `<html><body><p>Your payment of $${total_value} was successful for your purchase with ref: ${sale_ref}. You have now received 5 extra points!</p></body></html>`
-        send_email_notifications(
-            [email],
-            'Payment Successful',
-            sale_html_message
-        )
+        send_email_notifications([
+            {
+                email,
+                body: sale_html_message,
+                subject: 'Payment Successful',
+            },
+        ])
         const { total: current_total_points } = await knex_client('points')
             .select('total')
             .where({ user_id })
@@ -486,6 +545,7 @@ type KizunaMetrics = {
     views_count: number
     visits_count: number
     interaction_score: number
+    is_follower: boolean
 }
 
 export const rank_kizuna_followers = async (
@@ -519,6 +579,16 @@ export const rank_kizuna_followers = async (
         (await knex_client.raw(
             `SELECT sv.user_id, u.name, u.email, COUNT(*) AS visits_count FROM store_visits sv LEFT JOIN users u ON sv.user_id=u.id WHERE sv.athlete_id=${athlete_id} GROUP BY sv.user_id;`
         )) ?? []
+
+    const raw_kizuna_followers: { user_id: number }[] = await knex_client(
+        'users_athletes'
+    )
+        .select('user_id')
+        .where({ athlete_id })
+    const kizuna_followers = raw_kizuna_followers.map((follower) => {
+        return follower.user_id
+    })
+    //console.log(kizuna_followers)
     //console.log(sales_count, 'Count', product_views, 'vies', store_visits, 'visits')
     /**
      * Merges all three metrics into an object with the user_id as key
@@ -536,6 +606,7 @@ export const rank_kizuna_followers = async (
             views_count: 0,
             visits_count: 0,
             interaction_score: 0,
+            is_follower: true,
         }
     }
     for (const j of product_views[0]) {
@@ -548,6 +619,7 @@ export const rank_kizuna_followers = async (
                 views_count: j.views_count,
                 visits_count: 0,
                 interaction_score: 0,
+                is_follower: true,
             }
         } else {
             aggregated_metrics[j.user_id].views_count += j.views_count
@@ -563,6 +635,7 @@ export const rank_kizuna_followers = async (
                 views_count: 0,
                 visits_count: k.visits_count,
                 interaction_score: 0,
+                is_follower: true,
             }
         } else {
             aggregated_metrics[k.user_id].visits_count += k.visits_count
@@ -570,7 +643,7 @@ export const rank_kizuna_followers = async (
     }
 
     /**
-     * Create an array of all metrics, calculate interaction score and sort
+     * Create an array of all metrics, calculate interaction score, confirm if follower, and sort
      */
     const metrics_list: KizunaMetrics[] = []
     for (const l in aggregated_metrics) {
@@ -578,6 +651,9 @@ export const rank_kizuna_followers = async (
             2 * aggregated_metrics[l].sales_count +
             1.5 * aggregated_metrics[l].views_count +
             1.2 * aggregated_metrics[l].visits_count
+        aggregated_metrics[l].is_follower = kizuna_followers.includes(
+            aggregated_metrics[l].user_id
+        )
         metrics_list.push(aggregated_metrics[l])
     }
     metrics_list.sort((a, b) => b.interaction_score - a.interaction_score)
