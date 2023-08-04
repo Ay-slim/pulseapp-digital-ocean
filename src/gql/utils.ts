@@ -112,7 +112,10 @@ export type ProductsRespType = {
     media_urls: string[]
     description: string
     number_of_views: number
-    metadata?: { category: string }
+    metadata?: {
+        category: string
+        notified_followers: boolean
+    }
 }
 
 const AthleteData = list(

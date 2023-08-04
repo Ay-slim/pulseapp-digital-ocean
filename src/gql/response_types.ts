@@ -181,6 +181,7 @@ export const ProductsTmpl = objectType({
         t.string('distance')
         t.string('start_distance')
         t.string('end_distance')
+        t.boolean('notified_followers')
     },
 })
 

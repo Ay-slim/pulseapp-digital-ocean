@@ -239,6 +239,7 @@ export interface NexusGenObjects {
     media_url?: string | null; // String
     media_urls?: Array<string | null> | null; // [String]
     name?: string | null; // String
+    notified_followers?: boolean | null; // Boolean
     number_of_views?: number | null; // Int
     price?: number | null; // Float
     quantity?: number | null; // Int
@@ -675,6 +676,7 @@ export interface NexusGenFieldTypes {
     media_url: string | null; // String
     media_urls: Array<string | null> | null; // [String]
     name: string | null; // String
+    notified_followers: boolean | null; // Boolean
     number_of_views: number | null; // Int
     price: number | null; // Float
     quantity: number | null; // Int
@@ -1121,6 +1123,7 @@ export interface NexusGenFieldTypeNames {
     media_url: 'String'
     media_urls: 'String'
     name: 'String'
+    notified_followers: 'Boolean'
     number_of_views: 'Int'
     price: 'Float'
     quantity: 'Int'
@@ -1358,7 +1361,7 @@ export interface NexusGenArgTypes {
   Mutation: {
     athlete_alert_top_fans: { // args
       percentage?: number | null; // Int
-      product_ids: Array<number | null>; // [Int]!
+      product_ids: number[]; // [Int!]!
     }
     athlete_delete_products: { // args
       product_ids: Array<number | null>; // [Int]!
