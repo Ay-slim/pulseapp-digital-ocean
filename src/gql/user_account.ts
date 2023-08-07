@@ -1309,7 +1309,7 @@ export const UserFetchAthleteStore = extendType({
                                 'athletes.name as athlete_name',
                                 'athletes.image_url',
                                 knex_client.raw(
-                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time, 'quantity', quantity, 'start_time', start_time,
+                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time, 'quantity', quantity, 'start_time', start_time, 'metadata', metadata,
                                     'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)) FROM products WHERE products.athlete_id = ${athlete_id} AND products.deleted_at IS NULL AND end_time IS NOT NULL AND end_time > CURRENT_TIMESTAMP() ORDER BY created_at DESC LIMIT 1) AS featured`
                                 ),
                                 knex_client.raw(
@@ -1394,6 +1394,11 @@ export const UserFetchAthleteStore = extendType({
                     // ) {
                     //     featured_product['start_time'] = null
                     // }
+                    //console.log(products_list, expired_drops, future_products, featured_product)
+                    /**
+                     * As a specific frontend request, we're merging the featured products and future products arrays
+                     * with the featured product being the final element
+                     */
                     const featured = future_products.concat([featured_product])
                     const media_url_extractor_and_exclusive_bool_converter = (
                         product: ProductsRespType
@@ -1411,6 +1416,7 @@ export const UserFetchAthleteStore = extendType({
                                 number_of_views: number
                                 quantity: number
                                 category?: string
+                                notified_followers: boolean
                             } = {
                                 id: product.id,
                                 name: product.name,
@@ -1422,10 +1428,15 @@ export const UserFetchAthleteStore = extendType({
                                 description: product.description,
                                 number_of_views: product.number_of_views,
                                 quantity: product.quantity,
+                                notified_followers: false,
                             }
                             if (product?.metadata) {
                                 norm_product.category =
                                     product.metadata.category
+                                norm_product.notified_followers = product
+                                    .metadata?.notified_followers
+                                    ? product.metadata?.notified_followers
+                                    : false
                             }
                             return norm_product
                         }

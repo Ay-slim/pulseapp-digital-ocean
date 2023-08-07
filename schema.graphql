@@ -203,7 +203,9 @@ type InstagramData {
 }
 
 type KizunaRankingsTmpl {
+  age_range: String
   email: String
+  gender: String
   interaction_score: Float
   is_follower: Boolean
   name: String
@@ -214,7 +216,7 @@ type KizunaRankingsTmpl {
 }
 
 type Mutation {
-  athlete_alert_top_fans(percentage: Int, product_ids: [Int]!): BaseResponse!
+  athlete_alert_top_fans(percentage: Int, product_ids: [Int!]!): BaseResponse!
   athlete_delete_products(product_ids: [Int]!): BaseResponse!
   athlete_signin(email: String!, password: String!): TokenResponse!
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): TokenResponse!
@@ -268,6 +270,7 @@ type ProductsTmpl {
   media_url: String
   media_urls: [String]
   name: String
+  notified_followers: Boolean
   number_of_views: Int
   price: Float
   quantity: Int

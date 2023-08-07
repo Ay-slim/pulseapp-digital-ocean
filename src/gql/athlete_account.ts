@@ -618,7 +618,7 @@ export const AthleteAlertTopFans = extendType({
         t.nonNull.field('athlete_alert_top_fans', {
             type: BaseResponse,
             args: {
-                product_ids: nonNull(list(intArg())),
+                product_ids: nonNull(list(nonNull(intArg()))),
                 percentage: intArg(),
             },
             async resolve(_, args, context) {
@@ -644,13 +644,26 @@ export const AthleteAlertTopFans = extendType({
                             ? ranked_followers.slice(0, length_to_fetch)
                             : ranked_followers
                     //console.log(top_x_followers)
+                    //console.log(product_ids)
                     for (const i of product_ids) {
-                        await exclusive_product_notification(
-                            top_x_followers,
-                            athlete_id!,
-                            knex_client,
-                            athlete_name!,
-                            i!
+                        if (top_x_followers.length > 0) {
+                            await exclusive_product_notification(
+                                top_x_followers,
+                                athlete_id!,
+                                knex_client,
+                                athlete_name!,
+                                i!
+                            )
+                        }
+
+                        await knex_client.raw(
+                            `UPDATE products
+                                SET metadata = JSON_SET(
+                                IF(metadata IS NULL, '{"notified_followers": true}', metadata),
+                                '$.notified_followers',
+                                true
+                            )
+                            WHERE id = ${i};`
                         )
                     }
                     return {
