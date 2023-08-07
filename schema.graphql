@@ -203,7 +203,9 @@ type InstagramData {
 }
 
 type KizunaRankingsTmpl {
+  age_range: String
   email: String
+  gender: String
   interaction_score: Float
   is_follower: Boolean
   name: String

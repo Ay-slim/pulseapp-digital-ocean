@@ -196,7 +196,9 @@ export interface NexusGenObjects {
     profile_details?: NexusGenRootTypes['ProfileTmpl'] | null; // ProfileTmpl
   }
   KizunaRankingsTmpl: { // root type
+    age_range?: string | null; // String
     email?: string | null; // String
+    gender?: string | null; // String
     interaction_score?: number | null; // Float
     is_follower?: boolean | null; // Boolean
     name?: string | null; // String
@@ -616,7 +618,9 @@ export interface NexusGenFieldTypes {
     profile_details: NexusGenRootTypes['ProfileTmpl'] | null; // ProfileTmpl
   }
   KizunaRankingsTmpl: { // field return type
+    age_range: string | null; // String
     email: string | null; // String
+    gender: string | null; // String
     interaction_score: number | null; // Float
     is_follower: boolean | null; // Boolean
     name: string | null; // String
@@ -1063,7 +1067,9 @@ export interface NexusGenFieldTypeNames {
     profile_details: 'ProfileTmpl'
   }
   KizunaRankingsTmpl: { // field return type name
+    age_range: 'String'
     email: 'String'
+    gender: 'String'
     interaction_score: 'Float'
     is_follower: 'Boolean'
     name: 'String'

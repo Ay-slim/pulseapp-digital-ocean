@@ -379,6 +379,8 @@ const KizunaRankingsTmpl = objectType({
         t.int('user_id')
         t.string('name')
         t.string('email')
+        t.string('gender')
+        t.string('age_range')
         t.int('sales_count')
         t.int('views_count')
         t.int('visits_count')

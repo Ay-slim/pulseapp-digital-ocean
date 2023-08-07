@@ -544,6 +544,13 @@ type KizunaMetrics = {
     user_id: number
     name: string
     email: string
+    gender: 'male' | 'female' | 'nonbinary' | 'other'
+    age_range:
+        | 'under_18'
+        | 'eighteen_to_twentyfour'
+        | 'twentyfive_to_thirtyfour'
+        | 'thirtyfive_to_fortyfour'
+        | 'above_fortyfive'
     sales_count: number
     views_count: number
     visits_count: number
@@ -560,27 +567,48 @@ export const rank_kizuna_followers = async (
         name: string
         email: string
         sales_count: number
+        gender: 'male' | 'female' | 'nonbinary' | 'other'
+        age_range:
+            | 'under_18'
+            | 'eighteen_to_twentyfour'
+            | 'twentyfive_to_thirtyfour'
+            | 'thirtyfive_to_fortyfour'
+            | 'above_fortyfive'
     }[][] =
         (await knex_client.raw(
-            `SELECT sp.user_id, u.name, u.email, COUNT(*) AS sales_count FROM sales_products sp LEFT JOIN products p ON sp.product_id=p.id LEFT JOIN users u ON sp.user_id=u.id WHERE p.athlete_id=${athlete_id} GROUP BY sp.user_id;`
+            `SELECT sp.user_id, u.name, u.email, u.gender, u.age_range, COUNT(*) AS sales_count FROM sales_products sp LEFT JOIN products p ON sp.product_id=p.id LEFT JOIN users u ON sp.user_id=u.id WHERE p.athlete_id=${athlete_id} GROUP BY sp.user_id;`
         )) ?? []
     const product_views: {
         user_id: number
         name: string
         email: string
         views_count: number
+        gender: 'male' | 'female' | 'nonbinary' | 'other'
+        age_range:
+            | 'under_18'
+            | 'eighteen_to_twentyfour'
+            | 'twentyfive_to_thirtyfour'
+            | 'thirtyfive_to_fortyfour'
+            | 'above_fortyfive'
     }[][] =
         (await knex_client.raw(
-            `SELECT pv.user_id, u.name, u.email, COUNT(*) AS views_count FROM product_views pv LEFT JOIN products p ON pv.product_id=p.id LEFT JOIN users u ON pv.user_id=u.id WHERE p.athlete_id=${athlete_id} GROUP BY pv.user_id;`
+            `SELECT pv.user_id, u.name, u.email, u.gender, u.age_range, COUNT(*) AS views_count FROM product_views pv LEFT JOIN products p ON pv.product_id=p.id LEFT JOIN users u ON pv.user_id=u.id WHERE p.athlete_id=${athlete_id} GROUP BY pv.user_id;`
         )) ?? []
     const store_visits: {
         user_id: number
         name: string
         email: string
         visits_count: number
+        gender: 'male' | 'female' | 'nonbinary' | 'other'
+        age_range:
+            | 'under_18'
+            | 'eighteen_to_twentyfour'
+            | 'twentyfive_to_thirtyfour'
+            | 'thirtyfive_to_fortyfour'
+            | 'above_fortyfive'
     }[][] =
         (await knex_client.raw(
-            `SELECT sv.user_id, u.name, u.email, COUNT(*) AS visits_count FROM store_visits sv LEFT JOIN users u ON sv.user_id=u.id WHERE sv.athlete_id=${athlete_id} GROUP BY sv.user_id;`
+            `SELECT sv.user_id, u.name, u.email, u.gender, u.age_range, COUNT(*) AS visits_count FROM store_visits sv LEFT JOIN users u ON sv.user_id=u.id WHERE sv.athlete_id=${athlete_id} GROUP BY sv.user_id;`
         )) ?? []
 
     const raw_kizuna_followers: { user_id: number }[] = await knex_client(
@@ -606,6 +634,8 @@ export const rank_kizuna_followers = async (
             name: i.name,
             email: i.email,
             sales_count: i.sales_count,
+            gender: i.gender,
+            age_range: i.age_range,
             views_count: 0,
             visits_count: 0,
             interaction_score: 0,
@@ -618,6 +648,8 @@ export const rank_kizuna_followers = async (
                 user_id: j.user_id,
                 name: j.name,
                 email: j.email,
+                gender: j.gender,
+                age_range: j.age_range,
                 sales_count: 0,
                 views_count: j.views_count,
                 visits_count: 0,
@@ -634,6 +666,8 @@ export const rank_kizuna_followers = async (
                 user_id: k.user_id,
                 name: k.name,
                 email: k.email,
+                gender: k.gender,
+                age_range: k.age_range,
                 sales_count: 0,
                 views_count: 0,
                 visits_count: k.visits_count,
