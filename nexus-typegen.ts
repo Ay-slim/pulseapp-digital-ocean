@@ -407,7 +407,9 @@ export interface NexusGenObjects {
     status: number; // Int!
   }
   UserFetchSuggestionsResponseData: { // root type
-    suggestions?: Array<NexusGenRootTypes['SuggestionsResData'] | null> | null; // [SuggestionsResData]
+    athlete_suggestions?: Array<NexusGenRootTypes['SuggestionsResData'] | null> | null; // [SuggestionsResData]
+    products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+    upcoming_products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   UserSigninData: { // root type
     completion_status?: string | null; // String
@@ -866,7 +868,9 @@ export interface NexusGenFieldTypes {
     status: number; // Int!
   }
   UserFetchSuggestionsResponseData: { // field return type
-    suggestions: Array<NexusGenRootTypes['SuggestionsResData'] | null> | null; // [SuggestionsResData]
+    athlete_suggestions: Array<NexusGenRootTypes['SuggestionsResData'] | null> | null; // [SuggestionsResData]
+    products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
+    upcoming_products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
   UserSigninData: { // field return type
     completion_status: string | null; // String
@@ -1315,7 +1319,9 @@ export interface NexusGenFieldTypeNames {
     status: 'Int'
   }
   UserFetchSuggestionsResponseData: { // field return type name
-    suggestions: 'SuggestionsResData'
+    athlete_suggestions: 'SuggestionsResData'
+    products: 'ProductsTmpl'
+    upcoming_products: 'ProductsTmpl'
   }
   UserSigninData: { // field return type name
     completion_status: 'String'
@@ -1444,6 +1450,11 @@ export interface NexusGenArgTypes {
       limit: number; // Int!
       next_min_id?: number | null; // Int
       sports: Array<string | null>; // [String]!
+    }
+    fetch_user_suggestions: { // args
+      limit?: number | null; // Int
+      next_min_id?: number | null; // Int
+      user_id?: number | null; // Int
     }
     profile_details: { // args
       username: string; // String!

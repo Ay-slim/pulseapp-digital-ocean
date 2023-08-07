@@ -129,37 +129,6 @@ export const UserFetchAthletesResponse = objectType({
     },
 })
 
-const SuggestionsResData = list(
-    objectType({
-        name: 'SuggestionsResData',
-        definition(t) {
-            t.int('id')
-            t.string('name')
-            t.string('image_url')
-            t.string('sport')
-        },
-    })
-)
-
-export const UserFetchSuggestionsResponse = objectType({
-    name: 'UserFetchSuggestionsResponse',
-    definition(t) {
-        t.nonNull.int('status')
-        t.nonNull.boolean('error')
-        t.nonNull.string('message')
-        t.field('data', {
-            type: objectType({
-                name: 'UserFetchSuggestionsResponseData',
-                definition(t) {
-                    t.field('suggestions', {
-                        type: SuggestionsResData,
-                    })
-                },
-            }),
-        })
-    },
-})
-
 export const ProductsTmpl = objectType({
     name: 'ProductsTmpl',
     definition(t) {
@@ -182,6 +151,43 @@ export const ProductsTmpl = objectType({
         t.string('start_distance')
         t.string('end_distance')
         t.boolean('notified_followers')
+    },
+})
+
+const SuggestionsResData = list(
+    objectType({
+        name: 'SuggestionsResData',
+        definition(t) {
+            t.int('id')
+            t.string('name')
+            t.string('image_url')
+            t.string('sport')
+        },
+    })
+)
+
+export const UserFetchSuggestionsResponse = objectType({
+    name: 'UserFetchSuggestionsResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'UserFetchSuggestionsResponseData',
+                definition(t) {
+                    t.field('athlete_suggestions', {
+                        type: SuggestionsResData,
+                    })
+                    t.list.field('products', {
+                        type: ProductsTmpl,
+                    })
+                    t.list.field('upcoming_products', {
+                        type: ProductsTmpl,
+                    })
+                },
+            }),
+        })
     },
 })
 

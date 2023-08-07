@@ -336,17 +336,18 @@ type NotifComponentType = {
     email: string
     notifications_preference: string | null
 }
-const join_string_list = (string_list: string[]) => {
-    const string_len = string_list.length
-    let joined_string = ''
+export const prep_sql_array = (num_list: number[]) => {
+    const string_len = num_list.length
+    let joined_string = '('
     for (let i = 0; i < string_len; i++) {
-        console.log(string_list[i], 'each rec')
+        //console.log(num_list[i], 'each rec')
         if (i === 0) {
-            joined_string += string_list[i]
+            joined_string += String(num_list[i])
         } else {
-            joined_string += `, ${string_list[i]}`
+            joined_string += `, ${String(num_list[i])}`
         }
     }
+    joined_string += ')'
     return joined_string
 }
 export const send_email_notifications = async (

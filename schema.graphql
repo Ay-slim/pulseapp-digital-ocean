@@ -311,7 +311,7 @@ type Query {
   fetch_athlete_basics: AthleteFetchBasicsResponse!
   fetch_athlete_top_followers: AthleteTopFollowersResponse!
   fetch_store_analytics: StoreAnalyticsresponse!
-  fetch_user_suggestions: UserFetchSuggestionsResponse!
+  fetch_user_suggestions(limit: Int, next_min_id: Int, user_id: Int): UserFetchSuggestionsResponse!
   profile_details(username: String!): ProfileDetailsQuery!
   user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
   user_fetch_athlete_store(athlete_id: Int!): UsersFetchAthleteStore!
@@ -494,7 +494,9 @@ type UserFetchSuggestionsResponse {
 }
 
 type UserFetchSuggestionsResponseData {
-  suggestions: [SuggestionsResData]
+  athlete_suggestions: [SuggestionsResData]
+  products: [ProductsTmpl]
+  upcoming_products: [ProductsTmpl]
 }
 
 type UserSigninData {

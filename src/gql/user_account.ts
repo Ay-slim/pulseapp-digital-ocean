@@ -26,6 +26,7 @@ import {
     send_email_notifications,
     create_sale_notification,
     ProductsRespType,
+    prep_sql_array,
 } from './utils'
 import {
     TokenResponse,
@@ -446,145 +447,140 @@ export const UserDisplayAthletes = extendType({
     },
 })
 
-// export const UserDisplayContent = extendType({
-//     type: 'Query',
-//     definition(t) {
-//         t.nonNull.field('fetch_user_content', {
-//             type: GQLResponse,
-//             args: {
-//                 next_min_id: intArg(),
-//                 limit: nonNull(intArg()),
-//                 athlete_select_id: intArg(),
-//                 live_events: booleanArg(),
-//             },
-//             async resolve(_, args, context) {
-//                 // else if (live_events) {
-//                 //     // content_query.whereRaw('content.end_time IS NOT NULL')
-//                 //     // content_query.where('content.end_time', '>', Date.now())
-//                 // }
-//                 try {
-//                     const { next_min_id, limit, athlete_select_id } = args
-//                     const { user_id } = login_auth(
-//                         context?.auth_token,
-//                         'user_id'
-//                     )
-//                     //console.log(user_id)
-//                     const interests_data = await context
-//                         .knex_client('interests')
-//                         .select('athletes', 'sports')
-//                         .where('user_id', user_id)
-//                         .first()
-//                     //console.log(interests_data, 'INTERESTSSSSSSS')
-//                     const athletes_list = JSON.parse(interests_data?.athletes)
-//                     const sports_list = JSON.parse(interests_data?.sports)
-//                     const content_query = context.knex_client
-//                         .select(
-//                             'athletes.name',
-//                             'athletes.image_url',
-//                             'events.media_url',
-//                             'events.caption',
-//                             'events.id',
-//                             'events.created_at'
-//                         )
-//                         .from('athletes')
-//                         .join('events', 'athletes.id', '=', 'events.athlete_id')
-//                         .orderBy('events.id', 'asc')
-//                         .limit(limit)
-//                     if (athlete_select_id) {
-//                         content_query.where(
-//                             'athletes.id',
-//                             '=',
-//                             athlete_select_id
-//                         )
-//                     } else {
-//                         content_query.whereIn('athletes.id', athletes_list)
-//                     }
-//                     if (next_min_id) {
-//                         content_query.where('events.id', '>', next_min_id)
-//                     }
-//                     const db_resp: UserContentType[] = await content_query
-//                     const batch_len = db_resp.length
-//                     const max_id = batch_len ? db_resp[batch_len - 1]?.id : 0
-//                     const normalized_db_resp = db_resp?.map((content) => {
-//                         return {
-//                             athlete_name: content?.name,
-//                             athlete_image_url: content?.image_url,
-//                             content_media_url: content?.media_url,
-//                             content_caption: content?.caption,
-//                             distance: formatDistance(
-//                                 new Date(content?.created_at),
-//                                 new Date(),
-//                                 { addSuffix: true }
-//                             ),
-//                         }
-//                     })
-//                     //Only returning suggestios on first call to this endpoint, hence the check for next_min_id existence
-//                     const all_followed_athletes: SuggestionsDataType[] =
-//                         next_min_id
-//                             ? []
-//                             : await context.knex_client
-//                                   .select('id', 'name', 'image_url')
-//                                   .from('athletes')
-//                                   .whereIn('sport', sports_list)
-//                                   .whereNotIn('id', athletes_list)
-//                     //console.log(all_followed_athletes, 'ALL FOLLOWEEDDDDD')
-//                     return {
-//                         status: 201,
-//                         error: false,
-//                         message: 'Success',
-//                         data: {
-//                             content_data: normalized_db_resp,
-//                             athletes: all_followed_athletes,
-//                             max_id,
-//                         },
-//                     }
-//                 } catch (err) {
-//                     const Error = err as ServerReturnType
-//                     console.error(err)
-//                     return err_return(Error?.status)
-//                 }
-//             },
-//         })
-//     },
-// })
-
 export const UserInterestsSuggestions = extendType({
     type: 'Query',
     definition(t) {
         t.nonNull.field('fetch_user_suggestions', {
             type: UserFetchSuggestionsResponse,
-            args: {},
-            async resolve(_, __, context) {
+            args: {
+                next_min_id: intArg(),
+                limit: intArg(),
+                user_id: intArg(),
+            },
+            async resolve(_, args, context) {
                 try {
-                    const { user_id } = await login_auth(
-                        context?.auth_token,
-                        'user_id'
-                    )
+                    const { limit } = args
+                    let { user_id } = args
+                    /**
+                     * We use this endpoint both to show suggestions for logged in fans
+                     * and to display an overview of the product to visiting users who aren't signed up/logged in yet
+                     */
+                    const is_not_logged_in = user_id === -1
+                    const MAX_SUGGESTIONS = 15
+                    const suggestions_limit = limit ?? MAX_SUGGESTIONS
                     const { knex_client } = context
-                    // const interests_data = await context
-                    //     .knex_client('interests')
-                    //     .select('athletes', 'incentives')
-                    //     .where('user_id', user_id)
-                    //     .first()
-                    //const athletes_list = JSON.parse(interests_data?.athletes)
-                    // const incentives_list = JSON.parse(interests_data?.incentives)
-                    const athletes_list = knex_client('users_athletes')
-                        .select('athlete_id')
-                        .where({ user_id })
-                    const suggestions: SuggestionsDataType[] = await context
-                        .knex_client('athletes')
-                        .select('id', 'name', 'image_url', 'metadata', 'sport')
-                        .whereNotIn('id', athletes_list)
-                    // const filtered_suggestions = suggestions.map(suggestion => {
-                    //     const ath_metadata = JSON.parse(suggestion?.metadata)
+                    type SuggestedProducts = {
+                        id: number
+                        name: string
+                        price: number
+                        end_time: string | null
+                        start_time?: string | null | undefined
+                        exclusive: boolean
+                        media_urls: string
+                        description: string
+                    }
+                    let athlete_suggestions: SuggestionsDataType[] = []
+                    let curr_products_list: SuggestedProducts[] = []
+                    let upcoming_products_list: SuggestedProducts[] = []
+                    if (!is_not_logged_in) {
+                        const decoded_token = await login_auth(
+                            context?.auth_token,
+                            'user_id'
+                        )
+                        user_id = decoded_token?.user_id
 
-                    // })
+                        const raw_athletes_list: { athlete_id: number }[] =
+                            await knex_client('users_athletes')
+                                .select('athlete_id')
+                                .where({ user_id })
+                        const athletes_list = raw_athletes_list.map(
+                            (ath_packet) => ath_packet.athlete_id
+                        )
+                        athlete_suggestions = await knex_client('athletes')
+                            .select(
+                                'id',
+                                'name',
+                                'image_url',
+                                'metadata',
+                                'sport'
+                            )
+                            .whereNotIn('id', athletes_list)
+                            .limit(suggestions_limit)
+
+                        const raw_viewed_products: { product_id: number }[] =
+                            await knex_client('product_views')
+                                .distinct('product_id')
+                                .where({ user_id })
+                        let raw_curr_products_list: SuggestedProducts[][] = []
+                        let raw_upcoming_products_list: SuggestedProducts[][] =
+                            []
+                        //console.log(raw_upcoming_products_list)
+                        if (athletes_list.length > 0) {
+                            const athletes_list_str =
+                                prep_sql_array(athletes_list)
+                            raw_upcoming_products_list = await knex_client.raw(
+                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.athlete_id IN ${athletes_list_str} AND p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
+                            )
+                        } else {
+                            raw_upcoming_products_list = await knex_client.raw(
+                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
+                            )
+                        }
+                        upcoming_products_list = raw_upcoming_products_list[0]
+                        if (raw_viewed_products.length > 0) {
+                            const viewed_products_str = prep_sql_array(
+                                raw_viewed_products.map(
+                                    (prod) => prod.product_id
+                                )
+                            )
+                            //console.log(viewed_products_str)
+                            raw_curr_products_list = await knex_client.raw(
+                                `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.id NOT IN ${viewed_products_str} AND (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
+                            )
+                        } else {
+                            raw_curr_products_list = await knex_client.raw(
+                                `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
+                            )
+                        }
+                        curr_products_list = raw_curr_products_list[0]
+                    } else {
+                        const raw_athlete_suggestions: SuggestionsDataType[][] =
+                            await knex_client.raw(`
+                            SELECT ath.id, ath.name, ath.image_url, ath.metadata, ath.sport, COUNT(*) AS visits FROM athletes ath LEFT JOIN store_visits sv ON ath.id=sv.athlete_id GROUP BY ath.id ORDER BY visits DESC LIMIT ${suggestions_limit};
+                        `)
+                        athlete_suggestions = raw_athlete_suggestions[0]
+                        const raw_curr_products_list = await knex_client.raw(
+                            `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
+                        )
+                        curr_products_list = raw_curr_products_list[0]
+                        const raw_upcoming_products_list =
+                            await knex_client.raw(
+                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
+                            )
+                        upcoming_products_list = raw_upcoming_products_list[0]
+                    }
+                    //console.log(upcoming_products_list)
+                    const normalize_products = (prod: SuggestedProducts) => {
+                        return {
+                            id: prod.id,
+                            name: prod.name,
+                            media_urls: JSON.parse(prod.media_urls),
+                            price: prod.price,
+                            description: prod.description,
+                            start_time: prod.start_time,
+                            end_time: prod.end_time,
+                        }
+                    }
                     return {
                         status: 201,
                         error: false,
                         message: 'Success',
                         data: {
-                            suggestions,
+                            athlete_suggestions,
+                            products:
+                                curr_products_list.map(normalize_products),
+                            upcoming_products:
+                                upcoming_products_list.map(normalize_products),
                         },
                     }
                 } catch (err) {
