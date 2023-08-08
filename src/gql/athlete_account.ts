@@ -581,6 +581,57 @@ export const AthleteFetchProducts = extendType({
     },
 })
 
+export const AthleteEditProduct = extendType({
+    type: 'Mutation',
+    definition(t) {
+        t.nonNull.field('athlete_edit_product', {
+            type: BaseResponse,
+            args: {
+                product_id: nonNull(intArg()),
+                media_urls: list(stringArg()),
+                name: stringArg(),
+                price: floatArg(),
+                quantity: intArg(),
+                description: stringArg(),
+                currency: stringArg(),
+                category: stringArg(),
+                end_time: stringArg(),
+                start_time: stringArg(),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const { knex_client, auth_token } = context
+                    await login_auth(auth_token, 'athlete_id')
+                    const { product_id, ...update_packet } = args
+                    const normalized_update_packet: { [key: string]: any } = {}
+                    for (const i in update_packet) {
+                        if (i === 'media_urls') {
+                            normalized_update_packet[i] = JSON.stringify(
+                                update_packet[i]
+                            )
+                        } else {
+                            normalized_update_packet[i] =
+                                update_packet[i as keyof typeof update_packet]
+                        }
+                    }
+                    await knex_client('products')
+                        .update(normalized_update_packet)
+                        .where({ id: product_id })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
 export const AthleteDeleteProducts = extendType({
     type: 'Mutation',
     definition(t) {

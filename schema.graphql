@@ -218,6 +218,7 @@ type KizunaRankingsTmpl {
 type Mutation {
   athlete_alert_top_fans(percentage: Int, product_ids: [Int!]!): BaseResponse!
   athlete_delete_products(product_ids: [Int]!): BaseResponse!
+  athlete_edit_product(category: String, currency: String, description: String, end_time: String, media_urls: [String], name: String, price: Float, product_id: Int!, quantity: Int, start_time: String): BaseResponse!
   athlete_signin(email: String!, password: String!): TokenResponse!
   athlete_signup(country: String!, email: String!, name: String!, password: String!, phone: String!, sport: String!): TokenResponse!
   athlete_update_info(description: String!, image_url: String!): BaseResponse!

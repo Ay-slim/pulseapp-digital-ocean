@@ -634,6 +634,7 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     athlete_alert_top_fans: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     athlete_delete_products: NexusGenRootTypes['BaseResponse']; // BaseResponse!
+    athlete_edit_product: NexusGenRootTypes['BaseResponse']; // BaseResponse!
     athlete_signin: NexusGenRootTypes['TokenResponse']; // TokenResponse!
     athlete_signup: NexusGenRootTypes['TokenResponse']; // TokenResponse!
     athlete_update_info: NexusGenRootTypes['BaseResponse']; // BaseResponse!
@@ -1085,6 +1086,7 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     athlete_alert_top_fans: 'BaseResponse'
     athlete_delete_products: 'BaseResponse'
+    athlete_edit_product: 'BaseResponse'
     athlete_signin: 'TokenResponse'
     athlete_signup: 'TokenResponse'
     athlete_update_info: 'BaseResponse'
@@ -1377,6 +1379,18 @@ export interface NexusGenArgTypes {
     }
     athlete_delete_products: { // args
       product_ids: Array<number | null>; // [Int]!
+    }
+    athlete_edit_product: { // args
+      category?: string | null; // String
+      currency?: string | null; // String
+      description?: string | null; // String
+      end_time?: string | null; // String
+      media_urls?: Array<string | null> | null; // [String]
+      name?: string | null; // String
+      price?: number | null; // Float
+      product_id: number; // Int!
+      quantity?: number | null; // Int
+      start_time?: string | null; // String
     }
     athlete_signin: { // args
       email: string; // String!
