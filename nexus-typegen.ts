@@ -233,6 +233,8 @@ export interface NexusGenObjects {
     category?: string | null; // String
     currency?: string | null; // String
     description?: string | null; // String
+    discount?: number | null; // Float
+    discounted_price?: number | null; // Float
     distance?: string | null; // String
     end_distance?: string | null; // String
     end_time?: string | null; // String
@@ -675,6 +677,8 @@ export interface NexusGenFieldTypes {
     category: string | null; // String
     currency: string | null; // String
     description: string | null; // String
+    discount: number | null; // Float
+    discounted_price: number | null; // Float
     distance: string | null; // String
     end_distance: string | null; // String
     end_time: string | null; // String
@@ -1127,6 +1131,8 @@ export interface NexusGenFieldTypeNames {
     category: 'String'
     currency: 'String'
     description: 'String'
+    discount: 'Float'
+    discounted_price: 'Float'
     distance: 'String'
     end_distance: 'String'
     end_time: 'String'
@@ -1384,6 +1390,7 @@ export interface NexusGenArgTypes {
       category?: string | null; // String
       currency?: string | null; // String
       description?: string | null; // String
+      discount?: number | null; // Float
       end_time?: string | null; // String
       media_urls?: Array<string | null> | null; // [String]
       name?: string | null; // String

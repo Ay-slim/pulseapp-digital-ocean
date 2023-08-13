@@ -591,6 +591,7 @@ export const AthleteEditProduct = extendType({
                 media_urls: list(stringArg()),
                 name: stringArg(),
                 price: floatArg(),
+                discount: floatArg(),
                 quantity: intArg(),
                 description: stringArg(),
                 currency: stringArg(),

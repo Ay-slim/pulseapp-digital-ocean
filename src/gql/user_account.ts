@@ -1305,7 +1305,7 @@ export const UserFetchAthleteStore = extendType({
                                 'athletes.name as athlete_name',
                                 'athletes.image_url',
                                 knex_client.raw(
-                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time, 'quantity', quantity, 'start_time', start_time, 'metadata', metadata,
+                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time, 'quantity', quantity, 'start_time', start_time, 'metadata', metadata, 'discount', discount,
                                     'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)) FROM products WHERE products.athlete_id = ${athlete_id} AND products.deleted_at IS NULL AND end_time IS NOT NULL AND end_time > CURRENT_TIMESTAMP() ORDER BY created_at DESC LIMIT 1) AS featured`
                                 ),
                                 knex_client.raw(
@@ -1321,6 +1321,7 @@ export const UserFetchAthleteStore = extendType({
                                         'end_time', products.end_time,
                                         'quantity', products.quantity,
                                         'start_time', products.start_time,
+                                        'discount', products.discount,
                                         'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                                       )
                                     )
@@ -1342,6 +1343,7 @@ export const UserFetchAthleteStore = extendType({
                               'metadata', products.metadata,
                               'quantity', products.quantity,
                               'start_time', products.start_time,
+                              'discount', products.discount,
                               'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                             )
                           )
@@ -1363,6 +1365,7 @@ export const UserFetchAthleteStore = extendType({
                             'metadata', products.metadata,
                             'quantity', products.quantity,
                             'start_time', products.start_time,
+                            'discount', products.discount,
                             'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                           )
                         )
@@ -1404,6 +1407,8 @@ export const UserFetchAthleteStore = extendType({
                                 id: number
                                 name: string
                                 price: number
+                                discounted_price: number
+                                discount: number
                                 end_time: string | null
                                 start_time?: string | null
                                 exclusive: boolean
@@ -1417,6 +1422,14 @@ export const UserFetchAthleteStore = extendType({
                                 id: product.id,
                                 name: product.name,
                                 price: product.price,
+                                discount: product.discount,
+                                discounted_price:
+                                    product.discount > 0
+                                        ? Math.round(
+                                              (product.discount / 100) *
+                                                  product.price
+                                          )
+                                        : product.price,
                                 end_time: product.end_time,
                                 start_time: product?.start_time,
                                 exclusive: product.exclusive === 'true',

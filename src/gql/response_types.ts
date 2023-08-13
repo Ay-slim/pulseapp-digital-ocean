@@ -133,11 +133,13 @@ export const ProductsTmpl = objectType({
     name: 'ProductsTmpl',
     definition(t) {
         t.int('id')
-        t.string('name'),
-            t.list.string('media_urls'),
-            t.string('media_url'),
-            t.float('price'),
-            t.string('currency')
+        t.string('name')
+        t.list.string('media_urls')
+        t.string('media_url')
+        t.float('price')
+        t.float('discounted_price')
+        t.float('discount')
+        t.string('currency')
         t.string('category')
         t.string('end_time')
         t.string('start_time')

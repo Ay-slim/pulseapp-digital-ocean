@@ -105,6 +105,7 @@ export type ProductsRespType = {
     id: number
     name: string
     price: number
+    discount: number
     quantity: number
     end_time: string | null
     start_time?: string | null
