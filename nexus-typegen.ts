@@ -410,6 +410,15 @@ export interface NexusGenObjects {
   }
   UserFetchSuggestionsResponseData: { // root type
     athlete_suggestions?: Array<NexusGenRootTypes['SuggestionsResData'] | null> | null; // [SuggestionsResData]
+    min_ath_id?: number | null; // Int
+    min_ath_visits_count?: number | null; // Int
+    min_curr_products_id?: number | null; // Int
+    min_curr_view_count?: number | null; // Int
+    min_upc_products_id?: number | null; // Int
+    min_upc_view_count?: number | null; // Int
+    no_of_athlete_pages?: number | null; // Int
+    no_of_curr_product_pages?: number | null; // Int
+    no_of_upcoming_product_pages?: number | null; // Int
     products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     upcoming_products?: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
@@ -874,6 +883,15 @@ export interface NexusGenFieldTypes {
   }
   UserFetchSuggestionsResponseData: { // field return type
     athlete_suggestions: Array<NexusGenRootTypes['SuggestionsResData'] | null> | null; // [SuggestionsResData]
+    min_ath_id: number | null; // Int
+    min_ath_visits_count: number | null; // Int
+    min_curr_products_id: number | null; // Int
+    min_curr_view_count: number | null; // Int
+    min_upc_products_id: number | null; // Int
+    min_upc_view_count: number | null; // Int
+    no_of_athlete_pages: number | null; // Int
+    no_of_curr_product_pages: number | null; // Int
+    no_of_upcoming_product_pages: number | null; // Int
     products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
     upcoming_products: Array<NexusGenRootTypes['ProductsTmpl'] | null> | null; // [ProductsTmpl]
   }
@@ -1328,6 +1346,15 @@ export interface NexusGenFieldTypeNames {
   }
   UserFetchSuggestionsResponseData: { // field return type name
     athlete_suggestions: 'SuggestionsResData'
+    min_ath_id: 'Int'
+    min_ath_visits_count: 'Int'
+    min_curr_products_id: 'Int'
+    min_curr_view_count: 'Int'
+    min_upc_products_id: 'Int'
+    min_upc_view_count: 'Int'
+    no_of_athlete_pages: 'Int'
+    no_of_curr_product_pages: 'Int'
+    no_of_upcoming_product_pages: 'Int'
     products: 'ProductsTmpl'
     upcoming_products: 'ProductsTmpl'
   }
@@ -1474,7 +1501,12 @@ export interface NexusGenArgTypes {
     }
     fetch_user_suggestions: { // args
       limit?: number | null; // Int
-      next_min_id?: number | null; // Int
+      next_max_id_ath?: number | null; // Int
+      next_max_id_curr_products?: number | null; // Int
+      next_max_id_upc_products?: number | null; // Int
+      next_max_view_count_curr_products?: number | null; // Int
+      next_max_view_count_upc_products?: number | null; // Int
+      next_max_visits_count?: number | null; // Int
       user_id?: number | null; // Int
     }
     profile_details: { // args

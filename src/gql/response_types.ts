@@ -187,6 +187,15 @@ export const UserFetchSuggestionsResponse = objectType({
                     t.list.field('upcoming_products', {
                         type: ProductsTmpl,
                     })
+                    t.int('no_of_athlete_pages')
+                    t.int('no_of_curr_product_pages')
+                    t.int('no_of_upcoming_product_pages')
+                    t.int('min_ath_id')
+                    t.int('min_ath_visits_count')
+                    t.int('min_curr_products_id')
+                    t.int('min_upc_products_id')
+                    t.int('min_curr_view_count')
+                    t.int('min_upc_view_count')
                 },
             }),
         })

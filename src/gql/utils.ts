@@ -51,6 +51,7 @@ export type SuggestionsDataType = {
     name: string
     image_url: string
     sport: string
+    visits: number
 }
 export type UserAthleteStoreType = {
     athlete_name: string
@@ -339,6 +340,9 @@ type NotifComponentType = {
 }
 export const prep_sql_array = (num_list: number[]) => {
     const string_len = num_list.length
+    if (num_list.length === 0) {
+        return '(0)'
+    }
     let joined_string = '('
     for (let i = 0; i < string_len; i++) {
         //console.log(num_list[i], 'each rec')

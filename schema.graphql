@@ -314,7 +314,7 @@ type Query {
   fetch_athlete_basics: AthleteFetchBasicsResponse!
   fetch_athlete_top_followers: AthleteTopFollowersResponse!
   fetch_store_analytics: StoreAnalyticsresponse!
-  fetch_user_suggestions(limit: Int, next_min_id: Int, user_id: Int): UserFetchSuggestionsResponse!
+  fetch_user_suggestions(limit: Int, next_max_id_ath: Int, next_max_id_curr_products: Int, next_max_id_upc_products: Int, next_max_view_count_curr_products: Int, next_max_view_count_upc_products: Int, next_max_visits_count: Int, user_id: Int): UserFetchSuggestionsResponse!
   profile_details(username: String!): ProfileDetailsQuery!
   user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
   user_fetch_athlete_store(athlete_id: Int!): UsersFetchAthleteStore!
@@ -498,6 +498,15 @@ type UserFetchSuggestionsResponse {
 
 type UserFetchSuggestionsResponseData {
   athlete_suggestions: [SuggestionsResData]
+  min_ath_id: Int
+  min_ath_visits_count: Int
+  min_curr_products_id: Int
+  min_curr_view_count: Int
+  min_upc_products_id: Int
+  min_upc_view_count: Int
+  no_of_athlete_pages: Int
+  no_of_curr_product_pages: Int
+  no_of_upcoming_product_pages: Int
   products: [ProductsTmpl]
   upcoming_products: [ProductsTmpl]
 }

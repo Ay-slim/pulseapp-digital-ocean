@@ -453,14 +453,47 @@ export const UserInterestsSuggestions = extendType({
         t.nonNull.field('fetch_user_suggestions', {
             type: UserFetchSuggestionsResponse,
             args: {
-                next_min_id: intArg(),
+                next_max_id_ath: intArg(),
+                next_max_visits_count: intArg(),
+                next_max_id_curr_products: intArg(),
+                next_max_view_count_curr_products: intArg(),
+                next_max_id_upc_products: intArg(),
+                next_max_view_count_upc_products: intArg(),
                 limit: intArg(),
                 user_id: intArg(),
             },
             async resolve(_, args, context) {
                 try {
-                    const { limit } = args
+                    const {
+                        limit,
+                        next_max_id_ath,
+                        next_max_visits_count,
+                        next_max_id_curr_products,
+                        next_max_view_count_curr_products,
+                        next_max_id_upc_products,
+                        next_max_view_count_upc_products,
+                    } = args
+                    const DEFAULT_PAGINATION_UPPER_BOUND = 1000000000
+                    const nxt_max_id_ath =
+                        next_max_id_ath ?? DEFAULT_PAGINATION_UPPER_BOUND
+                    const nxt_max_visits_count =
+                        next_max_visits_count ?? DEFAULT_PAGINATION_UPPER_BOUND
+                    const nxt_max_id_curr_products =
+                        next_max_id_curr_products ??
+                        DEFAULT_PAGINATION_UPPER_BOUND
+                    const nxt_max_view_count_curr_products =
+                        next_max_view_count_curr_products ??
+                        DEFAULT_PAGINATION_UPPER_BOUND
+                    const nxt_max_id_upc_products =
+                        next_max_id_upc_products ??
+                        DEFAULT_PAGINATION_UPPER_BOUND
+                    const nxt_max_view_count_upc_products =
+                        next_max_view_count_upc_products ??
+                        DEFAULT_PAGINATION_UPPER_BOUND
                     let { user_id } = args
+                    let no_of_athlete_pages = 0,
+                        no_of_curr_product_pages = 0,
+                        no_of_upcoming_product_pages = 0
                     /**
                      * We use this endpoint both to show suggestions for logged in fans
                      * and to display an overview of the product to visiting users who aren't signed up/logged in yet
@@ -478,89 +511,20 @@ export const UserInterestsSuggestions = extendType({
                         exclusive: boolean
                         media_urls: string
                         description: string
+                        view_count: number
                     }
-                    let athlete_suggestions: SuggestionsDataType[] = []
-                    let curr_products_list: SuggestedProducts[] = []
-                    let upcoming_products_list: SuggestedProducts[] = []
-                    if (!is_not_logged_in) {
-                        const decoded_token = await login_auth(
-                            context?.auth_token,
-                            'user_id'
-                        )
-                        user_id = decoded_token?.user_id
-
-                        const raw_athletes_list: { athlete_id: number }[] =
-                            await knex_client('users_athletes')
-                                .select('athlete_id')
-                                .where({ user_id })
-                        const athletes_list = raw_athletes_list.map(
-                            (ath_packet) => ath_packet.athlete_id
-                        )
-                        athlete_suggestions = await knex_client('athletes')
-                            .select(
-                                'id',
-                                'name',
-                                'image_url',
-                                'metadata',
-                                'sport'
-                            )
-                            .whereNotIn('id', athletes_list)
-                            .limit(suggestions_limit)
-
-                        const raw_viewed_products: { product_id: number }[] =
-                            await knex_client('product_views')
-                                .distinct('product_id')
-                                .where({ user_id })
-                        let raw_curr_products_list: SuggestedProducts[][] = []
-                        let raw_upcoming_products_list: SuggestedProducts[][] =
-                            []
-                        //console.log(raw_upcoming_products_list)
-                        if (athletes_list.length > 0) {
-                            const athletes_list_str =
-                                prep_sql_array(athletes_list)
-                            raw_upcoming_products_list = await knex_client.raw(
-                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.athlete_id IN ${athletes_list_str} AND p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
-                            )
-                        } else {
-                            raw_upcoming_products_list = await knex_client.raw(
-                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
-                            )
-                        }
-                        upcoming_products_list = raw_upcoming_products_list[0]
-                        if (raw_viewed_products.length > 0) {
-                            const viewed_products_str = prep_sql_array(
-                                raw_viewed_products.map(
-                                    (prod) => prod.product_id
-                                )
-                            )
-                            //console.log(viewed_products_str)
-                            raw_curr_products_list = await knex_client.raw(
-                                `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.id NOT IN ${viewed_products_str} AND (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
-                            )
-                        } else {
-                            raw_curr_products_list = await knex_client.raw(
-                                `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
-                            )
-                        }
-                        curr_products_list = raw_curr_products_list[0]
-                    } else {
-                        const raw_athlete_suggestions: SuggestionsDataType[][] =
-                            await knex_client.raw(`
-                            SELECT ath.id, ath.name, ath.image_url, ath.metadata, ath.sport, COUNT(*) AS visits FROM athletes ath LEFT JOIN store_visits sv ON ath.id=sv.athlete_id GROUP BY ath.id ORDER BY visits DESC LIMIT ${suggestions_limit};
-                        `)
-                        athlete_suggestions = raw_athlete_suggestions[0]
-                        const raw_curr_products_list = await knex_client.raw(
-                            `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
-                        )
-                        curr_products_list = raw_curr_products_list[0]
-                        const raw_upcoming_products_list =
-                            await knex_client.raw(
-                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id ORDER BY view_count DESC LIMIT ${suggestions_limit}`
-                            )
-                        upcoming_products_list = raw_upcoming_products_list[0]
+                    type NormalizedProducts = {
+                        id: number
+                        name: string
+                        price: number
+                        end_time: string | null
+                        start_time?: string | null | undefined
+                        media_urls: string[]
+                        description: string
                     }
-                    //console.log(upcoming_products_list)
-                    const normalize_products = (prod: SuggestedProducts) => {
+                    const normalize_products = (
+                        prod: SuggestedProducts
+                    ): NormalizedProducts => {
                         return {
                             id: prod.id,
                             name: prod.name,
@@ -571,6 +535,188 @@ export const UserInterestsSuggestions = extendType({
                             end_time: prod.end_time,
                         }
                     }
+                    let athlete_suggestions: SuggestionsDataType[] = []
+                    let curr_products_list: SuggestedProducts[] = []
+                    let upcoming_products_list: SuggestedProducts[] = []
+                    let min_ath_id = 0
+                    let min_curr_products_id = 0
+                    let min_upc_products_id = 0
+                    let min_ath_visits_count = 0
+                    let min_curr_view_count = 0
+                    let min_upc_view_count = 0
+                    if (!is_not_logged_in) {
+                        //This is a scenario where we're pulling suggestions for a logged in user
+                        const decoded_token = await login_auth(
+                            context?.auth_token,
+                            'user_id'
+                        )
+                        user_id = decoded_token?.user_id
+                        const raw_athletes_list: { athlete_id: number }[] =
+                            await knex_client('users_athletes')
+                                .select('athlete_id')
+                                .where({ user_id })
+                        const athletes_list = raw_athletes_list.map(
+                            (ath_packet) => ath_packet.athlete_id
+                        )
+                        //console.log(athletes_list, 'lists')
+                        athlete_suggestions = await knex_client('athletes')
+                            .select(
+                                'id',
+                                'name',
+                                'image_url',
+                                'metadata',
+                                'sport'
+                            )
+                            .whereNotIn('id', athletes_list)
+                            .where('id', '<', nxt_max_id_ath)
+                            .orderBy('id', 'desc')
+                            .limit(suggestions_limit)
+                        //console.log(athlete_suggestions)
+                        min_ath_id =
+                            athlete_suggestions[athlete_suggestions.length - 1]
+                                ?.id
+                        const raw_viewed_products: { product_id: number }[] =
+                            await knex_client('product_views')
+                                .distinct('product_id')
+                                .where({ user_id })
+                        let raw_curr_products_list: SuggestedProducts[][] = []
+                        let raw_upcoming_products_list: SuggestedProducts[][] =
+                            []
+                        //console.log(raw_upcoming_products_list)
+                        const athletes_list_str = prep_sql_array(athletes_list)
+                        raw_upcoming_products_list = await knex_client.raw(
+                            `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.athlete_id IN ${athletes_list_str} AND p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_upc_products}, ${nxt_max_id_upc_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
+                        )
+                        upcoming_products_list = raw_upcoming_products_list[0]
+                        min_upc_products_id =
+                            upcoming_products_list[
+                                upcoming_products_list.length - 1
+                            ]?.id
+                        min_upc_view_count =
+                            upcoming_products_list[
+                                upcoming_products_list.length - 1
+                            ]?.view_count
+                        const viewed_products_str = prep_sql_array(
+                            raw_viewed_products.map((prod) => prod.product_id)
+                        )
+
+                        raw_curr_products_list = await knex_client.raw(
+                            `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.id NOT IN ${viewed_products_str} AND (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id HAVING (view_count, id) < (${nxt_max_view_count_curr_products}, ${nxt_max_id_curr_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
+                        )
+                        curr_products_list = raw_curr_products_list[0]
+                        min_curr_products_id =
+                            curr_products_list[curr_products_list.length - 1]
+                                ?.id
+                        min_curr_view_count =
+                            curr_products_list[curr_products_list.length - 1]
+                                ?.view_count
+                        if (nxt_max_id_ath === DEFAULT_PAGINATION_UPPER_BOUND) {
+                            const no_of_ath_rows: { total_athletes: number } =
+                                await knex_client('athletes')
+                                    .count('* as total_athletes')
+                                    .whereNotIn('id', athletes_list)
+                                    .first()
+                            const { total_athletes } = no_of_ath_rows
+                            no_of_athlete_pages = Math.ceil(
+                                total_athletes / suggestions_limit
+                            )
+                            //console.log(no_of_athlete_pages, 'page  nummmmm')
+
+                            const total_upcoming_products: {
+                                total_uc: number
+                            }[][] = await knex_client.raw(
+                                `SELECT COUNT(*) AS total_uc FROM (SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.athlete_id IN ${athletes_list_str} AND p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id) AS subquery_alias;`
+                            )
+                            //console.log(total_upcoming_products[0][0]?.total_uc, 'total upcoming products')
+                            no_of_upcoming_product_pages = Math.ceil(
+                                total_upcoming_products[0][0]?.total_uc /
+                                    suggestions_limit
+                            )
+
+                            //console.log(viewed_products_str, 'viewed str')
+                            const total_current_products: {
+                                total_cp: number
+                            }[][] = await knex_client.raw(
+                                `SELECT COUNT(*) AS total_cp FROM (SELECT p.id, p.name, p.media_urls, p.price, p.description, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.id NOT IN ${viewed_products_str} AND (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id) AS subquery_alias;`
+                            )
+                            //console.log(total_current_products[0][0]?.total_cp, 'total current products')
+                            no_of_curr_product_pages = Math.ceil(
+                                total_current_products[0][0]?.total_cp /
+                                    suggestions_limit
+                            )
+                        }
+                        //console.log(viewed_products_str)
+                    } else {
+                        if (nxt_max_id_ath === DEFAULT_PAGINATION_UPPER_BOUND) {
+                            const no_of_ath_rows: {
+                                total_athletes: number
+                            }[][] = await knex_client.raw(
+                                `SELECT COUNT(*) AS total_athletes FROM (SELECT ath.id, ath.name, ath.image_url, ath.metadata, ath.sport, COUNT(*) AS visits FROM athletes ath LEFT JOIN store_visits sv ON ath.id=sv.athlete_id GROUP BY ath.id) AS subquery_alias;`
+                            )
+                            const { total_athletes } = no_of_ath_rows[0][0]
+                            //console.log(no_of_ath_rows, 'total athhs')
+                            no_of_athlete_pages = Math.ceil(
+                                total_athletes / suggestions_limit
+                            )
+                            const total_upcoming_products: {
+                                total_uc: number
+                            }[][] = await knex_client.raw(
+                                `SELECT COUNT(*) AS total_uc FROM (SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id) AS subquery_alias;`
+                            )
+                            //console.log(total_upcoming_products[0][0]?.total_uc, 'total upcoming products')
+                            no_of_upcoming_product_pages = Math.ceil(
+                                total_upcoming_products[0][0]?.total_uc /
+                                    suggestions_limit
+                            )
+                            const total_current_products: {
+                                total_cp: number
+                            }[][] = await knex_client.raw(
+                                `SELECT COUNT(*) AS total_cp FROM (SELECT p.id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id) AS subquery_alias;`
+                            )
+                            //console.log(total_current_products[0][0]?.total_cp, 'total current products')
+                            no_of_curr_product_pages = Math.ceil(
+                                total_current_products[0][0]?.total_cp /
+                                    suggestions_limit
+                            )
+                        }
+                        const raw_athlete_suggestions: SuggestionsDataType[][] =
+                            await knex_client.raw(`
+                            SELECT ath.id, ath.name, ath.image_url, ath.metadata, ath.sport, COUNT(*) AS visits FROM athletes ath LEFT JOIN store_visits sv ON ath.id=sv.athlete_id GROUP BY ath.id HAVING (visits, ath.id) < (${nxt_max_visits_count}, ${nxt_max_id_ath}) ORDER BY visits DESC, ath.id DESC LIMIT ${suggestions_limit};
+                        `)
+                        //console.log(raw_athlete_suggestions)
+                        athlete_suggestions = raw_athlete_suggestions[0]
+                        min_ath_id =
+                            athlete_suggestions[athlete_suggestions.length - 1]
+                                ?.id
+                        min_ath_visits_count =
+                            athlete_suggestions[athlete_suggestions.length - 1]
+                                ?.visits
+                        const raw_curr_products_list = await knex_client.raw(
+                            `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_curr_products}, ${nxt_max_id_curr_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
+                        )
+                        curr_products_list = raw_curr_products_list[0]
+                        min_curr_products_id =
+                            curr_products_list[curr_products_list.length - 1]
+                                ?.id
+                        min_curr_view_count =
+                            curr_products_list[curr_products_list.length - 1]
+                                ?.view_count
+                        const raw_upcoming_products_list =
+                            await knex_client.raw(
+                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_upc_products}, ${nxt_max_id_upc_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
+                            )
+                        upcoming_products_list = raw_upcoming_products_list[0]
+                        min_upc_products_id =
+                            upcoming_products_list[
+                                upcoming_products_list.length - 1
+                            ]?.id
+                        min_upc_view_count =
+                            upcoming_products_list[
+                                upcoming_products_list.length - 1
+                            ]?.view_count
+                    }
+                    //console.log(upcoming_products_list)
+
                     return {
                         status: 201,
                         error: false,
@@ -581,6 +727,15 @@ export const UserInterestsSuggestions = extendType({
                                 curr_products_list.map(normalize_products),
                             upcoming_products:
                                 upcoming_products_list.map(normalize_products),
+                            no_of_athlete_pages,
+                            no_of_curr_product_pages,
+                            no_of_upcoming_product_pages,
+                            min_ath_id,
+                            min_ath_visits_count,
+                            min_curr_products_id,
+                            min_curr_view_count,
+                            min_upc_products_id,
+                            min_upc_view_count,
                         },
                     }
                 } catch (err) {
