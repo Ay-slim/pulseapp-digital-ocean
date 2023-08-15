@@ -448,8 +448,10 @@ export const AthleteCreateProduct = extendType({
                         metadata: string
                         currency?: string
                         end_time?: string | null
+                        end_time_raw?: string | null
                         exclusive: string
                         start_time: Date
+                        start_time_raw: string
                     } = {
                         athlete_id,
                         media_urls: JSON.stringify(media_urls),
@@ -462,7 +464,9 @@ export const AthleteCreateProduct = extendType({
                         start_time: start_time
                             ? new Date(start_time)
                             : new Date(),
+                        start_time_raw: start_time ?? new Date().toISOString(),
                         end_time,
+                        end_time_raw: end_time,
                     }
                     if (currency) {
                         insert_object['currency'] = currency
@@ -515,7 +519,8 @@ export const AthleteFetchProducts = extendType({
                         name: string
                         price: number
                         currency: string
-                        end_time: string | null
+                        end_time_raw: string | null
+                        start_time_raw: string | null
                         exclusive: string
                         quantity: number
                         media_urls: string
@@ -531,7 +536,8 @@ export const AthleteFetchProducts = extendType({
                             'currency',
                             'quantity',
                             'exclusive',
-                            'end_time',
+                            'end_time_raw',
+                            'start_time_raw',
                             'description',
                             knex_client.raw(
                                 `(SELECT COUNT(*) FROM product_views WHERE product_id = products.id) AS total_views`
@@ -560,7 +566,8 @@ export const AthleteFetchProducts = extendType({
                                     name: product.name,
                                     price: product.price,
                                     currency: product.currency,
-                                    end_time: product.end_time,
+                                    end_time: product.end_time_raw,
+                                    start_time: product.start_time_raw,
                                     exclusive: product.exclusive === 'true',
                                     quantity: product.quantity,
                                     media_urls: JSON.parse(product.media_urls),
@@ -613,6 +620,14 @@ export const AthleteEditProduct = extendType({
                         } else {
                             normalized_update_packet[i] =
                                 update_packet[i as keyof typeof update_packet]
+                            if (i === 'start_time') {
+                                normalized_update_packet['start_time_raw'] =
+                                    update_packet[i]
+                            }
+                            if (i === 'end_time') {
+                                normalized_update_packet['end_time_raw'] =
+                                    update_packet[i]
+                            }
                         }
                     }
                     await knex_client('products')

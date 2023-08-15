@@ -108,8 +108,8 @@ export type ProductsRespType = {
     price: number
     discount: number
     quantity: number
-    end_time: string | null
-    start_time?: string | null
+    end_time_raw: string | null
+    start_time_raw?: string | null
     exclusive: string
     media_urls: string[]
     description: string

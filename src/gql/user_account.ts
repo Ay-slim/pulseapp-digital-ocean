@@ -506,8 +506,8 @@ export const UserInterestsSuggestions = extendType({
                         id: number
                         name: string
                         price: number
-                        end_time: string | null
-                        start_time?: string | null | undefined
+                        end_time_raw: string | null
+                        start_time_raw?: string | null | undefined
                         exclusive: boolean
                         media_urls: string
                         description: string
@@ -531,8 +531,8 @@ export const UserInterestsSuggestions = extendType({
                             media_urls: JSON.parse(prod.media_urls),
                             price: prod.price,
                             description: prod.description,
-                            start_time: prod.start_time,
-                            end_time: prod.end_time,
+                            start_time: prod.start_time_raw,
+                            end_time: prod.end_time_raw,
                         }
                     }
                     let athlete_suggestions: SuggestionsDataType[] = []
@@ -585,7 +585,7 @@ export const UserInterestsSuggestions = extendType({
                         //console.log(raw_upcoming_products_list)
                         const athletes_list_str = prep_sql_array(athletes_list)
                         raw_upcoming_products_list = await knex_client.raw(
-                            `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.athlete_id IN ${athletes_list_str} AND p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_upc_products}, ${nxt_max_id_upc_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
+                            `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time_raw, p.end_time_raw, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.athlete_id IN ${athletes_list_str} AND p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_upc_products}, ${nxt_max_id_upc_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
                         )
                         upcoming_products_list = raw_upcoming_products_list[0]
                         min_upc_products_id =
@@ -601,7 +601,7 @@ export const UserInterestsSuggestions = extendType({
                         )
 
                         raw_curr_products_list = await knex_client.raw(
-                            `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.id NOT IN ${viewed_products_str} AND (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id HAVING (view_count, id) < (${nxt_max_view_count_curr_products}, ${nxt_max_id_curr_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
+                            `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.end_time_raw, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.id NOT IN ${viewed_products_str} AND (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id HAVING (view_count, id) < (${nxt_max_view_count_curr_products}, ${nxt_max_id_curr_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
                         )
                         curr_products_list = raw_curr_products_list[0]
                         min_curr_products_id =
@@ -692,7 +692,7 @@ export const UserInterestsSuggestions = extendType({
                             athlete_suggestions[athlete_suggestions.length - 1]
                                 ?.visits
                         const raw_curr_products_list = await knex_client.raw(
-                            `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_curr_products}, ${nxt_max_id_curr_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
+                            `SELECT p.id, p.name, p.media_urls, p.price, p.description, p.start_time_raw, p.end_time_raw, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE (p.start_time IS NULL OR p.start_time <= CURRENT_TIMESTAMP()) AND p.deleted_at IS NULL AND (p.end_time IS NULL OR p.end_time > CURRENT_TIMESTAMP()) GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_curr_products}, ${nxt_max_id_curr_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
                         )
                         curr_products_list = raw_curr_products_list[0]
                         min_curr_products_id =
@@ -703,7 +703,7 @@ export const UserInterestsSuggestions = extendType({
                                 ?.view_count
                         const raw_upcoming_products_list =
                             await knex_client.raw(
-                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time, p.end_time, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_upc_products}, ${nxt_max_id_upc_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
+                                `SELECT p.id, p.athlete_id, p.name, p.media_urls, p.price, p.description, p.start_time_raw, p.end_time_raw, count(*) AS view_count FROM products p LEFT JOIN product_views pv ON p.id = pv.product_id WHERE p.start_time > CURRENT_TIMESTAMP() AND p.deleted_at IS NULL GROUP BY p.id HAVING (view_count, p.id) < (${nxt_max_view_count_upc_products}, ${nxt_max_id_upc_products}) ORDER BY view_count DESC, p.id DESC LIMIT ${suggestions_limit};`
                             )
                         upcoming_products_list = raw_upcoming_products_list[0]
                         min_upc_products_id =
@@ -1460,7 +1460,7 @@ export const UserFetchAthleteStore = extendType({
                                 'athletes.name as athlete_name',
                                 'athletes.image_url',
                                 knex_client.raw(
-                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time', end_time, 'quantity', quantity, 'start_time', start_time, 'metadata', metadata, 'discount', discount,
+                                    `(SELECT JSON_OBJECT('id', id, 'name', name, 'media_urls', media_urls, 'price', price, 'description', description, 'exclusive', exclusive, 'end_time_raw', end_time_raw, 'quantity', quantity, 'start_time_raw', start_time_raw, 'metadata', metadata, 'discount', discount,
                                     'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)) FROM products WHERE products.athlete_id = ${athlete_id} AND products.deleted_at IS NULL AND end_time IS NOT NULL AND end_time > CURRENT_TIMESTAMP() ORDER BY created_at DESC LIMIT 1) AS featured`
                                 ),
                                 knex_client.raw(
@@ -1473,9 +1473,9 @@ export const UserFetchAthleteStore = extendType({
                                         'price', products.price,
                                         'description', products.description,
                                         'exclusive', products.exclusive,
-                                        'end_time', products.end_time,
+                                        'end_time_raw', products.end_time_raw,
                                         'quantity', products.quantity,
-                                        'start_time', products.start_time,
+                                        'start_time_raw', products.start_time_raw,
                                         'discount', products.discount,
                                         'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                                       )
@@ -1494,10 +1494,10 @@ export const UserFetchAthleteStore = extendType({
                               'price', products.price,
                               'description', products.description,
                               'exclusive', products.exclusive,
-                              'end_time', products.end_time,
+                              'end_time_raw', products.end_time_raw,
                               'metadata', products.metadata,
                               'quantity', products.quantity,
-                              'start_time', products.start_time,
+                              'start_time_raw', products.start_time_raw,
                               'discount', products.discount,
                               'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                             )
@@ -1516,10 +1516,10 @@ export const UserFetchAthleteStore = extendType({
                             'price', products.price,
                             'description', products.description,
                             'exclusive', products.exclusive,
-                            'end_time', products.end_time,
+                            'end_time_raw', products.end_time_raw,
                             'metadata', products.metadata,
                             'quantity', products.quantity,
-                            'start_time', products.start_time,
+                            'start_time_raw', products.start_time_raw,
                             'discount', products.discount,
                             'number_of_views', (SELECT COUNT(*) FROM product_views WHERE product_id = products.id)
                           )
@@ -1585,8 +1585,8 @@ export const UserFetchAthleteStore = extendType({
                                                   product.price
                                           )
                                         : product.price,
-                                end_time: product.end_time,
-                                start_time: product?.start_time,
+                                end_time: product.end_time_raw,
+                                start_time: product?.start_time_raw,
                                 exclusive: product.exclusive === 'true',
                                 media_url: (product.media_urls ?? [])[0],
                                 description: product.description,
@@ -1668,7 +1668,9 @@ export const UserFetchProduct = extendType({
                         price: number
                         currency: string
                         end_time: string | null
+                        end_time_raw: string | null
                         start_time: string | null
+                        start_time_raw: string | null
                         exclusive: string
                         quantity: number
                         media_urls: string
@@ -1683,7 +1685,9 @@ export const UserFetchProduct = extendType({
                             'quantity',
                             'exclusive',
                             'end_time',
+                            'end_time_raw',
                             'start_time',
+                            'start_time_raw',
                             'description',
                             knex_client.raw(
                                 `(SELECT COUNT(*) FROM product_views WHERE product_id = ${product_id}) AS total_views`
@@ -1706,8 +1710,8 @@ export const UserFetchProduct = extendType({
                                 name: product.name,
                                 price: product.price,
                                 currency: product.currency,
-                                end_time: product.end_time,
-                                start_time: product.start_time,
+                                end_time: product.end_time_raw,
+                                start_time: product.start_time_raw,
                                 end_distance: extract_distance(
                                     product.end_time
                                 ),
