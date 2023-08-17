@@ -227,7 +227,7 @@ type Mutation {
   interests(athletes: [Int]!, incentives: [String]!, notifications_preference: [String]!, sports: [String]!): BaseResponse!
   s3_upload(file_name: String!): MutationResponse!
   signin(email: String!, password: String!): UserSigninResponse!
-  signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, name: String!, password: String!, phone: String!): TokenResponse!
+  signup(age_range: AgeRangeEnum, email: String!, gender: GenderEnum, location: String!, name: String!, password: String!, phone: String!): TokenResponse!
   user_create_sale(delivery_details: DeliveryDetailsTmpl!, items: [SaleProductTmpl]!, total_value: Float!): UserCreateSaleResponse!
   user_follow_athlete(athlete_id: Int!): BaseResponse!
   user_mark_read_notifications: BaseResponse!
@@ -280,6 +280,7 @@ type ProductsTmpl {
   start_distance: String
   start_time: String
   total_views: Int
+  type: String
   unique_views: Int
 }
 

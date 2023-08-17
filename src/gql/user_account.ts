@@ -138,7 +138,7 @@ export const UserSignupMutation = extendType({
                 location: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
-                const { password, phone, email, name } = args
+                const { password, phone, email, name, location } = args
                 const gender = args?.gender
                 const age_range = args?.age_range
                 try {
@@ -523,6 +523,7 @@ export const UserInterestsSuggestions = extendType({
                         start_time?: string | null | undefined
                         media_urls: string[]
                         description: string
+                        type: 'product'
                     }
                     const normalize_products = (
                         prod: SuggestedProducts
@@ -535,6 +536,7 @@ export const UserInterestsSuggestions = extendType({
                             description: prod.description,
                             start_time: prod.start_time_raw,
                             end_time: prod.end_time_raw,
+                            type: 'product',
                         }
                     }
                     let athlete_suggestions: SuggestionsDataType[] = []
@@ -717,7 +719,6 @@ export const UserInterestsSuggestions = extendType({
                                 upcoming_products_list.length - 1
                             ]?.view_count
                     }
-                    //console.log(upcoming_products_list)
 
                     return {
                         status: 201,

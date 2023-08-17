@@ -250,6 +250,7 @@ export interface NexusGenObjects {
     start_distance?: string | null; // String
     start_time?: string | null; // String
     total_views?: number | null; // Int
+    type?: string | null; // String
     unique_views?: number | null; // Int
   }
   ProfileTmpl: { // root type
@@ -694,6 +695,7 @@ export interface NexusGenFieldTypes {
     start_distance: string | null; // String
     start_time: string | null; // String
     total_views: number | null; // Int
+    type: string | null; // String
     unique_views: number | null; // Int
   }
   ProfileTmpl: { // field return type
@@ -1147,6 +1149,7 @@ export interface NexusGenFieldTypeNames {
     start_distance: 'String'
     start_time: 'String'
     total_views: 'Int'
+    type: 'String'
     unique_views: 'Int'
   }
   ProfileTmpl: { // field return type name
@@ -1445,6 +1448,7 @@ export interface NexusGenArgTypes {
       age_range?: NexusGenEnums['AgeRangeEnum'] | null; // AgeRangeEnum
       email: string; // String!
       gender?: NexusGenEnums['GenderEnum'] | null; // GenderEnum
+      location: string; // String!
       name: string; // String!
       password: string; // String!
       phone: string; // String!
