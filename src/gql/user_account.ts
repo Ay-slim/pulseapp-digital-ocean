@@ -135,6 +135,7 @@ export const UserSignupMutation = extendType({
                 name: nonNull(stringArg()),
                 gender: GenderEnum,
                 age_range: AgeRangeEnum,
+                location: nonNull(stringArg()),
             },
             async resolve(_, args, context) {
                 const { password, phone, email, name } = args
@@ -164,6 +165,7 @@ export const UserSignupMutation = extendType({
                             name,
                             gender,
                             age_range,
+                            location,
                         },
                         ['id']
                     )
