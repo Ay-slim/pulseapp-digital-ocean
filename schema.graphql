@@ -283,17 +283,6 @@ type ProductsTmpl {
   unique_views: Int
 }
 
-type ProfileDetailsData {
-  profile_details: ProfileTmpl
-}
-
-type ProfileDetailsQuery {
-  data: ProfileDetailsData
-  error: Boolean!
-  message: String!
-  status: Int!
-}
-
 type ProfileTmpl {
   bio: String
   can_crawl_all_followers: Boolean
@@ -315,7 +304,6 @@ type Query {
   fetch_athlete_top_followers: AthleteTopFollowersResponse!
   fetch_store_analytics: StoreAnalyticsresponse!
   fetch_user_suggestions(limit: Int, next_max_id_ath: Int, next_max_id_curr_products: Int, next_max_id_upc_products: Int, next_max_view_count_curr_products: Int, next_max_view_count_upc_products: Int, next_max_visits_count: Int, user_id: Int): UserFetchSuggestionsResponse!
-  profile_details(username: String!): ProfileDetailsQuery!
   user_activity(limit: Int!, next_min_id: Int): UserFetchActivityResponse!
   user_fetch_athlete_store(athlete_id: Int!): UsersFetchAthleteStore!
   user_fetch_delivery_details: DeliveryDetailsResponse!

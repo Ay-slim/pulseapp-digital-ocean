@@ -252,15 +252,6 @@ export interface NexusGenObjects {
     total_views?: number | null; // Int
     unique_views?: number | null; // Int
   }
-  ProfileDetailsData: { // root type
-    profile_details?: NexusGenRootTypes['ProfileTmpl'] | null; // ProfileTmpl
-  }
-  ProfileDetailsQuery: { // root type
-    data?: NexusGenRootTypes['ProfileDetailsData'] | null; // ProfileDetailsData
-    error: boolean; // Boolean!
-    message: string; // String!
-    status: number; // Int!
-  }
   ProfileTmpl: { // root type
     bio?: string | null; // String
     can_crawl_all_followers?: boolean | null; // Boolean
@@ -705,15 +696,6 @@ export interface NexusGenFieldTypes {
     total_views: number | null; // Int
     unique_views: number | null; // Int
   }
-  ProfileDetailsData: { // field return type
-    profile_details: NexusGenRootTypes['ProfileTmpl'] | null; // ProfileTmpl
-  }
-  ProfileDetailsQuery: { // field return type
-    data: NexusGenRootTypes['ProfileDetailsData'] | null; // ProfileDetailsData
-    error: boolean; // Boolean!
-    message: string; // String!
-    status: number; // Int!
-  }
   ProfileTmpl: { // field return type
     bio: string | null; // String
     can_crawl_all_followers: boolean | null; // Boolean
@@ -734,7 +716,6 @@ export interface NexusGenFieldTypes {
     fetch_athlete_top_followers: NexusGenRootTypes['AthleteTopFollowersResponse']; // AthleteTopFollowersResponse!
     fetch_store_analytics: NexusGenRootTypes['StoreAnalyticsresponse']; // StoreAnalyticsresponse!
     fetch_user_suggestions: NexusGenRootTypes['UserFetchSuggestionsResponse']; // UserFetchSuggestionsResponse!
-    profile_details: NexusGenRootTypes['ProfileDetailsQuery']; // ProfileDetailsQuery!
     user_activity: NexusGenRootTypes['UserFetchActivityResponse']; // UserFetchActivityResponse!
     user_fetch_athlete_store: NexusGenRootTypes['UsersFetchAthleteStore']; // UsersFetchAthleteStore!
     user_fetch_delivery_details: NexusGenRootTypes['DeliveryDetailsResponse']; // DeliveryDetailsResponse!
@@ -1168,15 +1149,6 @@ export interface NexusGenFieldTypeNames {
     total_views: 'Int'
     unique_views: 'Int'
   }
-  ProfileDetailsData: { // field return type name
-    profile_details: 'ProfileTmpl'
-  }
-  ProfileDetailsQuery: { // field return type name
-    data: 'ProfileDetailsData'
-    error: 'Boolean'
-    message: 'String'
-    status: 'Int'
-  }
   ProfileTmpl: { // field return type name
     bio: 'String'
     can_crawl_all_followers: 'Boolean'
@@ -1197,7 +1169,6 @@ export interface NexusGenFieldTypeNames {
     fetch_athlete_top_followers: 'AthleteTopFollowersResponse'
     fetch_store_analytics: 'StoreAnalyticsresponse'
     fetch_user_suggestions: 'UserFetchSuggestionsResponse'
-    profile_details: 'ProfileDetailsQuery'
     user_activity: 'UserFetchActivityResponse'
     user_fetch_athlete_store: 'UsersFetchAthleteStore'
     user_fetch_delivery_details: 'DeliveryDetailsResponse'
@@ -1508,9 +1479,6 @@ export interface NexusGenArgTypes {
       next_max_view_count_upc_products?: number | null; // Int
       next_max_visits_count?: number | null; // Int
       user_id?: number | null; // Int
-    }
-    profile_details: { // args
-      username: string; // String!
     }
     user_activity: { // args
       limit: number; // Int!
