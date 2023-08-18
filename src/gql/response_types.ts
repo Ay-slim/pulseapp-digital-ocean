@@ -280,6 +280,22 @@ const WeeksVisits = objectType({
     },
 })
 
+const AgeAnalytics = objectType({
+    name: 'AgeAnalytics',
+    definition(t) {
+        t.string('age_range')
+        t.int('age_range_count')
+    },
+})
+
+const GenderAnalytics = objectType({
+    name: 'GenderAnalytics',
+    definition(t) {
+        t.string('gender')
+        t.int('gender_count')
+    },
+})
+
 export const StoreAnalyticsResponse = objectType({
     name: 'StoreAnalyticsresponse',
     definition(t) {
@@ -297,6 +313,12 @@ export const StoreAnalyticsResponse = objectType({
                         type: WeeksVisits,
                     })
                     t.int('todays_visits')
+                    t.list.field('age', {
+                        type: AgeAnalytics,
+                    })
+                    t.list.field('gender', {
+                        type: GenderAnalytics,
+                    })
                 },
             }),
         })

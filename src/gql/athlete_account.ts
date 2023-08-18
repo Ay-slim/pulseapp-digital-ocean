@@ -377,6 +377,26 @@ export const AthleteFetchStoreAnalytics = extendType({
                             )) ?? [{ count: 0 }]
                     //console.log(last_weeks_vists[0], 'WEEK VISITSSS')
                     //console.log(normalized_sales, 'SALESSSS')
+                    const age_range_groupings: {
+                        age_range: string
+                        age_range_count: number
+                    }[][] = await knex_client.raw(
+                        `SELECT u.age_range, COUNT(*) AS age_range_count FROM users u JOIN users_athletes ua ON u.id=ua.user_id WHERE ua.athlete_id=${athlete_id} GROUP BY u.age_range;`
+                    )
+                    const gender_groupings: {
+                        gender: string
+                        gender_count: number
+                    }[][] = await knex_client.raw(
+                        `SELECT u.gender, COUNT(*) AS gender_count FROM users u JOIN users_athletes ua ON u.id=ua.user_id WHERE ua.athlete_id=${athlete_id} GROUP BY u.gender;`
+                    )
+                    //console.log(age_range_groupings, 'AGE RANGE GROUPINGS', gender_groupings, 'GENDER GROUPINGS')
+                    const age_range_map: { [key: string]: string } = {
+                        above_fortyfive: 'Above 45',
+                        eighteen_to_twentyfour: '18-24',
+                        thirtyfive_to_fortyfour: '35-44',
+                        twentyfive_to_thirtyfour: '25-34',
+                        under_18: 'Under 18',
+                    }
                     return {
                         status: 201,
                         error: false,
@@ -385,6 +405,13 @@ export const AthleteFetchStoreAnalytics = extendType({
                             sales: normalized_sales,
                             week_visits: last_weeks_vists[0],
                             todays_visits,
+                            age: age_range_groupings[0].map((range) => {
+                                return {
+                                    age_range: age_range_map[range.age_range],
+                                    age_range_count: range.age_range_count,
+                                }
+                            }),
+                            gender: gender_groupings[0],
                         },
                     }
                 } catch (err) {

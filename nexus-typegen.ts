@@ -52,6 +52,10 @@ export interface NexusGenObjects {
     name?: string | null; // String
     status?: string | null; // String
   }
+  AgeAnalytics: { // root type
+    age_range?: string | null; // String
+    age_range_count?: number | null; // Int
+  }
   AthleteBasicStats: { // root type
     fixed_items_count?: number | null; // Int
     follower_count?: number | null; // Int
@@ -177,6 +181,10 @@ export interface NexusGenObjects {
     message: string; // String!
     status: number; // Int!
   }
+  GenderAnalytics: { // root type
+    gender?: string | null; // String
+    gender_count?: number | null; // Int
+  }
   InstPostsSentTmpl: { // root type
     average_sentiment?: number | null; // Float
     caption?: string | null; // String
@@ -280,6 +288,8 @@ export interface NexusGenObjects {
     notifications_preference?: Array<string | null> | null; // [String]
   }
   StoreAnalyticsData: { // root type
+    age?: Array<NexusGenRootTypes['AgeAnalytics'] | null> | null; // [AgeAnalytics]
+    gender?: Array<NexusGenRootTypes['GenderAnalytics'] | null> | null; // [GenderAnalytics]
     sales?: Array<NexusGenRootTypes['SalesTmpl'] | null> | null; // [SalesTmpl]
     todays_visits?: number | null; // Int
     week_visits?: Array<NexusGenRootTypes['WeeksVisits'] | null> | null; // [WeeksVisits]
@@ -479,6 +489,10 @@ export interface NexusGenFieldTypes {
     name: string | null; // String
     status: string | null; // String
   }
+  AgeAnalytics: { // field return type
+    age_range: string | null; // String
+    age_range_count: number | null; // Int
+  }
   AthleteBasicStats: { // field return type
     fixed_items_count: number | null; // Int
     follower_count: number | null; // Int
@@ -603,6 +617,10 @@ export interface NexusGenFieldTypes {
     error: boolean; // Boolean!
     message: string; // String!
     status: number; // Int!
+  }
+  GenderAnalytics: { // field return type
+    gender: string | null; // String
+    gender_count: number | null; // Int
   }
   InstPostsSentTmpl: { // field return type
     average_sentiment: number | null; // Float
@@ -744,6 +762,8 @@ export interface NexusGenFieldTypes {
     notifications_preference: Array<string | null> | null; // [String]
   }
   StoreAnalyticsData: { // field return type
+    age: Array<NexusGenRootTypes['AgeAnalytics'] | null> | null; // [AgeAnalytics]
+    gender: Array<NexusGenRootTypes['GenderAnalytics'] | null> | null; // [GenderAnalytics]
     sales: Array<NexusGenRootTypes['SalesTmpl'] | null> | null; // [SalesTmpl]
     todays_visits: number | null; // Int
     week_visits: Array<NexusGenRootTypes['WeeksVisits'] | null> | null; // [WeeksVisits]
@@ -933,6 +953,10 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     status: 'String'
   }
+  AgeAnalytics: { // field return type name
+    age_range: 'String'
+    age_range_count: 'Int'
+  }
   AthleteBasicStats: { // field return type name
     fixed_items_count: 'Int'
     follower_count: 'Int'
@@ -1057,6 +1081,10 @@ export interface NexusGenFieldTypeNames {
     error: 'Boolean'
     message: 'String'
     status: 'Int'
+  }
+  GenderAnalytics: { // field return type name
+    gender: 'String'
+    gender_count: 'Int'
   }
   InstPostsSentTmpl: { // field return type name
     average_sentiment: 'Float'
@@ -1198,6 +1226,8 @@ export interface NexusGenFieldTypeNames {
     notifications_preference: 'String'
   }
   StoreAnalyticsData: { // field return type name
+    age: 'AgeAnalytics'
+    gender: 'GenderAnalytics'
     sales: 'SalesTmpl'
     todays_visits: 'Int'
     week_visits: 'WeeksVisits'

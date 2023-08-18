@@ -11,6 +11,11 @@ type ActivityTmpl {
   status: String
 }
 
+type AgeAnalytics {
+  age_range: String
+  age_range_count: Int
+}
+
 enum AgeRangeEnum {
   above_fortyfive
   eighteen_to_twentyfour
@@ -172,6 +177,11 @@ input DeliveryDetailsTmpl {
   card_number: String
   city: String
   zipcode: String
+}
+
+type GenderAnalytics {
+  gender: String
+  gender_count: Int
 }
 
 enum GenderEnum {
@@ -341,6 +351,8 @@ type SettingsTmpl {
 }
 
 type StoreAnalyticsData {
+  age: [AgeAnalytics]
+  gender: [GenderAnalytics]
   sales: [SalesTmpl]
   todays_visits: Int
   week_visits: [WeeksVisits]
