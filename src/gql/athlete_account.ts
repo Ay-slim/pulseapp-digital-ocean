@@ -927,6 +927,8 @@ export const AthleteFetchFollowersRanking = extendType({
                         ? JSON.parse(insta_fan_rankings_raw[0][0]?.fan_rankings)
                         : []
                     const insta_posts_sentiments: {
+                        like_count: number
+                        comment_count: number
                         media_url: string
                         caption: string
                         average_sentiment: number
@@ -936,7 +938,7 @@ export const AthleteFetchFollowersRanking = extendType({
                               insta_fan_rankings_raw[0][0]?.posts_sentiments
                           )
                         : []
-                    //console.log(insta_fan_rankings_raw, insta_posts_sentiments)
+                    //console.log(insta_posts_sentiments)
                     const insta_profile_details: {
                         bio: string
                         full_name: string

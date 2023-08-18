@@ -188,6 +188,8 @@ export interface NexusGenObjects {
   InstPostsSentTmpl: { // root type
     average_sentiment?: number | null; // Float
     caption?: string | null; // String
+    comment_count?: number | null; // Int
+    like_count?: number | null; // Int
     media_url?: string | null; // String
     post_id?: string | null; // String
   }
@@ -625,6 +627,8 @@ export interface NexusGenFieldTypes {
   InstPostsSentTmpl: { // field return type
     average_sentiment: number | null; // Float
     caption: string | null; // String
+    comment_count: number | null; // Int
+    like_count: number | null; // Int
     media_url: string | null; // String
     post_id: string | null; // String
   }
@@ -1089,6 +1093,8 @@ export interface NexusGenFieldTypeNames {
   InstPostsSentTmpl: { // field return type name
     average_sentiment: 'Float'
     caption: 'String'
+    comment_count: 'Int'
+    like_count: 'Int'
     media_url: 'String'
     post_id: 'String'
   }

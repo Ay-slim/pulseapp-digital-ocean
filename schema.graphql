@@ -194,6 +194,8 @@ enum GenderEnum {
 type InstPostsSentTmpl {
   average_sentiment: Float
   caption: String
+  comment_count: Int
+  like_count: Int
   media_url: String
   post_id: String
 }

@@ -408,6 +408,8 @@ const InstaPostsSentTmpl = objectType({
     definition(t) {
         t.string('caption')
         t.string('media_url')
+        t.int('like_count')
+        t.int('comment_count')
         t.float('average_sentiment')
         t.string('post_id')
     },
