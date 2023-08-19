@@ -926,6 +926,7 @@ export const AthleteFetchFollowersRanking = extendType({
                     }[] = insta_fan_rankings_raw[0].length
                         ? JSON.parse(insta_fan_rankings_raw[0][0]?.fan_rankings)
                         : []
+                    //console.log(insta_fan_rankings_raw[0], 'RAWWWW')
                     const insta_posts_sentiments: {
                         like_count: number
                         comment_count: number
@@ -955,6 +956,9 @@ export const AthleteFetchFollowersRanking = extendType({
                           )
                         : []
                     //console.log(insta_posts_sentiments, 'posssttsss')
+                    insta_posts_sentiments.forEach((i_p_s) => {
+                        i_p_s.media_url = i_p_s.media_url.split('?')[0]
+                    })
                     return {
                         status: 201,
                         error: false,
