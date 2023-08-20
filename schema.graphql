@@ -220,11 +220,17 @@ type KizunaRankingsTmpl {
   gender: String
   interaction_score: Float
   is_follower: Boolean
+  location: String
   name: String
   sales_count: Int
   user_id: Int
   views_count: Int
   visits_count: Int
+}
+
+type LocationAnalytics {
+  location: String
+  location_count: Int
 }
 
 type Mutation {
@@ -355,6 +361,7 @@ type SettingsTmpl {
 type StoreAnalyticsData {
   age: [AgeAnalytics]
   gender: [GenderAnalytics]
+  location: [LocationAnalytics]
   sales: [SalesTmpl]
   todays_visits: Int
   week_visits: [WeeksVisits]

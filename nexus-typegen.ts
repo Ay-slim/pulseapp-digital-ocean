@@ -211,11 +211,16 @@ export interface NexusGenObjects {
     gender?: string | null; // String
     interaction_score?: number | null; // Float
     is_follower?: boolean | null; // Boolean
+    location?: string | null; // String
     name?: string | null; // String
     sales_count?: number | null; // Int
     user_id?: number | null; // Int
     views_count?: number | null; // Int
     visits_count?: number | null; // Int
+  }
+  LocationAnalytics: { // root type
+    location?: string | null; // String
+    location_count?: number | null; // Int
   }
   Mutation: {};
   MutationResponse: { // root type
@@ -292,6 +297,7 @@ export interface NexusGenObjects {
   StoreAnalyticsData: { // root type
     age?: Array<NexusGenRootTypes['AgeAnalytics'] | null> | null; // [AgeAnalytics]
     gender?: Array<NexusGenRootTypes['GenderAnalytics'] | null> | null; // [GenderAnalytics]
+    location?: Array<NexusGenRootTypes['LocationAnalytics'] | null> | null; // [LocationAnalytics]
     sales?: Array<NexusGenRootTypes['SalesTmpl'] | null> | null; // [SalesTmpl]
     todays_visits?: number | null; // Int
     week_visits?: Array<NexusGenRootTypes['WeeksVisits'] | null> | null; // [WeeksVisits]
@@ -650,11 +656,16 @@ export interface NexusGenFieldTypes {
     gender: string | null; // String
     interaction_score: number | null; // Float
     is_follower: boolean | null; // Boolean
+    location: string | null; // String
     name: string | null; // String
     sales_count: number | null; // Int
     user_id: number | null; // Int
     views_count: number | null; // Int
     visits_count: number | null; // Int
+  }
+  LocationAnalytics: { // field return type
+    location: string | null; // String
+    location_count: number | null; // Int
   }
   Mutation: { // field return type
     athlete_alert_top_fans: NexusGenRootTypes['BaseResponse']; // BaseResponse!
@@ -768,6 +779,7 @@ export interface NexusGenFieldTypes {
   StoreAnalyticsData: { // field return type
     age: Array<NexusGenRootTypes['AgeAnalytics'] | null> | null; // [AgeAnalytics]
     gender: Array<NexusGenRootTypes['GenderAnalytics'] | null> | null; // [GenderAnalytics]
+    location: Array<NexusGenRootTypes['LocationAnalytics'] | null> | null; // [LocationAnalytics]
     sales: Array<NexusGenRootTypes['SalesTmpl'] | null> | null; // [SalesTmpl]
     todays_visits: number | null; // Int
     week_visits: Array<NexusGenRootTypes['WeeksVisits'] | null> | null; // [WeeksVisits]
@@ -1116,11 +1128,16 @@ export interface NexusGenFieldTypeNames {
     gender: 'String'
     interaction_score: 'Float'
     is_follower: 'Boolean'
+    location: 'String'
     name: 'String'
     sales_count: 'Int'
     user_id: 'Int'
     views_count: 'Int'
     visits_count: 'Int'
+  }
+  LocationAnalytics: { // field return type name
+    location: 'String'
+    location_count: 'Int'
   }
   Mutation: { // field return type name
     athlete_alert_top_fans: 'BaseResponse'
@@ -1234,6 +1251,7 @@ export interface NexusGenFieldTypeNames {
   StoreAnalyticsData: { // field return type name
     age: 'AgeAnalytics'
     gender: 'GenderAnalytics'
+    location: 'LocationAnalytics'
     sales: 'SalesTmpl'
     todays_visits: 'Int'
     week_visits: 'WeeksVisits'

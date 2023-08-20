@@ -296,6 +296,14 @@ const GenderAnalytics = objectType({
     },
 })
 
+const LocationAnalytics = objectType({
+    name: 'LocationAnalytics',
+    definition(t) {
+        t.string('location')
+        t.int('location_count')
+    },
+})
+
 export const StoreAnalyticsResponse = objectType({
     name: 'StoreAnalyticsresponse',
     definition(t) {
@@ -318,6 +326,9 @@ export const StoreAnalyticsResponse = objectType({
                     })
                     t.list.field('gender', {
                         type: GenderAnalytics,
+                    })
+                    t.list.field('location', {
+                        type: LocationAnalytics,
                     })
                 },
             }),
@@ -423,6 +434,7 @@ const KizunaRankingsTmpl = objectType({
         t.string('email')
         t.string('gender')
         t.string('age_range')
+        t.string('location')
         t.int('sales_count')
         t.int('views_count')
         t.int('visits_count')

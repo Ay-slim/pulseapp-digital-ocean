@@ -383,13 +383,29 @@ export const AthleteFetchStoreAnalytics = extendType({
                     }[][] = await knex_client.raw(
                         `SELECT u.age_range, COUNT(*) AS age_range_count FROM users u JOIN users_athletes ua ON u.id=ua.user_id WHERE ua.athlete_id=${athlete_id} GROUP BY u.age_range;`
                     )
+                    //console.log(age_range_groupings[0], athlete_id)
                     const gender_groupings: {
                         gender: string
                         gender_count: number
                     }[][] = await knex_client.raw(
                         `SELECT u.gender, COUNT(*) AS gender_count FROM users u JOIN users_athletes ua ON u.id=ua.user_id WHERE ua.athlete_id=${athlete_id} GROUP BY u.gender;`
                     )
-                    //console.log(age_range_groupings, 'AGE RANGE GROUPINGS', gender_groupings, 'GENDER GROUPINGS')
+                    //console.log(gender_groupings[0], 'GENDER GROUPINGS')
+                    type LocationMap = {
+                        location: string
+                        location_count: number
+                    }
+                    const location_groupings: LocationMap[][] =
+                        await knex_client.raw(`
+                        SELECT u.location, COUNT(*) AS location_count FROM users u JOIN users_athletes ua ON u.id=ua.user_id WHERE ua.athlete_id=${athlete_id} GROUP BY u.location;
+                    `)
+                    //console.log(location_groupings[0])
+                    const location_replace_null = (loc_obj: LocationMap) => {
+                        if (!loc_obj.location) {
+                            loc_obj.location = 'Unknown'
+                        }
+                        return loc_obj
+                    }
                     const age_range_map: { [key: string]: string } = {
                         above_fortyfive: 'Above 45',
                         eighteen_to_twentyfour: '18-24',
@@ -412,6 +428,9 @@ export const AthleteFetchStoreAnalytics = extendType({
                                 }
                             }),
                             gender: gender_groupings[0],
+                            location: location_groupings[0].map((loc) =>
+                                location_replace_null(loc)
+                            ),
                         },
                     }
                 } catch (err) {
@@ -957,7 +976,9 @@ export const AthleteFetchFollowersRanking = extendType({
                         : []
                     //console.log(insta_posts_sentiments, 'posssttsss')
                     insta_posts_sentiments.forEach((i_p_s) => {
-                        i_p_s.media_url = i_p_s.media_url.split('?')[0]
+                        i_p_s.media_url = i_p_s.media_url
+                            ? i_p_s.media_url.split('?')[0]
+                            : ''
                     })
                     return {
                         status: 201,
