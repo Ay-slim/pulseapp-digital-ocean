@@ -100,6 +100,17 @@ type AthleteSettingsFetchResponse {
   status: Int!
 }
 
+type AthleteSingleProductFetchData {
+  product: ProductsTmpl
+}
+
+type AthleteSingleProductFetchResponse {
+  data: AthleteSingleProductFetchData
+  error: Boolean!
+  message: String!
+  status: Int!
+}
+
 type AthleteTopFollowersData {
   top_followers: [TopFollowerStats]
 }
@@ -315,6 +326,7 @@ type ProfileTmpl {
 }
 
 type Query {
+  athlete_fetch_product(product_id: Int!): AthleteSingleProductFetchResponse!
   athlete_fetch_products: AthleteProductsFetchResponse!
   athlete_fetch_rankings: AthleteFetchRankingsResponse!
   athlete_fetch_settings: AthleteSettingsFetchResponse!

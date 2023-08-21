@@ -25,6 +25,7 @@ import {
     AthleteSettingsFetchResponse,
     AthleteProductsFetchResponse,
     AthleteFetchRankingsResponse,
+    AthleteSingleProductFetchResponse,
 } from './response_types'
 
 dotenv.config()
@@ -622,6 +623,92 @@ export const AthleteFetchProducts = extendType({
                                     unique_views: product.unique_views,
                                 }
                             }),
+                        },
+                    }
+                } catch (err) {
+                    const Error = err as ServerReturnType
+                    console.error(err)
+                    return err_return(Error?.status)
+                }
+            },
+        })
+    },
+})
+
+export const AthleteFetchProduct = extendType({
+    type: 'Query',
+    definition(t) {
+        t.nonNull.field('athlete_fetch_product', {
+            type: AthleteSingleProductFetchResponse,
+            args: {
+                product_id: nonNull(intArg()),
+            },
+            async resolve(_, args, context) {
+                try {
+                    const { athlete_id } = await login_auth(
+                        context?.auth_token,
+                        'athlete_id'
+                    )
+                    const { product_id } = args
+                    const { knex_client } = context
+                    const product: {
+                        id: number
+                        name: string
+                        price: number
+                        currency: string
+                        metadata: string
+                        end_time_raw: string | null
+                        start_time_raw: string | null
+                        exclusive: string
+                        quantity: number
+                        media_urls: string
+                        description: string
+                    } = await knex_client
+                        .select(
+                            'id',
+                            'name',
+                            'media_urls',
+                            'price',
+                            'currency',
+                            'metadata',
+                            'quantity',
+                            'exclusive',
+                            'end_time_raw',
+                            'start_time_raw',
+                            'description'
+                        )
+                        .from('products')
+                        .where('id', product_id)
+                        .whereRaw('deleted_at IS NULL')
+                        .first()
+                    if (!product) {
+                        throw new Error('Could not find product to edit')
+                    }
+                    // console.log({
+                    //     athlete_name: products[0]?.athlete_name,
+                    //     image_url: products[0]?.image_url,
+                    //     products: JSON.parse(products[0].products)
+                    // })
+                    return {
+                        status: 201,
+                        error: false,
+                        message: 'Success',
+                        data: {
+                            product: {
+                                id: product.id,
+                                name: product.name,
+                                price: product.price,
+                                currency: product.currency,
+                                category:
+                                    JSON.parse(product.metadata)?.category ??
+                                    '',
+                                end_time: product.end_time_raw,
+                                start_time: product.start_time_raw,
+                                exclusive: product.exclusive === 'true',
+                                quantity: product.quantity,
+                                media_urls: JSON.parse(product.media_urls),
+                                description: product.description,
+                            },
                         },
                     }
                 } catch (err) {

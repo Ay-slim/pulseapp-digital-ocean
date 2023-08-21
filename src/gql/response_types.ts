@@ -404,6 +404,25 @@ export const AthleteProductsFetchResponse = objectType({
     },
 })
 
+export const AthleteSingleProductFetchResponse = objectType({
+    name: 'AthleteSingleProductFetchResponse',
+    definition(t) {
+        t.nonNull.int('status')
+        t.nonNull.boolean('error')
+        t.nonNull.string('message')
+        t.field('data', {
+            type: objectType({
+                name: 'AthleteSingleProductFetchData',
+                definition(t) {
+                    t.field('product', {
+                        type: ProductsTmpl,
+                    })
+                },
+            }),
+        })
+    },
+})
+
 const InstaRankingsTmpl = objectType({
     name: 'InstRankingsTmpl',
     definition(t) {

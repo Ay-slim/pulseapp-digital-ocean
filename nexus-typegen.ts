@@ -121,6 +121,15 @@ export interface NexusGenObjects {
     message: string; // String!
     status: number; // Int!
   }
+  AthleteSingleProductFetchData: { // root type
+    product?: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
+  }
+  AthleteSingleProductFetchResponse: { // root type
+    data?: NexusGenRootTypes['AthleteSingleProductFetchData'] | null; // AthleteSingleProductFetchData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
   AthleteTopFollowersData: { // root type
     top_followers?: Array<NexusGenRootTypes['TopFollowerStats'] | null> | null; // [TopFollowerStats]
   }
@@ -566,6 +575,15 @@ export interface NexusGenFieldTypes {
     message: string; // String!
     status: number; // Int!
   }
+  AthleteSingleProductFetchData: { // field return type
+    product: NexusGenRootTypes['ProductsTmpl'] | null; // ProductsTmpl
+  }
+  AthleteSingleProductFetchResponse: { // field return type
+    data: NexusGenRootTypes['AthleteSingleProductFetchData'] | null; // AthleteSingleProductFetchData
+    error: boolean; // Boolean!
+    message: string; // String!
+    status: number; // Int!
+  }
   AthleteTopFollowersData: { // field return type
     top_followers: Array<NexusGenRootTypes['TopFollowerStats'] | null> | null; // [TopFollowerStats]
   }
@@ -743,6 +761,7 @@ export interface NexusGenFieldTypes {
     username: string | null; // String
   }
   Query: { // field return type
+    athlete_fetch_product: NexusGenRootTypes['AthleteSingleProductFetchResponse']; // AthleteSingleProductFetchResponse!
     athlete_fetch_products: NexusGenRootTypes['AthleteProductsFetchResponse']; // AthleteProductsFetchResponse!
     athlete_fetch_rankings: NexusGenRootTypes['AthleteFetchRankingsResponse']; // AthleteFetchRankingsResponse!
     athlete_fetch_settings: NexusGenRootTypes['AthleteSettingsFetchResponse']; // AthleteSettingsFetchResponse!
@@ -1038,6 +1057,15 @@ export interface NexusGenFieldTypeNames {
     message: 'String'
     status: 'Int'
   }
+  AthleteSingleProductFetchData: { // field return type name
+    product: 'ProductsTmpl'
+  }
+  AthleteSingleProductFetchResponse: { // field return type name
+    data: 'AthleteSingleProductFetchData'
+    error: 'Boolean'
+    message: 'String'
+    status: 'Int'
+  }
   AthleteTopFollowersData: { // field return type name
     top_followers: 'TopFollowerStats'
   }
@@ -1215,6 +1243,7 @@ export interface NexusGenFieldTypeNames {
     username: 'String'
   }
   Query: { // field return type name
+    athlete_fetch_product: 'AthleteSingleProductFetchResponse'
     athlete_fetch_products: 'AthleteProductsFetchResponse'
     athlete_fetch_rankings: 'AthleteFetchRankingsResponse'
     athlete_fetch_settings: 'AthleteSettingsFetchResponse'
@@ -1523,6 +1552,9 @@ export interface NexusGenArgTypes {
     }
   }
   Query: {
+    athlete_fetch_product: { // args
+      product_id: number; // Int!
+    }
     athletes: { // args
       limit: number; // Int!
       next_min_id?: number | null; // Int
